@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>التُّمَيض الشفاف</title>
+<title>Gessoum Glass</title>
 <meta name="theme-color" content="#eef3f2">
 <meta name="description" content="زجاج صدام: البيع بالكريدي، ديون ورشات الألمنيوم، ومخزون الزجاج">
 <link rel="manifest" href="manifest.webmanifest">
@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="التُّمَيض">
+<meta name="apple-mobile-web-app-title" content="Gessoum Glass">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Reem+Kufi:wght@500;600;700&display=swap">
@@ -364,7 +364,7 @@ function applyPrefs(){
   if(prefs.theme==='system')h.removeAttribute('data-theme');else h.setAttribute('data-theme',prefs.theme);
   const dark=prefs.theme==='dark'||(prefs.theme==='system'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);
   const m=document.querySelector('meta[name=theme-color]');if(m)m.content=dark?'#0b1312':'#eef3f2';
-  document.title=tr('التُّمَيض الشفاف','Tumayd');
+  document.title='Gessoum Glass';
 }
 try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(prefs.theme==='system')applyPrefs()})}catch(_){}
 
@@ -377,7 +377,7 @@ const num=v=>{const n=parseFloat(String(v??'').replace(/\s/g,'').replace(',','.'
 const loc=()=>isFr()?'fr-FR':'en-US';
 const grp=n=>{const r=Math.round(n);return(r<0?'-':'')+Math.abs(r).toLocaleString(loc()).replace(/ /g,' ')};
 const grpTxt=n=>Math.round(n).toLocaleString('en-US');
-const APP_VER=21; // نفس الرقم تاع VERSION في sw.js
+const APP_VER=22; // نفس الرقم تاع VERSION في sw.js
 const CUR=()=>tr('دج','DA');
 const DA=n=>`<bdi dir="ltr">${grp(n)}</bdi>&nbsp;${CUR()}`;
 const dec2=a=>(Math.round(a*100)/100).toLocaleString(loc(),{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -725,7 +725,7 @@ function failState(){try{return JSON.parse(localStorage.getItem('sz-fail')||'{"n
 function setFail(o){try{localStorage.setItem('sz-fail',JSON.stringify(o))}catch(_){}}
 
 function gateHTML(){
-  const head=`<div class="gate-head">${MARK}<b>${tr('التُّمَيض الشفاف','Tumayd')}</b><span>${esc(shopName())}</span></div>
+  const head=`<div class="gate-head">${MARK}<b dir="ltr">Gessoum Glass</b></div>
   <div class="gate-lang"><div class="seg"><button type="button" data-act="lang" data-v="ar" class="${!isFr()?'on':''}">العربية</button><button type="button" data-act="lang" data-v="fr" class="${isFr()?'on':''}">Français</button></div></div>`;
   if(gateMode==='setup')return `<form class="gate-card" data-form="setup" novalidate>${head}
     <div><h2>${tr('إنشاء حساب الدخول','Créer l’accès')}</h2><p class="note">${tr('هذا الحساب يحمي الدفتر. صدام وحده يعرف كلمة السر.','Ce compte protège le registre. Seul Saddam connaît le mot de passe.')}</p></div>
@@ -837,7 +837,7 @@ function printHTML(html,paper){
 }
 function waText(phone,text){const w=waLink(phone);return w?w+'?text='+encodeURIComponent(text):''}
 function shopName(){return (S.shop&&S.shop.name)||tr('زجاج صدام','Vitrerie Saddam')}
-function brandHTML(){return `${MARK}<div><b>${tr('التُّمَيض الشفاف','Tumayd')}</b><span>${esc(shopName())}</span></div>`}
+function brandHTML(){return `${MARK}<div><b dir="ltr">Gessoum Glass</b></div>`}
 function navHTML(){
   const v=view.name,on=(...n)=>n.includes(v)?'on':'';
   return `<button data-act="nav-home" class="${on('home')}">${ic('home')}<span>${tr('الرئيسية','Accueil')}</span></button>
@@ -867,6 +867,7 @@ function sideHTML(){
   ${it('nav-stk','box',tr('المخزون','Stock'),on('stock','kin','kadj','cut','art','aform','ain','aadj'))}
   ${it('nav-sups','truck',tr('الموردون','Fournisseurs'),on('sups','sup','sform','spay'))}
   <div class="sgrp">${tr('المالية','Finances')}</div>
+  ${it('nav-debts','chart',tr('الديون والأرباح','Crédits et bénéfices'),on('debts'))}
   ${it('nav-cash','wallet',tr('الصندوق والمصاريف','Caisse et dépenses'),on('cash','exp'))}
   ${it('nav-stats','chart',tr('الإحصائيات','Statistiques'),on('stats'))}
   ${it('nav-reports','chart',tr('التقارير الشهرية','Rapports mensuels'),on('reports'))}
@@ -896,10 +897,6 @@ function homeHTML(){
   const noClients=!Object.keys(S.clients).length;
   return `<div class="stack">${junkBanner()}
   <div><h2>${greeting()}</h2><div class="note">${esc(longDate())}</div></div>
-  <section class="hero">
-    <div><div class="lbl">${tr('مجموع الديون عند الزبائن','Total des crédits clients')}</div><div class="big"><bdi dir="ltr">${grp(debt)}</bdi> <small>${CUR()}</small></div></div>
-    <div class="sub"><span><b><bdi dir="ltr">${debtors}</bdi></b> ${tr('ورشة عليها دين','ateliers débiteurs')}</span>${(()=>{const o=Object.values(S.sstats).reduce((a,x)=>a+Math.max(0,x.bal),0);return o>0?`<span>${tr('علينا للموردين','Dû aux fournisseurs')}: <b><bdi dir="ltr">${grp(o)}</bdi></b> ${CUR()}</span>`:''})()}${late?`<span class="pill">${ic('alert')}<bdi dir="ltr">${late}</bdi> ${tr('متأخرة','en retard')} · <bdi dir="ltr">${grp(lateAmt)}</bdi> ${CUR()}</span>`:''}</div>
-  </section>
   ${backupBanner()}
   <div class="tiles">
     <div class="tile"><span class="lbl">${tr('مبيعات اليوم','Ventes du jour')}</span><span class="v">${DA(sT)}</span></div>
@@ -914,6 +911,8 @@ function homeHTML(){
     <button class="qa" data-act="new-pay"><span class="ib">${ic('cash')}</span>${tr('تسجيل دفع','Encaisser')}</button>
     <button class="qa" data-act="new-in"><span class="ib">${ic('inbox')}</span>${tr('إدخال سلعة','Entrée stock')}</button>
     <button class="qa" data-act="new-exp"><span class="ib">${ic('wallet')}</span>${tr('مصروف','Dépense')}</button>
+    <button class="qa" data-act="nav-debts"><span class="ib">${ic('chart')}</span>${tr('الديون والأرباح','Crédits et bénéfices')}</button>
+    <button class="qa" data-act="cut-free"><span class="ib">${ic('cut')}</span>${tr('مخطط القص','Plan de découpe')}</button>
   </div>
   ${noClients?`<div class="empty"><p>${tr('لا توجد أي ورشة بعد. أضف الورشات واحدة بواحدة، أو استورد الديون من الكراس دفعة واحدة.','Aucun client pour l’instant. Ajoutez-les un par un, ou importez les crédits du cahier en une fois.')}</p><div class="rowflex"><button class="btn" data-act="add-client">${ic('userplus')}${tr('إضافة ورشة','Ajouter un client')}</button><button class="btn ghost" data-act="nav-import">${ic('scan')}${tr('استيراد من الكراس','Importer du cahier')}</button></div></div>`:''}
   ${orders.length?`<div class="sec"><h3>${tr('طلبيات في الورشة','Commandes en cours')}</h3><button class="link" data-act="nav-journal" data-f="open">${tr('الكل','Tout voir')}</button></div><div class="list">${orders.slice(0,6).map(([id,b])=>`<button class="row" data-act="open-bon" data-id="${id}"><span class="rleft"><span class="av">${ic('cut')}</span><span class="rmain"><span class="rname">${esc(custName(b))}</span><span class="rsub">${tr('فاتورة','Facture')} <bdi dir="ltr">${b.num}</bdi> · ${fdt(b.date,b.createdAt)}</span></span></span>${stChip(b.status)}</button>`).join('')}</div>`:''}
@@ -923,7 +922,6 @@ function homeHTML(){
   <div class="list">${toCall.map(id=>{const c=S.clients[id],s=S.stats[id],wa=waLink(c.phone);
     return `<div class="row"><button class="rleft" style="background:none;border:0;padding:0;text-align:start;flex:1;min-width:0" data-act="open-client" data-id="${id}"><span class="av ${s.age>60?'bad':'warn'}">${esc(initial(c.name))}</span><span class="rmain"><span class="rname">${esc(c.name)}</span><span class="rsub"><span class="amt neg">${DA(s.bal)}</span> · ${s.lastPay?tr(`آخر دفع منذ ${s.age} يوم`,`dernier paiement il y a ${s.age} j`):tr(`دون دفع منذ ${s.age} يوم`,`sans paiement depuis ${s.age} j`)}</span></span></button>
     ${c.phone?`<span class="acts"><a class="mini-btn" href="tel:${esc(String(c.phone).replace(/[^\d+]/g,''))}" aria-label="${tr('اتصل','Appeler')}">${ic('phone')}</a>${wa?`<a class="mini-btn" href="${wa}" target="_blank" rel="noopener" aria-label="WhatsApp">${ic('chat')}</a>`:''}</span>`:''}</div>`}).join('')}</div>`:''}
-  ${chart7()}
   ${(()=>{const la=Object.keys(S.arts).filter(id=>!S.arts[id].archived&&artState(id).alert);return la.length?`<div class="sec"><h3>${tr('سلع قريبة تكمل','Articles bientôt épuisés')}</h3><button class="link" data-act="stk-tab" data-v="art" data-go="1">${tr('السلع','Articles')}</button></div><div class="list">${la.slice(0,6).map(id=>{const x=S.arts[id],st=artState(id);return `<button class="row" data-act="open-art" data-id="${id}"><span class="rleft"><span class="av ${st.cls==='out'?'bad':'warn'}">${ic('box')}</span><span class="rmain"><span class="rname">${esc(x.name)}</span><span class="rsub">${tr('باقي','Reste')} ${artQtyTxt(x,(S.ak[id]||{bal:0}).bal)}</span></span></span>${st.chip}</button>`}).join('')}</div>`:''})()}
   ${lowStock.length?`<div class="sec"><h3>${tr('تنبيهات المخزون','Alertes stock')}</h3><button class="link" data-act="nav-stk">${tr('المخزون','Stock')}</button></div>
   <div class="list">${lowStock.map(x=>`<button class="row" data-act="nav-stk"><span class="rleft"><span class="av ${x.s.cls==='out'?'bad':'warn'}">${ic('box')}</span><span class="rmain"><span class="rname">${esc(x.e.name)}</span><span class="rsub">${tr('المتبقي','Reste')} ${M2(Math.max(0,x.e.bal))}</span></span></span>${x.s.chip}</button>`).join('')}</div>`:''}
@@ -932,6 +930,81 @@ function homeHTML(){
     return r.k==='bon'?`<button class="row" data-act="open-bon" data-id="${r.id}"><span class="rleft"><span class="av" ${r.walk?'style="background:var(--warn-soft);color:var(--warn)"':''}>${ic(r.walk?'cash':'receipt')}</span><span class="rmain"><span class="rname">${esc(custName(r.b))}</span><span class="rsub">${r.b.kind==='opening'?tr('دين قديم','Ancien crédit'):tr(`فاتورة رقم ${r.b.num}`,`Facture n° ${r.b.num}`)}${r.walk?' · '+tr('نقداً','comptant'):''} · ${fdt(r.d,r.t)}</span></span></span><span class="amt ${r.walk?'pos':''}">${DA(r.a)}</span></button>`
     :`<button class="row" data-act="open-client" data-id="${r.c}"><span class="rleft"><span class="av" style="background:var(--ok-soft);color:var(--ok)">${ic('cash')}</span><span class="rmain"><span class="rname">${esc(c.name)}</span><span class="rsub">${tr('دفع','Paiement')} · ${fdt(r.d,r.t)}</span></span></span><span class="amt pos">+${DA(r.a)}</span></button>`}).join('')}</div>`:''}
   </div>`;
+}
+/* ---- الديون والأرباح ---- */
+let dbv={tab:'debt',p:'all',from:'',to:''};
+function heroDebtHTML(){let debt=0,debtors=0,late=0,lateAmt=0;for(const id in S.stats){const s=S.stats[id];if(s.bal>0){debt+=s.bal;debtors++;if(s.age>30){late++;lateAmt+=s.bal}}}
+  return `  <section class="hero">
+    <div><div class="lbl">${tr('مجموع الديون عند الزبائن','Total des crédits clients')}</div><div class="big"><bdi dir="ltr">${grp(debt)}</bdi> <small>${CUR()}</small></div></div>
+    <div class="sub"><span><b><bdi dir="ltr">${debtors}</bdi></b> ${tr('ورشة عليها دين','ateliers débiteurs')}</span>${(()=>{const o=Object.values(S.sstats).reduce((a,x)=>a+Math.max(0,x.bal),0);return o>0?`<span>${tr('علينا للموردين','Dû aux fournisseurs')}: <b><bdi dir="ltr">${grp(o)}</bdi></b> ${CUR()}</span>`:''})()}${late?`<span class="pill">${ic('alert')}<bdi dir="ltr">${late}</bdi> ${tr('متأخرة','en retard')} · <bdi dir="ltr">${grp(lateAmt)}</bdi> ${CUR()}</span>`:''}</div>
+  </section>`}
+function weekStart(){const d=new Date();d.setDate(d.getDate()-d.getDay());return dstr(d)}
+function dbRange(){const td=today();if(dbv.p==='today')return[td,td];if(dbv.p==='week')return[weekStart(),td];if(dbv.p==='month')return[td.slice(0,7)+'-01',td];if(dbv.p==='custom')return[dbv.from||td.slice(0,7)+'-01',dbv.to||td];return['0000-01-01','9999-12-31']}
+function bonMargin(b){let m=0,u=0;if(!b||b.kind==='opening')return{m,u};
+  if(b.kind==='return'){for(const l of b.lines||[]){if(l.lk==='art'){const c=artCostAt(l.articleId,b.date);m+=num(l.amount)+(b.restock&&c!==null?num(l.baseQty||l.qty)*c:0);continue}const c=costAt(l.typeId,b.date);m+=num(l.amount)+(b.restock&&c!==null?num(l.area)*c:0)}return{m,u}}
+  for(const l of b.lines||[]){if(l.lk==='art'){if(l.cat==='svc'){m+=num(l.amount);continue}const c=artCostAt(l.articleId,b.date);if(c===null)u+=num(l.amount);else m+=num(l.amount)-num(l.baseQty||l.qty)*c;continue}
+    const c=costAt(l.typeId,b.date);if(c===null)u+=num(l.amount);else m+=num(l.amount)-num(l.area)*c}
+  m-=num(b.disc);return{m,u}}
+function dbData(f,t){const rows={};const R=k=>rows[k]||(rows[k]={id:k,buy:0,paid:0,sales:0,m:0,u:0});
+  for(const b of Object.values(S.bons)){if(!b.date||b.date<f||b.date>t)continue;const k=b.walkin?'__walk':b.clientId;if(!k||(k!=='__walk'&&!S.clients[k]))continue;const r=R(k),amt=num(b.total);
+    r.buy+=amt;if(b.walkin)r.paid+=amt;if(b.kind!=='opening'){r.sales+=amt;const x=bonMargin(b);r.m+=x.m;r.u+=x.u}}
+  for(const p of Object.values(S.pays)){if(!p.date||p.date<f||p.date>t||!S.clients[p.clientId])continue;R(p.clientId).paid+=num(p.amount)}
+  if(f==='0000-01-01')for(const id in S.stats)if(S.clients[id]&&num(S.stats[id].bal)>0.5)R(id);
+  for(const r of Object.values(rows)){r.debt=r.buy-r.paid;r.bal=r.id==='__walk'?0:num((S.stats[r.id]||{}).bal);r.name=r.id==='__walk'?tr('زبائن عاديون','Clients comptoir'):S.clients[r.id].name}
+  return Object.values(rows)}
+const pct=(a,b)=>b>0?Math.round(a/b*100):(a>0?100:0);
+function expSum(f,t){let e=0;for(const x of Object.values(S.exps))if(x.date&&x.date>=f&&x.date<=t)e+=num(x.amount);return e}
+function debtsHTML(){
+  if(!loaded())return `<div class="empty"><p>${tr('جاري التحميل…','Chargement…')}</p></div>`;
+  const [f,t]=dbRange(),all=dbv.p==='all',rows=dbData(f,t);
+  const ch=v=>`<button data-act="db-p" data-v="${v[0]}" class="${dbv.p===v[0]?'on':''}">${v[1]}</button>`;
+  const per=`<div class="chips" style="flex-wrap:wrap">${[['all',tr('الكل','Tout')],['today',tr('اليوم','Aujourd’hui')],['week',tr('هذا الأسبوع','Cette semaine')],['month',tr('هذا الشهر','Ce mois')],['custom',tr('من … إلى','Période')]].map(ch).join('')}</div>
+  ${dbv.p==='custom'?`<div class="grid2"><div class="field"><label for="dbf">${tr('من','Du')}</label><input id="dbf" type="date" value="${esc(f)}"></div><div class="field"><label for="dbt">${tr('إلى','Au')}</label><input id="dbt" type="date" value="${esc(t)}"></div></div>`:''}`;
+  const bar=(v,cls)=>`<div class="bar"><i class="${cls||''}" style="width:${Math.max(0,Math.min(100,v))}%"></i></div>`;
+  const seg=`<div class="seg" style="align-self:stretch"><button data-act="db-tab" data-v="debt" class="${dbv.tab==='debt'?'on':''}">${tr('الديون','Crédits')}</button><button data-act="db-tab" data-v="profit" class="${dbv.tab==='profit'?'on':''}">${tr('الأرباح','Bénéfices')}</button></div>`;
+  let body='';
+  if(dbv.tab==='debt'){
+    const ws=rows.filter(r=>r.id!=='__walk'&&(Math.abs(r.debt)>0.5||r.buy||r.paid)).sort((a,b)=>b.debt-a.debt);
+    const T=ws.reduce((a,r)=>({buy:a.buy+r.buy,paid:a.paid+r.paid,debt:a.debt+r.debt,sales:a.sales+r.sales,m:a.m+r.m}),{buy:0,paid:0,debt:0,sales:0,m:0});
+    const pp=pct(T.paid,T.buy),mp=pct(T.m,T.sales);
+    body=`${heroDebtHTML()}${per}
+    <div class="card pad stack" style="gap:10px">
+      <div class="rowflex between"><span class="note">${all?tr('مجموع الديون لكل الزبائن','Total des crédits clients'):tr('ديون هذه الفترة لكل الزبائن','Crédits de la période, tous clients')}</span><b class="amt ${T.debt>0.5?'neg':'pos'}" style="font-size:1.35rem">${DA(T.debt)}</b></div>
+      <div class="rowflex between note"><span>${all?tr('كل المشتريات','Total acheté'):tr('مشتريات الفترة','Acheté sur la période')} ${DA(T.buy)}</span><span>${tr('دفعوا','Payé')} ${DA(T.paid)}</span></div>
+      <div class="rowflex between"><span>${tr('نسبة الدفع','Taux de paiement')}</span><b><bdi dir="ltr">${pp}%</bdi></b></div>${bar(pp,pp>=80?'':pp>=50?'low':'out')}
+      <div class="rowflex between"><span>${tr('الربح من المبيعات','Bénéfice sur ventes')} ${DA(T.m)}</span><b><bdi dir="ltr">${mp}%</bdi></b></div>
+    </div>
+    <h3>${tr('كل ورشة','Par atelier')}</h3>
+    ${ws.length?`<div class="list">${ws.map(r=>{const p1=pct(r.paid,r.buy),p2=pct(r.m,r.sales);return `<button class="row" data-act="open-client" data-id="${r.id}" style="flex-direction:column;align-items:stretch;gap:6px">
+      <span class="rowflex between"><span class="rname">${esc(r.name)}</span><span class="amt ${r.debt>0.5?'neg':'pos'}">${DA(r.debt)}</span></span>
+      <span class="rsub rowflex between"><span>${tr('اشترى','Acheté')} ${DA(r.buy)} · ${tr('دفع','Payé')} ${DA(r.paid)}</span><span>${tr('دفع','Payé')} <bdi dir="ltr">${p1}%</bdi></span></span>
+      ${bar(p1,p1>=80?'':p1>=50?'low':'out')}
+      <span class="rsub rowflex between"><span>${tr('الربح','Bénéfice')} ${DA(r.m)} (<bdi dir="ltr">${p2}%</bdi>)</span>${all?'':`<span>${tr('الرصيد الكلي','Solde total')} ${DA(r.bal)}</span>`}</span></button>`}).join('')}</div>`
+    :`<div class="empty"><p>${tr('ما كاين حتى دين في هذي الفترة.','Aucun crédit sur cette période.')}</p></div>`}`;
+  }else{
+    const td=today();let mT=0,uT=0;for(const b of Object.values(S.bons))if(b.date===td){const x=bonMargin(b);mT+=x.m;uT+=x.u}
+    const eT=expSum(td,td),netT=mT-eT;
+    const ps=rows.filter(r=>r.sales||r.m).sort((a,b)=>b.m-a.m);
+    const mP=ps.reduce((a,r)=>a+r.m,0),sP=ps.reduce((a,r)=>a+r.sales,0),uP=ps.reduce((a,r)=>a+r.u,0),eP=expSum(f==='0000-01-01'?'0000-01-01':f,t);
+    const maxM=Math.max(1,...ps.map(r=>Math.max(0,r.m)));
+    body=`<div class="balbox"><div><div class="note">${tr('الربح الصافي اليوم (بعد المصاريف)','Bénéfice net du jour (après dépenses)')}</div><div class="amt ${netT<0?'neg':'pos'}" style="font-size:1.7rem">${DA(netT)}</div></div>
+      <div class="rside"><span class="note">${tr('ربح المبيعات','Marge ventes')} ${DA(mT)}</span><span class="note">${tr('المصاريف','Dépenses')} −${DA(eT)}</span></div></div>
+    ${uT?`<p class="note">${tr('مبيعات بلا سعر شراء ما تحسبتش في الربح','Ventes sans prix d’achat non comptées')}: ${DA(uT)}</p>`:''}
+    ${per}
+    <div class="tiles">
+      <div class="tile"><span class="lbl">${tr('المبيعات','Ventes')}</span><span class="v">${DA(sP)}</span></div>
+      <div class="tile"><span class="lbl">${tr('ربح المبيعات','Marge')}</span><span class="v ok">${DA(mP)}</span><span class="note"><bdi dir="ltr">${pct(mP,sP)}%</bdi></span></div>
+      <div class="tile"><span class="lbl">${tr('المصاريف','Dépenses')}</span><span class="v" style="color:var(--debt)">${DA(eP)}</span></div>
+      <div class="tile"><span class="lbl">${tr('الربح الصافي','Bénéfice net')}</span><span class="v ${mP-eP<0?'':'ok'}" ${mP-eP<0?'style="color:var(--debt)"':''}>${DA(mP-eP)}</span></div>
+    </div>
+    ${uP?`<p class="note">${tr('مبيعات بلا سعر شراء ما تحسبتش في الربح','Ventes sans prix d’achat non comptées')}: ${DA(uP)}</p>`:''}
+    <h3>${tr('الربح مع كل زبون','Bénéfice par client')}</h3>
+    ${ps.length?`<div class="card pad stack" style="gap:12px">${ps.map(r=>`<div style="display:grid;gap:5px"><div class="rowflex between"><b>${esc(r.name)}</b><span>${DA(r.m)} <span class="note">(<bdi dir="ltr">${pct(r.m,r.sales)}%</bdi>)</span></span></div><div class="note">${tr('مبيعات','Ventes')} ${DA(r.sales)}</div>${bar(r.m/maxM*100)}</div>`).join('')}</div>`
+    :`<div class="empty"><p>${tr('ما كاين حتى بيع في هذي الفترة.','Aucune vente sur cette période.')}</p></div>`}
+    ${chart7()}
+    <p class="note">${tr('الربح = سعر البيع − آخر سعر شراء قبل تاريخ البيع، ناقص التخفيض. التشطيب يُحسب كله ربح.','Bénéfice = prix de vente − dernier prix d’achat avant la vente, moins la remise. Le façonnage compte entièrement.')}</p>`;
+  }
+  return `<div class="stack">${backBtn('nav-home',tr('الرئيسية','Accueil'))}<h2>${tr('الديون والأرباح','Crédits et bénéfices')}</h2>${seg}${body}</div>`;
 }
 function chart7(){
   const days=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);days.push(dstr(d))}
@@ -1048,8 +1121,8 @@ function releveText(id,f='0000-01-01',t='9999-12-31'){
 }
 function docLinesTable(lines){
   const hasSvc=(lines||[]).some(l=>num(l.svcAmt)>0);
-  return `<div class="scroll"><table class="tbl"><thead><tr><th>${tr('النوع','Type')}</th><th>${tr('الاستعمال','Usage')}</th><th>${tr('المقاس (سم)','Dim. (cm)')}</th><th>${tr('العدد','Qté')}</th><th>${tr('المساحة','Surface')}</th><th>${tr('السعر','Prix')}</th>${hasSvc?`<th>${tr('التشطيب','Façonnage')}</th>`:''}<th>${tr('المبلغ','Montant')}</th></tr></thead><tbody>
-  ${(lines||[]).map(l=>l.lk==='art'?`<tr><td>${esc(l.type)}</td><td></td><td>—</td><td><bdi dir="ltr">${esc(l.qty)}</bdi> ${esc(l.unit||'')}</td><td>—</td><td>${DA(l.price)}</td>${hasSvc?'<td></td>':''}<td>${DA(l.amount)}</td></tr>`:`<tr><td>${esc(l.type)}</td><td>${esc(l.use||'')}</td><td><bdi dir="ltr">${esc(l.w)} × ${esc(l.h)}</bdi></td><td>${esc(l.qty)}</td><td>${M2(l.billArea||l.area)}</td><td>${DA(l.price)}</td>${hasSvc?`<td>${esc(l.svcText||'')}${num(l.svcAmt)?'<br>'+DA(l.svcAmt):''}</td>`:''}<td>${DA(l.amount)}</td></tr>`).join('')}
+  return `<div class="scroll"><table class="tbl"><thead><tr><th>${tr('النوع','Type')}</th><th>${tr('الاستعمال','Usage')}</th><th>${tr('المقاس (سم)','Dim. (cm)')}</th><th>${tr('العدد','Qté')}</th><th>${tr('السعر','Prix')}</th>${hasSvc?`<th>${tr('التشطيب','Façonnage')}</th>`:''}<th>${tr('المبلغ','Montant')}</th></tr></thead><tbody>
+  ${(lines||[]).map(l=>l.lk==='art'?`<tr><td>${esc(l.type)}</td><td></td><td>—</td><td><bdi dir="ltr">${esc(l.qty)}</bdi> ${esc(l.unit||'')}</td><td>${DA(l.price)}</td>${hasSvc?'<td></td>':''}<td>${DA(l.amount)}</td></tr>`:`<tr><td>${esc(l.type)}</td><td>${esc(l.use||'')}</td><td><bdi dir="ltr">${esc(l.w)} × ${esc(l.h)}</bdi></td><td>${esc(l.qty)}</td><td>${DA(l.price)}</td>${hasSvc?`<td>${esc(l.svcText||'')}${num(l.svcAmt)?'<br>'+DA(l.svcAmt):''}</td>`:''}<td>${DA(l.amount)}</td></tr>`).join('')}
   </tbody></table></div>`;
 }
 function bonViewHTML(){
@@ -1107,10 +1180,10 @@ function receiptHTML(id,kind){
   ${rcHead(true)}
   <div class="rc-meta"><div><b>${q?tr('عرض سعر رقم','Devis n°'):b.kind==='return'?tr('مرتجع رقم','Avoir n°'):tr('فاتورة رقم','Facture n°')} <bdi dir="ltr">${b.num}</bdi></b><div>${tr('التاريخ','Date')}: ${fdate(b.date)} · ${tr('الساعة','Heure')}: ${ftime(b.createdAt)}</div>${q?`<div>${tr('صالح لمدة 15 يوماً','Valable 15 jours')}</div>`:''}</div>
     <div><div>${tr('الزبون','Client')}: <b>${esc(custName(b))}</b></div>${b.walkin&&b.cphone?`<div><bdi dir="ltr">${esc(b.cphone)}</bdi></div>`:''}${cl&&cl.phone?`<div><bdi dir="ltr">${esc(cl.phone)}</bdi></div>`:''}${mode?`<div>${tr('طريقة الدفع','Paiement')}: ${mode}</div>`:''}</div></div>
-  <table><thead><tr><th>${tr('النوع','Type')}</th><th>${tr('الاستعمال','Usage')}</th><th>${tr('المقاس سم','Dim. cm')}</th><th>${tr('العدد','Qté')}</th><th>${tr('م²','m²')}</th><th>${tr('السعر','Prix')}</th>${hasSvc?`<th>${tr('التشطيب','Façonnage')}</th>`:''}<th>${tr('المبلغ','Montant')}</th></tr></thead><tbody>
-  ${(b.lines||[]).map(l=>l.lk==='art'?`<tr><td>${esc(l.type)}</td><td></td><td>—</td><td><bdi dir="ltr">${esc(l.qty)}</bdi> ${esc(l.unit||'')}</td><td>—</td><td><bdi dir="ltr">${grp(l.price)}</bdi></td>${hasSvc?'<td></td>':''}<td><bdi dir="ltr">${grp(l.amount)}</bdi></td></tr>`:`<tr><td>${esc(l.type)}</td><td>${esc(l.use||'')}</td><td><bdi dir="ltr">${esc(l.w)}×${esc(l.h)}</bdi></td><td>${esc(l.qty)}</td><td><bdi dir="ltr">${dec2(num(l.billArea||l.area))}</bdi></td><td><bdi dir="ltr">${grp(l.price)}</bdi></td>${hasSvc?`<td>${esc(l.svcText||'')}${num(l.svcAmt)?` <bdi dir="ltr">${grp(l.svcAmt)}</bdi>`:''}</td>`:''}<td><bdi dir="ltr">${grp(l.amount)}</bdi></td></tr>`).join('')}
+  <table><thead><tr><th>${tr('النوع','Type')}</th><th>${tr('الاستعمال','Usage')}</th><th>${tr('المقاس سم','Dim. cm')}</th><th>${tr('العدد','Qté')}</th><th>${tr('السعر','Prix')}</th>${hasSvc?`<th>${tr('التشطيب','Façonnage')}</th>`:''}<th>${tr('المبلغ','Montant')}</th></tr></thead><tbody>
+  ${(b.lines||[]).map(l=>l.lk==='art'?`<tr><td>${esc(l.type)}</td><td></td><td>—</td><td><bdi dir="ltr">${esc(l.qty)}</bdi> ${esc(l.unit||'')}</td><td><bdi dir="ltr">${grp(l.price)}</bdi></td>${hasSvc?'<td></td>':''}<td><bdi dir="ltr">${grp(l.amount)}</bdi></td></tr>`:`<tr><td>${esc(l.type)}</td><td>${esc(l.use||'')}</td><td><bdi dir="ltr">${esc(l.w)}×${esc(l.h)}</bdi></td><td>${esc(l.qty)}</td><td><bdi dir="ltr">${grp(l.price)}</bdi></td>${hasSvc?`<td>${esc(l.svcText||'')}${num(l.svcAmt)?` <bdi dir="ltr">${grp(l.svcAmt)}</bdi>`:''}</td>`:''}<td><bdi dir="ltr">${grp(l.amount)}</bdi></td></tr>`).join('')}
   </tbody></table>
-  <div class="tot"><div><span>${tr('المساحة','Surface')}</span><span>${M2(area)}</span></div>${num(b.disc)>0?`<div><span>${tr('المجموع قبل التخفيض','Sous-total')}</span><span>${DA(b.sub)}</span></div><div><span>${tr('التخفيض','Remise')}</span><span>−${DA(b.disc)}</span></div>`:''}<div class="g"><span>${tr('المجموع','Total')}</span><span>${DA(b.total)}</span></div>
+  <div class="tot">${num(b.disc)>0?`<div><span>${tr('المجموع قبل التخفيض','Sous-total')}</span><span>${DA(b.sub)}</span></div><div><span>${tr('التخفيض','Remise')}</span><span>−${DA(b.disc)}</span></div>`:''}<div class="g"><span>${tr('المجموع','Total')}</span><span>${DA(b.total)}</span></div>
   ${q?'':`<div><span>${tr('المدفوع','Payé')}</span><span>${DA(atSale)}</span></div><div><span>${tr('الباقي','Reste')}</span><span>${DA(num(b.total)-atSale)}</span></div>`}
   ${st?`<div><span>${tr('رصيد الحساب الكلي','Solde total du compte')}</span><span>${DA(st.bal)}</span></div>`:''}</div>
   <p class="words">${q?tr('أُوقف هذا العرض على مبلغ','Arrêté le présent devis à la somme de'):tr('أُوقفت هذه الفاتورة على مبلغ','Arrêtée la présente facture à la somme de')}: <b>${esc(amountWords(b.total))}</b></p>
@@ -1134,7 +1207,7 @@ function ticketHTML(id,kind){
   ${row(`<b>${q?tr('عرض سعر','Devis'):b.kind==='return'?tr('مرتجع','Avoir'):tr('فاتورة','Facture')} <bdi dir="ltr">${b.num}</bdi></b>`,`<bdi dir="ltr">${fdateTxt(b.date)} ${ftime(b.createdAt)}</bdi>`)}
   ${row(tr('الزبون','Client'),esc(custName(b)))}
   <div class="tk-sep"></div>
-  ${(b.lines||[]).map(l=>`<div class="tk-l"><div>${esc(l.type)}${l.use?' · '+esc(l.use):''}</div>${row(l.lk==='art'?`<bdi dir="ltr">${esc(l.qty)}</bdi> ${esc(l.unit||'')} × <bdi dir="ltr">${grp(l.price)}</bdi>`:`<bdi dir="ltr">${esc(l.w)}×${esc(l.h)} ×${esc(l.qty)}</bdi> · <bdi dir="ltr">${dec2(num(l.billArea||l.area))}</bdi> ${tr('م²','m²')}`,`<bdi dir="ltr">${grp(l.amount)}</bdi>`)}</div>`).join('')}
+  ${(b.lines||[]).map(l=>`<div class="tk-l"><div>${esc(l.type)}${l.use?' · '+esc(l.use):''}</div>${row(l.lk==='art'?`<bdi dir="ltr">${esc(l.qty)}</bdi> ${esc(l.unit||'')} × <bdi dir="ltr">${grp(l.price)}</bdi>`:`<bdi dir="ltr">${esc(l.w)}×${esc(l.h)} ×${esc(l.qty)}</bdi>`,`<bdi dir="ltr">${grp(l.amount)}</bdi>`)}</div>`).join('')}
   <div class="tk-sep"></div>
   ${num(b.disc)>0?row(tr('التخفيض','Remise'),'−'+DA(b.disc)):''}
   ${row(`<b>${tr('المجموع','Total')}</b>`,`<b>${DA(b.total)}</b>`,'big')}
@@ -1496,7 +1569,7 @@ function settingsHTML(){
   <h3 style="color:var(--debt)">${tr('منطقة الخطر','Zone dangereuse')}</h3>
   <div class="set-group"><button class="set-row" data-act="nav-wipe"><span class="t"><span class="ib" style="background:var(--debt-soft);color:var(--debt)">${ic('trash')}</span><span style="color:var(--debt)">${tr('حذف جميع الورشات','Supprimer tous les clients')}<small>${tr('بعد تحميل نسخة احتياطية وكلمة سر المسؤول','Après sauvegarde et mot de passe admin')}</small></span></span>${ic('chev','flip')}</button></div>
   ${installEvt?`<button class="btn full" data-act="install">${ic('install')}${tr('تثبيت التطبيق على الشاشة','Installer l’application')}</button>`:''}
-  <p class="note" style="text-align:center;margin:8px auto 0">${tr('التُّمَيض الشفاف','Tumayd')} · ${tr('النسخة','Version')} <b><bdi dir="ltr">${APP_VER}</bdi></b></p>
+  <p class="note" style="text-align:center;margin:8px auto 0"><bdi dir="ltr">Gessoum Glass</bdi> · ${tr('النسخة','Version')} <b><bdi dir="ltr">${APP_VER}</bdi></b></p>
   </div>`;
 }
 function importBoxHTML(){
@@ -2021,6 +2094,7 @@ function reportsHTML(){
   let shopS=0,walkS=0,coll=0,exps=0,margin=0,unknown=0;const byType={};
   for(const b of Object.values(S.bons)){if(b.kind==='opening'||!b.date||b.date.slice(0,7)!==mo)continue;if(b.walkin){walkS+=num(b.total);coll+=num(b.total)}else shopS+=num(b.total);
     if(b.kind==='return'){for(const l of b.lines||[]){if(l.lk==='art'){const c=artCostAt(l.articleId,b.date);margin+=num(l.amount)+(b.restock&&c!==null?num(l.baseQty||l.qty)*c:0);continue}const c=costAt(l.typeId,b.date);margin+=num(l.amount)+(b.restock&&c!==null?num(l.area)*c:0)}continue}
+    margin-=num(b.disc);
     for(const l of b.lines||[]){const k=l.type||'?';byType[k]=byType[k]||{a:0,v:0};byType[k].a+=num(l.area);byType[k].v+=num(l.amount);
       if(l.lk==='art'){if(l.cat==='svc'){margin+=num(l.amount);continue}const c=artCostAt(l.articleId,b.date);if(c===null)unknown+=num(l.amount);else margin+=num(l.amount)-num(l.baseQty||l.qty)*c;continue}
       const c=costAt(l.typeId,b.date);if(c===null)unknown+=num(l.amount);else margin+=num(l.amount)-num(l.area)*c}}
@@ -2041,7 +2115,7 @@ function reportsHTML(){
     <div class="tile"><span class="lbl">${tr('المصاريف','Dépenses')}</span><span class="v" style="color:var(--debt)">${DA(exps)}</span></div>
   </div>
   <div class="balbox"><div><div class="note">${tr('الربح التقريبي (الهامش − المصاريف)','Résultat estimé (marge − dépenses)')}</div><div class="amt ${margin-exps<0?'neg':'pos'}" style="font-size:1.5rem">${DA(margin-exps)}</div></div></div>
-  <p class="note">${tr('الهامش = سعر البيع − آخر سعر شراء للمتر قبل تاريخ البيع. التشطيب يُحسب كله هامشاً.','Marge = prix de vente − dernier prix d’achat au m² avant la vente. Le façonnage compte entièrement en marge.')}</p>
+  <p class="note">${tr('الهامش = سعر البيع − آخر سعر شراء للمتر قبل تاريخ البيع، ناقص التخفيض. التشطيب يُحسب كله هامشاً.','Marge = prix de vente − dernier prix d’achat au m² avant la vente, moins la remise. Le façonnage compte entièrement en marge.')}</p>
   ${tl.length?`<h3>${tr('المبيعات حسب النوع','Ventes par type')}</h3><div class="card pad stack" style="gap:12px">${tl.map(([k,v])=>`<div style="display:grid;gap:5px"><div class="rowflex between"><b>${esc(k)}</b><span class="note">${M2(v.a)} · ${DA(v.v)}</span></div><div class="bar"><i style="width:${(v.a/maxA*100).toFixed(0)}%"></i></div></div>`).join('')}</div>`:`<div class="empty"><p>${tr('لا مبيعات في هذا الشهر.','Aucune vente ce mois.')}</p></div>`}
   <h3>${tr('أعمار الديون (اليوم)','Ancienneté des crédits (aujourd’hui)')}</h3>
   <div class="card pad stack" style="gap:12px">${[[0,tr('أقل من 30 يوماً','Moins de 30 j'),''],[1,tr('من 30 إلى 60 يوماً','30 à 60 j'),'low'],[2,tr('أكثر من 60 يوماً','Plus de 60 j'),'out']].map(([i,l,c])=>`<div style="display:grid;gap:5px"><div class="rowflex between"><span>${l}</span><b>${DA(ag[i])}</b></div><div class="bar"><i class="${c}" style="width:${agT?(ag[i]/agT*100).toFixed(0):0}%"></i></div></div>`).join('')}</div>
@@ -2065,6 +2139,7 @@ function packSheets(pieces,SW,SH){
   return{sheets,over};
 }
 function cutHTML(){
+  if(cutSrc&&cutSrc.k==='free')return cutFreeHTML();
   const src=cutSrc&&(cutSrc.k==='quote'?S.quotes[cutSrc.id]:S.bons[cutSrc.id]);
   const back=`<button class="back" data-act="${cutSrc&&cutSrc.k==='quote'?'open-quote':'open-bon'}" data-id="${cutSrc?cutSrc.id:''}">${ic('back','flip')}${tr('رجوع','Retour')}</button>`;
   if(!src)return `${back}<div class="empty"><p>${tr('المستند غير موجود.','Document introuvable.')}</p></div>`;
@@ -2072,7 +2147,11 @@ function cutHTML(){
   return `<div class="stack">${back}
   <h2>${tr('مخطط القص','Plan de découpe')}</h2>
   <p class="note">${tr('اقتراح لترتيب القطع على الألواح بقصّات مستقيمة من طرف إلى طرف. مقاس اللوح من آخر إدخال لكل نوع، وإلا 321×225. سُمك خط القص غير محسوب.','Placement proposé en coupes guillotine. Format : dernier achat du type, sinon 321×225. Épaisseur de coupe non comptée.')}</p>
-  ${Object.entries(groups).map(([tid,g])=>{const e=S.sk[tid];const SW=e&&e.last?num(e.last.sw):SHEET0.w,SH=e&&e.last?num(e.last.sh):SHEET0.h;const r=packSheets(g.pieces,SW,SH);
+  ${cutCards(groups)}
+  </div>`;
+}
+
+function cutCards(groups){return Object.entries(groups).map(([tid,g])=>{const e=S.sk[tid];const SW=g.SW||(e&&e.last?num(e.last.sw):SHEET0.w),SH=g.SH||(e&&e.last?num(e.last.sh):SHEET0.h);const r=packSheets(g.pieces,SW,SH);
     return `<div class="card pad stack" style="gap:10px"><div class="rowflex between"><b>${esc(g.name)}</b><span class="note">${tr('اللوح','Plaque')} <bdi dir="ltr">${SW}×${SH}</bdi> · <bdi dir="ltr">${r.sheets.length}</bdi> ${tr('لوح','plaque(s)')}</span></div>
     ${r.over.length?`<div class="banner">${ic('alert')}<span>${tr('قطع أكبر من اللوح','Pièces plus grandes que la plaque')}: ${r.over.map(p=>`<bdi dir="ltr">${p.w}×${p.h}</bdi>`).join('، ')}</span></div>`:''}
     ${r.sheets.map((s,i)=>{const used=s.used.reduce((a,u)=>a+u.w*u.h,0)/(SW*SH)*100;const off=s.free.filter(f=>Math.min(f.w,f.h)>=20).sort((a,b)=>b.w*b.h-a.w*a.h).slice(0,4);
@@ -2080,7 +2159,28 @@ function cutHTML(){
       <div class="cutbox"><svg viewBox="-3 -3 ${SW+6} ${SH+6}" role="img" aria-label="${tr('مخطط اللوح','Plan de la plaque')} ${i+1}"><rect x="0" y="0" width="${SW}" height="${SH}" fill="var(--sunk)" stroke="var(--faint)" stroke-width="1.5"/>
       ${s.used.map(u=>`<rect x="${u.x}" y="${u.y}" width="${u.w}" height="${u.h}" fill="var(--edge)" stroke="var(--accent)" stroke-width="1.4"/>${u.w>=36&&u.h>=16?`<text x="${u.x+u.w/2}" y="${u.y+u.h/2}" text-anchor="middle" dominant-baseline="central" font-size="${Math.max(7,Math.min(16,u.h/2.6,u.w/5.5)).toFixed(1)}" font-weight="600" fill="var(--ink)" direction="ltr">${u.w}×${u.h}</text>`:''}`).join('')}</svg></div>
       ${off.length?`<div class="note">${tr('بقايا قابلة للاستعمال','Chutes réutilisables')}: ${off.map(f=>`<bdi dir="ltr">${Math.round(f.w)}×${Math.round(f.h)}</bdi>`).join('، ')}</div>`:''}</div>`}).join('')}</div>`}).join('')}
-  </div>`;
+function cutFreeHTML(){const c=cutSrc,tys=types().filter(t=>!t.archived);let res='';
+  if(c.show){const ps=[];for(const p of c.pieces){const w=num(p.w),h=num(p.h),q=Math.max(0,Math.round(num(p.qty)));if(w>0&&h>0)for(let i=0;i<q&&i<500;i++)ps.push({w,h})}
+    const ty=tys.find(x=>x.id===c.tid);
+    res=ps.length&&num(c.SW)>0&&num(c.SH)>0?cutCards({free:{name:ty?ty.name:tr('القطع','Pièces'),pieces:ps,SW:num(c.SW),SH:num(c.SH)}})
+      :`<div class="banner">${ic('alert')}<span>${tr('اكتب مقاس اللوح ومقاس قطعة وحدة على الأقل.','Saisissez le format de plaque et au moins une pièce.')}</span></div>`}
+  return `<div class="stack">${backBtn('nav-home',tr('الرئيسية','Accueil'))}
+  <h2>${tr('مخطط القص','Plan de découpe')}</h2>
+  <p class="note">${tr('اكتب مقاس اللوح والقطع بالسنتيم، ويعطيك كيفاش ترتّبهم على الألواح بقصّات مستقيمة.','Saisissez la plaque et les pièces en cm : le plan les range en coupes droites.')}</p>
+  <div class="card pad stack" style="gap:10px"><b>${tr('اللوح','Plaque')}</b>
+    ${tys.length?`<div class="field"><label for="cu-ty">${tr('النوع (اختياري، ياخذ مقاس آخر لوح دخل)','Type (facultatif, reprend le dernier format acheté)')}</label><select id="cu-ty"><option value="">${tr('مقاس يدوي','Format manuel')}</option>${tys.map(x=>`<option value="${esc(x.id)}" ${c.tid===x.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select></div>`:''}
+    <div class="grid2"><div class="field"><label for="cu-sw">${tr('العرض (سم)','Largeur (cm)')}</label><input id="cu-sw" inputmode="decimal" dir="ltr" value="${esc(c.SW)}"></div><div class="field"><label for="cu-sh">${tr('الطول (سم)','Hauteur (cm)')}</label><input id="cu-sh" inputmode="decimal" dir="ltr" value="${esc(c.SH)}"></div></div>
+  </div>
+  <div class="card pad stack" style="gap:10px"><b>${tr('القطع','Pièces')}</b>
+    ${c.pieces.map((p,i)=>`<div class="rowflex" style="gap:8px;align-items:flex-end">
+      <div class="field" style="flex:1;min-width:0"><label for="cu-w${i}">${tr('العرض','Larg.')}</label><input id="cu-w${i}" data-cu="w" data-i="${i}" inputmode="decimal" dir="ltr" value="${esc(p.w)}" placeholder="50"></div>
+      <div class="field" style="flex:1;min-width:0"><label for="cu-h${i}">${tr('الطول','Haut.')}</label><input id="cu-h${i}" data-cu="h" data-i="${i}" inputmode="decimal" dir="ltr" value="${esc(p.h)}" placeholder="80"></div>
+      <div class="field" style="width:64px"><label for="cu-q${i}">${tr('العدد','Qté')}</label><input id="cu-q${i}" data-cu="qty" data-i="${i}" inputmode="numeric" dir="ltr" value="${esc(p.qty)}"></div>
+      <button class="mini-btn" data-act="cu-del" data-i="${i}" aria-label="${tr('حذف القطعة','Supprimer la pièce')}">${ic('trash')}</button></div>`).join('')}
+    <button class="btn ghost" data-act="cu-add">${ic('plus')}${tr('زيد قطعة','Ajouter une pièce')}</button>
+  </div>
+  <button class="btn full" data-act="cu-run">${ic('cut')}${tr('احسب مخطط القص','Calculer le plan')}</button>
+  <div id="cu-res" class="stack">${res}</div></div>`;
 }
 
 /* ---- import from notebook ---- */
@@ -2183,7 +2283,7 @@ function render(){
   $('#boot').hidden=true;$('#gate').hidden=true;$('#shell').hidden=false;
   $('#brand').innerHTML=brandHTML();$('#lockbtn').innerHTML=ic('lock');$('#lockbtn').setAttribute('aria-label',tr('قفل','Verrouiller'));
   const v=view.name,m=$('#main');
-  m.innerHTML=v==='home'?homeHTML():v==='clients'?clientsHTML():v==='client'?clientHTML():v==='bonview'?bonViewHTML():v==='bon'?bonFormHTML():v==='pay'?payFormHTML():v==='cform'?clientFormHTML():v==='stock'?stockHTML():v==='kin'?kinFormHTML():v==='kadj'?kadjFormHTML():v==='prices'?pricesHTML():v==='acct'?acctHTML():v==='import'?importHTML():v==='shop'?shopHTML():v==='quotes'?quotesHTML():v==='quoteview'?quoteViewHTML():v==='cash'?cashHTML():v==='exp'?expFormHTML():v==='reports'?reportsHTML():v==='cut'?cutHTML():v==='svcs'?svcsHTML():v==='cloud'?cloudHTML():v==='journal'?journalHTML():v==='ret'?retFormHTML():v==='sups'?supsHTML():v==='sup'?supHTML():v==='sform'?supFormHTML():v==='spay'?spayFormHTML():v==='stmt'?stmtHTML():v==='export'?exportHTML():v==='search'?searchHTML():v==='stats'?statsHTML():v==='art'?artHTML():v==='aform'?artFormHTML():v==='ain'?ainFormHTML():v==='aadj'?aadjFormHTML():v==='events'?eventsHTML():v==='wipe'?wipeHTML():settingsHTML();
+  m.innerHTML=v==='debts'?debtsHTML():v==='home'?homeHTML():v==='clients'?clientsHTML():v==='client'?clientHTML():v==='bonview'?bonViewHTML():v==='bon'?bonFormHTML():v==='pay'?payFormHTML():v==='cform'?clientFormHTML():v==='stock'?stockHTML():v==='kin'?kinFormHTML():v==='kadj'?kadjFormHTML():v==='prices'?pricesHTML():v==='acct'?acctHTML():v==='import'?importHTML():v==='shop'?shopHTML():v==='quotes'?quotesHTML():v==='quoteview'?quoteViewHTML():v==='cash'?cashHTML():v==='exp'?expFormHTML():v==='reports'?reportsHTML():v==='cut'?cutHTML():v==='svcs'?svcsHTML():v==='cloud'?cloudHTML():v==='journal'?journalHTML():v==='ret'?retFormHTML():v==='sups'?supsHTML():v==='sup'?supHTML():v==='sform'?supFormHTML():v==='spay'?spayFormHTML():v==='stmt'?stmtHTML():v==='export'?exportHTML():v==='search'?searchHTML():v==='stats'?statsHTML():v==='art'?artHTML():v==='aform'?artFormHTML():v==='ain'?ainFormHTML():v==='aadj'?aadjFormHTML():v==='events'?eventsHTML():v==='wipe'?wipeHTML():settingsHTML();
   if(v==='search')setTimeout(()=>{const i=$('#gsq');if(i&&document.activeElement!==i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}},30);
   if(v==='bon')updBon();if(v==='pay')updPay();if(v==='cloud')syncUI();if(v==='kin')updKin();if(v==='kadj')updAdj();
   $('#nav').innerHTML=navHTML();$('#side').innerHTML=sideHTML();$('#searchbtn').innerHTML=ic('search');$('#searchbtn').setAttribute('aria-label',tr('بحث','Recherche'));
@@ -2272,6 +2372,7 @@ document.addEventListener('input',e=>{
   if(view.name==='sform'&&sfdraft){const k={sfn:'name',sfp:'phone',sfo:'opening'}[t.id];if(k){sfdraft[k]=t.value;return}}
   if(view.name==='spay'&&spdraft){const k={spa:'amount',spd:'date',spn:'note'}[t.id];if(k){spdraft[k]=t.value;return}}
   if(view.name==='stmt'&&stdraft){if(t.id==='stf')stdraft.from=t.value;if(t.id==='stt')stdraft.to=t.value}
+  if(view.name==='cut'&&cutSrc&&cutSrc.k==='free'){if(t.dataset.cu){const p=cutSrc.pieces[+t.dataset.i];if(p)p[t.dataset.cu]=t.value;return}if(t.id==='cu-sw'){cutSrc.SW=t.value;return}if(t.id==='cu-sh'){cutSrc.SH=t.value;return}}
   if(view.name==='shop'){const k={'sh-name':'name','sh-phone':'phone','sh-addr':'address','sh-foot':'footer','sh-rc':'rc','sh-nif':'nif','sh-nis':'nis','sh-ai':'ai','sh-act':'activity','sh-rib':'rib'}[t.id];if(k){shopDraft[k]=t.value;return}}
   if(t.id==='imp-text'&&imp){imp.text=t.value;return}
   if(t.dataset&&t.dataset.ir&&imp&&imp.rows){const r=imp.rows[+t.dataset.i];if(t.dataset.ir==='on')r.on=t.checked;else r[t.dataset.ir]=t.value;
@@ -2300,6 +2401,8 @@ document.addEventListener('change',e=>{
   if(t.id==='ai-a'&&aind){const a=S.arts[t.value];aind.articleId=t.value;aind.u=a&&a.pack&&num(a.pack.n)>1?'pack':'base';aind.uc=a&&num(a.cost)>0?String(Math.round(num(a.cost)*artFactor(a,aind.u)*100)/100):'';return render()}
   if(t.id==='aisup'&&aind){aind.supplierId=t.value;return render()}
   if(t.id==='sh-logo'&&t.files&&t.files[0]&&shopDraft){const f=t.files[0];t.value='';shrinkImage(f).then(u=>{if(!u)return toast(tr('ما قدرتش نقرا الصورة.','Image illisible.'));shopDraft.logo=u;render()});return}
+  if(t.id==='dbf'||t.id==='dbt'){if(t.value){dbv[t.id==='dbf'?'from':'to']=t.value;render()}return}
+  if(t.id==='cu-ty'&&cutSrc){cutSrc.tid=t.value;const e=S.sk[t.value];if(e&&e.last&&num(e.last.sw)>0){cutSrc.SW=num(e.last.sw);cutSrc.SH=num(e.last.sh)}return render()}
   if(t.id==='stf-f'||t.id==='stf-t'){if(t.value){stf[t.id==='stf-f'?'from':'to']=t.value;stf.pre='';render()}return}
   if(t.id==='lockSel'){prefs.lock=+t.value;savePrefs();if(prefs.lock>0)touch(true);toast(tr('تم الحفظ.','Enregistré.'));return}
   if(t.id==='imp-file'&&t.files&&t.files[0]){const f=t.files[0];t.value='';readImportFile(f).then(txt=>{if(txt===null)return;imp.text=txt;imp.rows=parseCSV(txt);$('#imp-text').value=txt;$('#imp-rows').innerHTML=impRowsHTML()}).catch(()=>toast(tr('تعذّرت قراءة الملف.','Lecture du fichier impossible.')));return}
@@ -2508,6 +2611,13 @@ document.addEventListener('click',async e=>{
   if(a==='nav-reports'){repMonth=today().slice(0,7);return go('reports')}
   if(a==='rep-prev'||a==='rep-next'){const [y,m]=(repMonth||today().slice(0,7)).split('-').map(Number);const d=new Date(y,m-1+(a==='rep-prev'?-1:1),15);repMonth=d.getFullYear()+'-'+pad(d.getMonth()+1);return render()}
   if(a==='cut-plan'){cutSrc={k:b.dataset.k,id};return go('cut')}
+  if(a==='cut-free'){cutSrc={k:'free',tid:'',SW:SHEET0.w,SH:SHEET0.h,pieces:[{w:'',h:'',qty:1}],show:false};return go('cut')}
+  if(a==='cu-add'){cutSrc.pieces.push({w:'',h:'',qty:1});return render()}
+  if(a==='cu-del'){cutSrc.pieces.splice(+b.dataset.i,1);if(!cutSrc.pieces.length)cutSrc.pieces.push({w:'',h:'',qty:1});return render()}
+  if(a==='cu-run'){cutSrc.show=true;render();const r=$('#cu-res');if(r&&r.scrollIntoView)r.scrollIntoView({behavior:'smooth',block:'start'});return}
+  if(a==='nav-debts')return go('debts');
+  if(a==='db-tab'){dbv.tab=b.dataset.v;return render()}
+  if(a==='db-p'){dbv.p=b.dataset.v;if(dbv.p==='custom'&&!dbv.from){dbv.from=today().slice(0,7)+'-01';dbv.to=today()}return render()}
   if(a==='nav-svcs'){sdraft={svcs:svcs().map(x=>({...x})),minArea:minArea()?String(minArea()):''};return go('svcs')}
   if(a==='save-svcs'){const list=sdraft.svcs.map(x=>({...x,name:String(x.name||'').trim()||x.id,price:Math.max(0,num(x.price))}));const ma=Math.max(0,num(sdraft.minArea));
     if(ma>2)return toast(tr('الحد الأدنى كبير جداً. اكتبه بالمتر المربع، مثلاً 0.25.','Minimum trop grand. Saisissez-le en m², ex. 0,25.'));
@@ -2561,7 +2671,7 @@ document.addEventListener('click',async e=>{
   if(a==='share-bk'||a==='dl-bk'){
     const f=backupFile();
     if(a==='share-bk'&&navigator.canShare&&navigator.canShare({files:[f]})){
-      try{await navigator.share({files:[f],title:tr('نسخة التُّمَيض','Sauvegarde Tumayd')});setLastBackup();toast(tr('تم إرسال النسخة.','Sauvegarde envoyée.'));render()}
+      try{await navigator.share({files:[f],title:tr('نسخة Gessoum Glass','Sauvegarde Gessoum Glass')});setLastBackup();toast(tr('تم إرسال النسخة.','Sauvegarde envoyée.'));render()}
       catch(err){if(err&&err.name!=='AbortError'){downloadFile(f);setLastBackup();toast(tr('تم تنزيل الملف.','Fichier téléchargé.'));render()}}
     }else{downloadFile(f);setLastBackup();toast(tr('تم تنزيل الملف ','Fichier téléchargé : ')+f.name);render()}
     return}
@@ -2663,7 +2773,7 @@ window.addEventListener('appinstalled',()=>{installEvt=null;toast(tr('تم تث�
 applyPrefs();
 (async()=>{
   try{if(!window.indexedDB||!window.crypto||!crypto.subtle)throw 0;await LocalDB.load()}
-  catch(e){$('#boot').innerHTML=`<div class="gate-card"><div class="gate-head">${MARK}<b>${tr('التُّمَيض الشفاف','Tumayd')}</b></div><p class="note">${tr('هذا المتصفح لا يسمح بحفظ البيانات. افتح التطبيق في Chrome أو Safari، دون الوضع الخفي.','Ce navigateur ne permet pas d’enregistrer les données. Ouvrez l’application dans Chrome ou Safari, hors navigation privée.')}</p></div>`;return}
+  catch(e){$('#boot').innerHTML=`<div class="gate-card"><div class="gate-head">${MARK}<b dir="ltr">Gessoum Glass</b></div><p class="note">${tr('هذا المتصفح لا يسمح بحفظ البيانات. افتح التطبيق في Chrome أو Safari، دون الوضع الخفي.','Ce navigateur ne permet pas d’enregistrer les données. Ouvrez l’application dans Chrome ou Safari, hors navigation privée.')}</p></div>`;return}
   db=LocalDB;dbState='ok';LocalDB.setHook(markOut);LocalDB.setEvtHook(evHook);cloudBoot();
   try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(_){}
   const asMap=q=>Object.fromEntries(q.docs.map(d=>[d.id,d.data()]));

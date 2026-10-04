@@ -1,7 +1,7 @@
 {
-  "name": "التُّمَيض الشفاف",
-  "short_name": "التُّمَيض",
-  "description": "التُّمَيض الشفاف: فواتير، ديون الورشات، ومخزون الزجاج",
+  "name": "Gessoum Glass",
+  "short_name": "Gessoum Glass",
+  "description": "Gessoum Glass: فواتير، ديون الورشات، ومخزون الزجاج",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "./",
