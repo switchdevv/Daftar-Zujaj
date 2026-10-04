@@ -443,13 +443,13 @@ const LocalDB=(()=>{
 })();
 
 /* ====================== cloud sync (Firebase) ====================== */
-const FIREBASE_CONFIG=null; /* يُملأ بمفاتيح مشروع Firebase */
+const FIREBASE_CONFIG={apiKey:"AIzaSyDrG8gnNGd3--FofiKR7HPuS4Z6iU6TDus",authDomain:"saddam-tumayd.firebaseapp.com",projectId:"saddam-tumayd",storageBucket:"saddam-tumayd.firebasestorage.app",messagingSenderId:"173113371518",appId:"1:173113371518:web:505f6f9a419b51e2c9e12f"};
 const FB_VER='10.12.2';
 const Sync={state:'off',err:'',last:0,pending:0,fs:null,auth:null,uid:null,email:'',unsub:null,timer:null,busy:false};
 const lsGet=(k,d)=>{try{const v=localStorage.getItem(k);return v===null?d:v}catch(_){return d}};
 const lsSet=(k,v)=>{try{if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(_){}};
 const DEV=(()=>{let d=lsGet('sz-dev','');if(!d){d=Math.random().toString(36).slice(2,10);lsSet('sz-dev',d)}return d})();
-function fbCfg(){if(FIREBASE_CONFIG)return FIREBASE_CONFIG;try{return JSON.parse(lsGet('sz-fb','null'))}catch(_){return null}}
+function fbCfg(){try{const o=JSON.parse(lsGet('sz-fb','null'));if(o&&o.apiKey)return o}catch(_){}return FIREBASE_CONFIG}
 function parseFbCfg(txt){const o={};String(txt||'').replace(/(apiKey|authDomain|projectId|storageBucket|messagingSenderId|appId|measurementId)\s*["']?\s*:\s*["']([^"']+)["']/g,(m,k,v)=>{o[k]=v});return o.apiKey&&o.projectId&&o.appId?o:null}
 const outbox=()=>{try{return JSON.parse(lsGet('sz-out','{}'))||{}}catch(_){return{}}};
 const saveOut=o=>lsSet('sz-out',JSON.stringify(o));
@@ -501,6 +501,7 @@ function cloudErr(e){const c=(e&&e.code)||'';
   if(/operation-not-allowed/.test(c))return tr('فعّل Email/Password في Firebase ← Authentication.','Activez E-mail/Mot de passe dans Firebase Authentication.');
   if(/unauthorized-domain/.test(c))return tr('أضف switchdevv.github.io في Authorized domains.','Ajoutez switchdevv.github.io aux domaines autorisés.');
   if(/permission-denied/.test(c))return tr('قواعد Firestore غير صحيحة. راجع خطوة Rules.','Règles Firestore incorrectes.');
+  if(/api-key|invalid-api-key|API_KEY/.test(c))return tr('مفتاح Firebase غير صحيح. الصق firebaseConfig من جديد في «تغيير مفاتيح Firebase».','Clé Firebase invalide. Recollez le firebaseConfig.');
   if(/nocfg/.test(c))return tr('مفاتيح Firebase غير موجودة.','Configuration Firebase manquante.');
   return tr('حدث خطأ: ','Erreur : ')+c;
 }
@@ -1178,7 +1179,7 @@ function settingsHTML(){
     <div id="impbox">${pendingImport?importBoxHTML():''}</div>
   </div></div>
   ${installEvt?`<button class="btn full" data-act="install">${ic('install')}${tr('تثبيت التطبيق على الشاشة','Installer l’application')}</button>`:''}
-  <p class="note" style="text-align:center;margin:8px auto 0">${tr('التُّمَيض الشفاف','Tumayd')} · v9</p>
+  <p class="note" style="text-align:center;margin:8px auto 0">${tr('التُّمَيض الشفاف','Tumayd')} · v10</p>
   </div>`;
 }
 function importBoxHTML(){
@@ -1258,7 +1259,7 @@ function cloudHTML(){
   const cfg=fbCfg();
   const why=`<div class="card pad stack" style="gap:6px"><b>${tr('واش تعطيك المزامنة؟','Pourquoi synchroniser ?')}</b><ul style="margin:0;padding-inline-start:18px;color:var(--muted);font-size:.88rem"><li>${tr('نسخة دائمة في السحاب: إذا ضاع الهاتف لا تضيع الحسابات.','Copie permanente : rien n’est perdu si le téléphone l’est.')}</li><li>${tr('نفس الدفتر على أكثر من جهاز.','Le même registre sur plusieurs appareils.')}</li><li>${tr('التطبيق يبقى يعمل بلا أنترنت، ويرسل التغييرات فقط عند عودة الاتصال.','L’application marche hors ligne et n’envoie que les changements.')}</li><li>${tr('مجانية في خطة Firebase Spark، بلا بطاقة بنكية.','Gratuit avec Firebase Spark, sans carte bancaire.')}</li></ul></div>`;
   let body='';
-  if(!cfg){body=`<div class="card pad stack" style="gap:10px"><b>${tr('مفاتيح مشروع Firebase','Configuration Firebase')}</b><p class="note">${tr('الصق هنا كود firebaseConfig من Firebase ← Project settings ← Your apps.','Collez ici le firebaseConfig (Project settings ← Your apps).')}</p>
+  if(!cfg||cdl.editCfg){body=`<div class="card pad stack" style="gap:10px"><b>${tr('مفاتيح مشروع Firebase','Configuration Firebase')}</b><p class="note">${tr('الصق هنا كود firebaseConfig من Firebase ← Project settings ← Your apps.','Collez ici le firebaseConfig (Project settings ← Your apps).')}</p>
     <textarea id="fb-cfg" rows="7" dir="ltr" placeholder="const firebaseConfig = { apiKey: ... }">${esc(cdl.cfg)}</textarea><p class="err" id="cl-err">${esc(cdl.err)}</p><button class="btn" data-act="cloud-cfg">${tr('حفظ المفاتيح','Enregistrer')}</button></div>`}
   else if(!cloudOn()||!Sync.uid){body=`<div class="card pad stack" style="gap:10px"><b>${tr('حساب المزامنة','Compte de synchronisation')}</b>
     <p class="note">${tr('أول مرة: «إنشاء حساب». في هاتف آخر بنفس البيانات: «دخول» بنفس الإيميل وكلمة السر.','Première fois : « Créer le compte ». Sur un autre téléphone : « Se connecter » avec les mêmes identifiants.')}</p>
@@ -1266,7 +1267,7 @@ function cloudHTML(){
     <div class="field"><label for="cl-pw">${tr('كلمة السر (6 أحرف على الأقل)','Mot de passe (6 caractères min.)')}</label><input id="cl-pw" type="password" dir="ltr" autocomplete="current-password"></div>
     <p class="err" id="cl-err">${esc(cdl.err)}</p>
     <div class="actions"><button class="btn ghost" data-act="cloud-create">${tr('إنشاء حساب','Créer le compte')}</button><button class="btn" data-act="cloud-login">${tr('دخول','Se connecter')}</button></div>
-    ${FIREBASE_CONFIG?'':`<button class="btn plain" data-act="cloud-reset-cfg">${tr('تغيير مفاتيح Firebase','Changer la configuration')}</button>`}</div>`}
+    <button class="btn plain" data-act="cloud-edit-cfg">${tr('تغيير مفاتيح Firebase','Changer la configuration')}</button></div>`}
   else{body=`<div class="card pad stack" style="gap:10px"><div class="rowflex"><span id="sync-dot" class="sdot"></span><b id="sync-status"></b></div>
     <div class="note">${tr('الحساب','Compte')}: <bdi dir="ltr">${esc(Sync.email)}</bdi> · ${tr('المشروع','Projet')}: <bdi dir="ltr">${esc(cfg.projectId)}</bdi></div>
     <div class="actions"><button class="btn" data-act="cloud-sync">${ic('restore')}${tr('مزامنة الآن','Synchroniser')}</button><button class="btn line" data-act="cloud-off">${tr('إيقاف على هذا الهاتف','Arrêter ici')}</button></div>
@@ -1603,8 +1604,8 @@ document.addEventListener('click',async e=>{
   if(a==='type-restore'){const t=types().find(x=>x.id===id);if(await write(()=>saveSettings({types:types().map(x=>x.id===id?{...x,archived:false}:x)}),tr(`تمت استعادة «${t&&t.name}»`,`« ${t&&t.name} » restauré`)))render();return}
   if(a==='cancel-form')return cancelForm();
   if(a==='nav-cloud'){cdl.err='';return go('cloud')}
-  if(a==='cloud-cfg'){const c=parseFbCfg(cdl.cfg);if(!c){cdl.err=tr('لم أجد apiKey و projectId و appId في النص. انسخ الكود كاملاً.','apiKey, projectId et appId introuvables. Copiez tout le bloc.');return render()}lsSet('sz-fb',JSON.stringify(c));cdl.err='';toast(tr('تم حفظ المفاتيح.','Configuration enregistrée.'));return render()}
-  if(a==='cloud-reset-cfg'){lsSet('sz-fb',null);cdl.cfg='';return render()}
+  if(a==='cloud-cfg'){const c=parseFbCfg(cdl.cfg);if(!c){cdl.err=tr('لم أجد apiKey و projectId و appId في النص. انسخ الكود كاملاً.','apiKey, projectId et appId introuvables. Copiez tout le bloc.');return render()}lsSet('sz-fb',JSON.stringify(c));cdl.err='';cdl.editCfg=false;try{if(window.firebase&&firebase.apps.length)location.reload()}catch(_){}toast(tr('تم حفظ المفاتيح.','Configuration enregistrée.'));return render()}
+  if(a==='cloud-edit-cfg'){cdl.editCfg=true;cdl.cfg='';return render()}
   if(a==='cloud-login'||a==='cloud-create'){
     const email=String(($('#cl-email')||{}).value||'').trim(),pw=String(($('#cl-pw')||{}).value||'');cdl.email=email;
     if(!email||pw.length<6){cdl.err=tr('اكتب الإيميل وكلمة سر من 6 أحرف على الأقل.','Saisissez l’e-mail et un mot de passe de 6 caractères min.');return render()}
