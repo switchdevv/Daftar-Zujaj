@@ -379,7 +379,7 @@ const num=v=>{const n=parseFloat(String(v??'').replace(/\s/g,'').replace(',','.'
 const loc=()=>isFr()?'fr-FR':'en-US';
 const grp=n=>{const r=Math.round(n);return(r<0?'-':'')+Math.abs(r).toLocaleString(loc()).replace(/ /g,' ')};
 const grpTxt=n=>Math.round(n).toLocaleString('en-US');
-const APP_VER=28; // نفس الرقم تاع VERSION في sw.js
+const APP_VER=29; // نفس الرقم تاع VERSION في sw.js
 const CUR=()=>tr('دج','DA');
 const DA=n=>`<bdi dir="ltr">${grp(n)}</bdi>&nbsp;${CUR()}`;
 const dec2=a=>(Math.round(a*100)/100).toLocaleString(loc(),{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -1182,7 +1182,7 @@ function bonViewHTML(){
   ${b.kind==='return'?`<div class="banner info">${ic('undo')}<span>${tr('مرتجع من الفاتورة رقم','Retour sur la facture n°')} <bdi dir="ltr">${b.refNum||''}</bdi> · ${b.restock?tr('رجعت السلعة للمخزون','remis en stock'):tr('السلعة تالفة، ما رجعتش للمخزون','non remis en stock')}</span></div>`:''}
   ${b.kind==='sale'&&b.status&&b.status!=='done'?`<div class="card pad stack" style="gap:8px"><b>${tr('حالة الطلبية','État de la commande')}</b><div class="seg">${ST.map(([k,a,f])=>`<button data-act="set-status" data-id="${view.id}" data-v="${k}" class="${(b.status||'done')===k?'on':''}">${tr(a,f)}</button>`).join('')}</div>
     ${b.status==='ready'&&(waText(b.walkin?b.cphone:(S.clients[b.clientId]||{}).phone,'x'))?`<a class="btn ghost" target="_blank" rel="noopener" href="${waText(b.walkin?b.cphone:(S.clients[b.clientId]||{}).phone,tr(`السلام عليكم، طلبيتكم (فاتورة رقم ${b.num}) جاهزة للاستلام لدى ${shopName()}. شكراً.`,`Bonjour, votre commande (facture n° ${b.num}) est prête chez ${shopName()}. Merci.`))}">${ic('chat')}${tr('إبلاغ الزبون عبر واتساب','Prévenir par WhatsApp')}</a>`:''}</div>`:''}
-  ${b.due&&!b.walkin?`<div class="note">${tr('موعد التسديد المتفق عليه','Échéance convenue')}: <b>${fdate(b.due)}</b></div>`:''}
+  ${b.due&&!b.walkin?`<div class="note">${tr('موعد التسديد المتفق عليه','Échéance convenue')}: <b>${fdate(b.due)}${b.dueT?` · <bdi dir="ltr">${esc(b.dueT)}</bdi>`:''}</b></div>`:''}
   ${b.kind==='opening'?'':docLinesTable(b.lines)}
   <div class="totals">${bonKg(b)>0?`<div class="trow"><span>${tr('الوزن التقريبي','Poids approximatif')}</span><b>${KG(bonKg(b))}</b></div>`:''}${num(b.disc)>0?`<div class="trow"><span>${tr('المجموع قبل التخفيض','Sous-total')}</span><span>${DA(b.sub)}</span></div><div class="trow"><span>${tr('التخفيض','Remise')}</span><span>−${DA(b.disc)}</span></div>`:''}<div class="trow big"><span>${tr('المجموع','Total')}</span><span>${DA(b.total)}</span></div>
   ${b.kind!=='sale'?'':`<div class="trow"><span>${tr('دفع عند البيع','Payé à la vente')}</span><span>${DA(atSale)}</span></div><div class="trow"><span>${tr('الباقي من هذه الفاتورة','Reste sur cette facture')}</span><span class="amt ${b.total-atSale>0?'neg':''}">${DA(b.total-atSale)}</span></div>`}</div>
@@ -1347,9 +1347,8 @@ function bonFormHTML(){
     :`<div class="field"><label for="bp">${tr('المبلغ المدفوع الآن','Montant payé maintenant')}</label><input id="bp" inputmode="decimal" value="${esc(draft.paid)}" placeholder="${tr('0 = كامل المبلغ بالدين','0 = tout à crédit')}"></div>
     <div class="quickpay"><button data-act="paid-zero">${tr('كامل بالدين','Tout à crédit')}</button><button data-act="paid-full">${tr('مدفوع كاملاً','Payé en totalité')}</button></div>
     <div class="trow"><span>${tr('الباقي من هذه الفاتورة','Reste sur cette facture')}</span><b id="tr"></b></div>
-    <div class="field"><label for="bdu">${tr('موعد التسديد المتفق عليه (اختياري)','Échéance convenue (facultatif)')}</label><input id="bdu" type="date" value="${esc(draft.due||'')}"></div>`}
+    <div class="field"><label for="bdu">${tr('موعد التسديد المتفق عليه (اختياري)','Échéance convenue (facultatif)')}</label><div class="grid2"><input id="bdu" type="date" value="${esc(draft.due||'')}" aria-label="${tr('تاريخ التسديد','Date d’échéance')}"><input id="bdut" type="time" value="${esc(draft.dueT||'')}" aria-label="${tr('وقت التسديد','Heure d’échéance')}"></div><span class="note">${tr('كي يوصل الوقت وما يتخلّصش، التطبيق يرنّ وينبّهك.','À l’heure dite, si ce n’est pas payé, l’application sonne.')}</span></div>`}
   </div>
-  ${q?'':`<div class="field"><label>${tr('التسليم','Livraison')}</label><div class="seg"><button data-act="bon-st" data-v="done" class="${(draft.status||'done')==='done'?'on':''}">${tr('سُلّمت الآن','Livrée maintenant')}</button><button data-act="bon-st" data-v="prep" class="${draft.status==='prep'?'on':''}">${tr('قيد التحضير','À préparer')}</button></div></div>`}
   <div class="field"><label for="bn">${tr('ملاحظة (اختياري)','Note (facultatif)')}</label><input id="bn" value="${esc(draft.note)}"></div>
   <div class="actions"><button class="btn line" data-act="cancel-form">${tr('إلغاء','Annuler')}</button><button class="btn" data-act="save-bon">${q?tr('حفظ العرض','Enregistrer le devis'):tr('حفظ الفاتورة','Enregistrer la vente')}</button></div>
   </div>`;
@@ -2532,7 +2531,54 @@ function render(){
   $('#nav').innerHTML=navHTML();$('#side').innerHTML=sideHTML();$('#searchbtn').innerHTML=ic('search');$('#searchbtn').setAttribute('aria-label',tr('بحث','Recherche'));
 }
 function go(name,args={}){leaveAdmin(name);if(name!=='wipe')wdraft=null;view={name,...args};render();window.scrollTo(0,0)}
-function startApp(){gateMode=null;render()}
+function startApp(){gateMode=null;render();setTimeout(()=>{try{dueCheck()}catch(_){}},2500)}
+/* ---- تنبيه موعد التسديد: رنة خطر + نافذة فيها الحرفي والفاتورة + تأجيل ---- */
+const DUE_ACK='gg-due-ack';
+let dueOpen=null,dueLoop=null;
+function dueAcks(){try{return JSON.parse(localStorage.getItem(DUE_ACK)||'{}')}catch(_){return{}}}
+function dueAck(k){try{const a=dueAcks();a[k]=Date.now();const ks=Object.keys(a);if(ks.length>300)delete a[ks[0]];localStorage.setItem(DUE_ACK,JSON.stringify(a))}catch(_){}}
+const dueKey=(id,b)=>id+'|'+b.due+' '+(b.dueT||'09:00');
+const dueAt=b=>{const [y,m,d]=String(b.due).split('-').map(Number),[hh,mm]=String(b.dueT||'09:00').split(':').map(Number);return new Date(y,(m||1)-1,d||1,hh||0,mm||0).getTime()};
+function dueList(){if(!loaded())return[];const now=Date.now(),ack=dueAcks();
+  return Object.entries(S.bons).filter(([id,b])=>b.due&&!b.walkin&&b.clientId&&b.kind!=='return'&&b.kind!=='opening'&&num(S.bonRem[id])>0.5&&dueAt(b)<=now&&!ack[dueKey(id,b)]).sort((a,b)=>dueAt(a[1])-dueAt(b[1]))}
+function askNotifyPerm(){try{if('Notification' in window&&Notification.permission==='default')Notification.requestPermission()}catch(_){}}
+function alarmTone(){if(prefs.sound===false)return;const c=sndCtx();if(!c)return;try{for(let i=0;i<3;i++){sTone(c,988,i*0.5,0.22,'square',0.16);sTone(c,740,i*0.5+0.25,0.22,'square',0.16)}}catch(_){}}
+function stopAlarm(){if(dueLoop){clearInterval(dueLoop);dueLoop=null}try{navigator.vibrate&&navigator.vibrate(0)}catch(_){}}
+function dueCheck(){if(dueOpen||!$('#modal').hidden)return;const l=dueList();if(!l.length)return;const [id,b]=l[0];showDueAlarm(id,b,l.length)}
+function showDueAlarm(id,b,n){const c=S.clients[b.clientId]||{name:'?'},m=$('#modal');dueOpen=id;
+  const rem=num(S.bonRem[id]),when=`${fdateTxt(b.due)} · ${b.dueT||'09:00'}`;
+  m.innerHTML=`<div class="sheet" role="alertdialog" aria-modal="true" aria-labelledby="mt" style="border:2px solid var(--debt)">
+    <span class="sico">${ic('bell')}</span><h2 id="mt" style="color:var(--debt)">${tr('وصل وقت التسديد!','Échéance atteinte !')}</h2>
+    <div style="text-align:center;margin:6px 0 10px"><div style="color:var(--debt);font-size:1.45rem;font-weight:800">${esc(c.name)}</div>${c.owner?`<div style="color:var(--debt);font-weight:700">${esc(c.owner)}</div>`:''}${c.phone?`<a href="tel:${esc(String(c.phone).replace(/[^\d+]/g,''))}" dir="ltr">${esc(c.phone)}</a>`:''}</div>
+    <div class="totals" style="margin:0"><div class="trow"><span>${tr('الفاتورة','Facture')}</span><b><bdi dir="ltr">${esc(b.num||'')}</bdi> · <bdi dir="ltr">${fdateTxt(b.date)}</bdi></b></div>
+    <div class="trow"><span>${tr('مبلغ الفاتورة','Montant')}</span><b>${DA(b.total)}</b></div>
+    <div class="trow big"><span>${tr('ما تخلّصش منها','Reste impayé')}</span><span style="color:var(--debt)">${DA(rem)}</span></div>
+    <div class="trow"><span>${tr('الموعد كان','Échéance')}</span><b><bdi dir="ltr">${when}</bdi></b></div></div>
+    ${n>1?`<p class="note" style="text-align:center">${tr(`وكاين ${n-1} فواتير أخرى حلّ وقتها`,`et ${n-1} autre(s) échéance(s)`)}</p>`:''}
+    <div id="due-snz" class="stack" style="gap:8px;margin-top:10px"><b>${tr('بدّل وقت التسديد','Reporter l’échéance')}</b>
+      <div class="chips" style="flex-wrap:wrap"><button data-due="h1">${tr('بعد ساعة','+1 h')}</button><button data-due="h3">${tr('بعد 3 سوايع','+3 h')}</button><button data-due="d1">${tr('غدوة','Demain')}</button><button data-due="d3">${tr('بعد 3 أيام','+3 jours')}</button><button data-due="d7">${tr('بعد أسبوع','+1 semaine')}</button></div>
+      <div class="grid2"><input id="due-d" type="date" value="${esc(today())}" aria-label="${tr('التاريخ الجديد','Nouvelle date')}"><input id="due-t" type="time" value="${esc(b.dueT||'09:00')}" aria-label="${tr('الوقت الجديد','Nouvelle heure')}"></div>
+      <button class="btn ghost" data-due="set">${tr('حفظ الوقت الجديد','Enregistrer la nouvelle échéance')}</button></div>
+    <div class="actions"><button class="btn line" data-due="mute">${tr('سكّت','Arrêter')}</button><button class="btn dangerfill" data-due="open">${tr('حلّ الفاتورة','Ouvrir la facture')}</button></div></div>`;
+  m.hidden=false;
+  const ring=()=>{alarmTone();try{navigator.vibrate&&navigator.vibrate([400,200,400,200,400])}catch(_){}};
+  ring();let t=0;stopAlarm();dueLoop=setInterval(()=>{t++;if(t>40)return stopAlarm();ring()},1600);
+  try{if('Notification' in window&&Notification.permission==='granted'&&navigator.serviceWorker)navigator.serviceWorker.ready.then(r=>r.showNotification(tr('وصل وقت التسديد','Échéance atteinte'),{body:`${c.name}${c.owner?' · '+c.owner:''} — ${tr('فاتورة','Facture')} ${b.num||''}: ${grpTxt(rem)} ${CUR()}`,tag:'due-'+id,renotify:true,requireInteraction:true,vibrate:[400,200,400]})).catch(()=>{})}catch(_){}
+  const close=()=>{stopAlarm();m.hidden=true;m.innerHTML='';m.onclick=null;dueOpen=null;setTimeout(dueCheck,800)};
+  const move=async(d,tm)=>{if(!d)return toast(tr('اختار التاريخ.','Choisissez la date.'));
+    if(await write(()=>db.doc('bons/'+id).update({due:d,dueT:tm||'09:00'}),tr(`تبدّل موعد التسديد: ${fdateTxt(d)} ${tm||'09:00'}`,`Échéance reportée : ${fdateTxt(d)} ${tm||'09:00'}`)))close()};
+  m.onclick=e=>{e.stopPropagation();const x=e.target.closest('[data-due]');if(!x){return}const k=x.dataset.due,now=new Date();
+    const pad=v=>String(v).padStart(2,'0'),hm=dt=>pad(dt.getHours())+':'+pad(dt.getMinutes());
+    if(k==='mute'){dueAck(dueKey(id,b));return close()}
+    if(k==='open'){dueAck(dueKey(id,b));close();return go('bonview',{id})}
+    if(k==='set')return move(($('#due-d')||{}).value,($('#due-t')||{}).value);
+    const dt=new Date(now);if(k==='h1')dt.setHours(dt.getHours()+1);if(k==='h3')dt.setHours(dt.getHours()+3);
+    if(k[0]==='d'){dt.setDate(dt.getDate()+num(k.slice(1)));const [hh,mm]=String(b.dueT||'09:00').split(':');dt.setHours(num(hh),num(mm),0,0)}
+    return move(dstr(dt),hm(dt))};
+}
+setInterval(()=>{try{if(unlocked)dueCheck()}catch(_){}},30000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(()=>{try{if(unlocked)dueCheck()}catch(_){}},1500)});
+
 function refresh(){
   compute();
   const g=decideGate();
@@ -2621,7 +2667,8 @@ document.addEventListener('input',e=>{
   if(t.dataset&&t.dataset.ir&&imp&&imp.rows){const r=imp.rows[+t.dataset.i];if(t.dataset.ir==='on')r.on=t.checked;else r[t.dataset.ir]=t.value;
     if(t.dataset.ir==='on'||t.dataset.ir==='debt'){const btn=$('[data-act=imp-save]');const inc=imp.rows.filter(x=>x.on);if(btn)btn.innerHTML=ic('download')+tr(`حفظ ${inc.length} حرفي في الدفتر`,`Importer ${inc.length} clients`)}return}
   if(view.name==='bon'&&draft&&t.dataset.svc){const l=draft.lines[+t.dataset.i];l.svc=l.svc||{};l.svc[t.dataset.svc]=t.value;updBon();return}
-  if(view.name==='bon'&&draft&&t.id==='bdu'){draft.due=t.value;return}
+  if(view.name==='bon'&&draft&&t.id==='bdu'){draft.due=t.value;if(t.value&&!draft.dueT){draft.dueT='09:00';const x=$('#bdut');if(x)x.value='09:00'}askNotifyPerm();return}
+  if(view.name==='bon'&&draft&&t.id==='bdut'){draft.dueT=t.value;askNotifyPerm();return}
   if(view.name==='exp'&&edraft){const k={ea:'amount',ed:'date',en:'note',el:'label',et:'time'}[t.id];if(k){edraft[k]=t.value;if(k==='amount'){const w=$('#ea-w');if(w)w.innerHTML=num(t.value)>0?DA(Math.round(num(t.value))):''}return}}
   if(view.name==='cloud'){if(t.id==='cl-email'){cdl.email=t.value;return}if(t.id==='fb-cfg'){cdl.cfg=t.value;return}if(t.id==='cl-pw')return}
   if(view.name==='svcs'&&sdraft){if(t.id==='sv-min'){sdraft.minArea=t.value;return}if(t.dataset.sv){const x=sdraft.svcs[+t.dataset.i];if(t.dataset.sv==='price')x.price=t.value;else{if(isFr())x.fr=t.value;else{x.name=t.value}}return}}
@@ -2797,7 +2844,7 @@ document.addEventListener('click',async e=>{
   if(a==='set-status'){const bon=S.bons[id];if(!bon)return;await write(()=>db.doc('bons/'+id).update({status:b.dataset.v}),tr('تم تحديث الحالة: ','État : ')+stName(b.dataset.v));return}
   if(a==='edit-bon'){const bon=S.bons[id];if(!bon)return;
     if(Object.values(S.bons).some(x=>x.refOf===id))return toast(tr('لهذه الفاتورة مرتجع. احذف المرتجع أولاً لتعديلها.','Cette facture a un retour. Supprimez-le d’abord.'));
-    draft={editId:id,mode:bon.walkin?'walk':'shop',kind:'bon',clientId:bon.clientId||'',cname:bon.cname||'',cphone:bon.cphone||'',date:bon.date,note:bon.note||'',due:bon.due||'',disc:bon.disc?String(bon.disc):'',status:bon.status||'done',paid:'',
+    draft={editId:id,mode:bon.walkin?'walk':'shop',kind:'bon',clientId:bon.clientId||'',cname:bon.cname||'',cphone:bon.cphone||'',date:bon.date,note:bon.note||'',due:bon.due||'',dueT:bon.dueT||'',disc:bon.disc?String(bon.disc):'',status:bon.status||'done',paid:'',
       lines:(bon.lines||[]).map(toDraftLine)};return go('bon')}
   if(a==='new-ret'){rdraft={bonId:id,qty:{},restock:true,date:today(),note:''};return go('ret')}
   if(a==='save-ret'){const bon=S.bons[rdraft.bonId];if(!bon)return;const lines=[];
@@ -2982,14 +3029,14 @@ document.addEventListener('click',async e=>{
     if(q){const nq=Object.values(S.quotes).reduce((m,x)=>Math.max(m,num(x.num)),0)+1;const ref=db.collection('quotes').doc();
       if(await write(()=>ref.set({...who,...base,num:nq,status:'open'}),tr(`تم حفظ عرض السعر رقم ${nq}.`,`Devis n° ${nq} enregistré.`))){draft=null;go('quoteview',{id:ref.id})}return}
     if(draft.editId){const eid=draft.editId,old=S.bons[eid];if(!old)return;
-      const upd={...who,lines,sub,disc,total,date,note:base.note,status:draft.status||'done',editedAt:Date.now(),walkin:!!walk};if(walk)upd.paid=total;else upd.due=draft.due||'';
+      const upd={...who,lines,sub,disc,total,date,note:base.note,status:draft.status||'done',editedAt:Date.now(),walkin:!!walk};if(walk)upd.paid=total;else upd.due=draft.due||'';upd.dueT=draft.due?(draft.dueT||'09:00'):'';
       if(await write(()=>db.doc('bons/'+eid).set({...old,...upd}),tr('تم حفظ التعديل.','Modification enregistrée.'))){if(!walk)rememberPrices(draft.clientId,lines);draft=null;go('bonview',{id:eid})}return}
     base.status=draft.status||'done';
     const nb=Object.values(S.bons).filter(x=>x.kind!=='return').reduce((m,x)=>Math.max(m,num(x.num)),0)+1;
     const ref=db.collection('bons').doc(),fq=draft.fromQuote,paid=Math.round(num(draft.paid));
     const ok=await write(async()=>{
       if(walk)await ref.set({...who,...base,kind:'sale',num:nb,paid:total});
-      else{await ref.set({...who,...base,kind:'sale',num:nb,due:draft.due||''});
+      else{await ref.set({...who,...base,kind:'sale',num:nb,due:draft.due||'',dueT:draft.due?(draft.dueT||'09:00'):''});
         if(paid>0)await db.collection('payments').doc().set({clientId:draft.clientId,bonId:ref.id,amount:paid,method:'cash',date,note:tr('دفع عند البيع · فاتورة ','Payé à la vente · facture ')+nb,createdAt:Date.now()+1})}
       if(fq&&S.quotes[fq])await db.doc('quotes/'+fq).update({status:'done',bonId:ref.id})},tr(`تم حفظ الفاتورة رقم ${nb}.`,`Facture n° ${nb} enregistrée.`));
     if(ok){if(!walk)rememberPrices(draft.clientId,lines);draft=null;go('bonview',{id:ref.id})}
