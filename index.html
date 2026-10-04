@@ -1281,7 +1281,7 @@ function settingsHTML(){
     <div id="impbox">${pendingImport?importBoxHTML():''}</div>
   </div></div>
   ${installEvt?`<button class="btn full" data-act="install">${ic('install')}${tr('تثبيت التطبيق على الشاشة','Installer l’application')}</button>`:''}
-  <p class="note" style="text-align:center;margin:8px auto 0">${tr('التُّمَيض الشفاف','Tumayd')} · v11</p>
+  <p class="note" style="text-align:center;margin:8px auto 0">${tr('التُّمَيض الشفاف','Tumayd')} · v12</p>
   </div>`;
 }
 function importBoxHTML(){
@@ -2113,7 +2113,18 @@ applyPrefs();
   db.collection('payments').onSnapshot(q=>{S.pays=asMap(q);S.ok.p=true;refresh()});
   db.collection('stock').onSnapshot(q=>{S.stock=asMap(q);S.ok.k=true;refresh()});
 })();
-if('serviceWorker' in navigator&&location.protocol!=='file:'){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})})}
+if('serviceWorker' in navigator&&location.protocol!=='file:'){
+  const hadCtl=!!navigator.serviceWorker.controller;let reloading=false;
+  const busy=()=>['bon','pay','cform','kin','kadj','exp','ret','sform','spay','prices','shop','acct','import','svcs'].includes(view&&view.name);
+  const doReload=()=>{if(reloading)return;reloading=true;location.reload()};
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!hadCtl)return;
+    if(!busy())return doReload();
+    toast(tr('تحديث جديد جاهز، يتطبّق كي تكمّل هذي الصفحة.','Mise à jour prête, appliquée après ce formulaire.'));
+    const t=setInterval(()=>{if(!busy()){clearInterval(t);doReload()}},1500)});
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{
+    const chk=()=>{if(navigator.onLine)reg.update().catch(()=>{})};
+    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')chk()});
+    setInterval(chk,30*60*1000)}).catch(()=>{})})}
 </script>
 </body>
 </html>

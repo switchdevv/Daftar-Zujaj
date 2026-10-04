@@ -1,5 +1,5 @@
 // دفتر الزجاج — service worker: يخلي التطبيق يحل بلا أنترنت
-const VERSION = 'tumayd-v11';
+const VERSION = 'tumayd-v12';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
@@ -21,7 +21,7 @@ self.addEventListener('fetch', e => {
   // الصفحة: من الأنترنت إذا كاين (باش توصل التحديثات)، وإلا من الذاكرة
   if (req.mode === 'navigate') {
     e.respondWith(
-      fetch(req).then(res => {
+      fetch(req, { cache: 'no-store' }).then(res => {
         const copy = res.clone();
         caches.open(VERSION).then(c => c.put('./index.html', copy));
         return res;
