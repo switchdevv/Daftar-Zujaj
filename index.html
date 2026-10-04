@@ -347,6 +347,16 @@ const PREF_KEY='sz-prefs';
 const prefs={lang:'ar',theme:'system',lock:30};
 try{Object.assign(prefs,JSON.parse(localStorage.getItem(PREF_KEY)||'{}'))}catch(_){}
 function savePrefs(){try{localStorage.setItem(PREF_KEY,JSON.stringify(prefs))}catch(_){}}
+/* ---- أصوات: الدفع (ساكن / مزال دين) وزيادة ورشة ---- */
+let SNDC=null;
+function sndCtx(){try{if(!SNDC)SNDC=new (window.AudioContext||window.webkitAudioContext)();if(SNDC.state==='suspended')SNDC.resume();return SNDC}catch(_){return null}}
+document.addEventListener('pointerdown',()=>{if(prefs.sound!==false)sndCtx()},{passive:true});
+function sTone(c,f,t0,dur,type,vol,f2){const o=c.createOscillator(),g=c.createGain(),t=c.currentTime+t0;o.type=type;o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+dur);g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+0.015);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur+0.05)}
+function sound(k){if(prefs.sound===false)return;const c=sndCtx();if(!c)return;try{
+  if(k==='paid'){sTone(c,1318.5,0,0.35,'triangle',0.25);sTone(c,2637,0,0.25,'sine',0.08);sTone(c,1760,0.11,0.7,'triangle',0.28);sTone(c,3520,0.11,0.5,'sine',0.08);for(let i=0;i<6;i++)sTone(c,3200+Math.random()*1800,0.2+i*0.045,0.12,'sine',0.06)}
+  else if(k==='debt'){sTone(c,392,0,0.35,'triangle',0.25);sTone(c,311.1,0.3,0.7,'triangle',0.25)}
+  else if(k==='add'){sTone(c,784,0,0.18,'sine',0.22,1046.5);sTone(c,1174.7,0.12,0.45,'sine',0.22);sTone(c,2349.3,0.12,0.3,'sine',0.05)}
+}catch(_){}}
 const isFr=()=>prefs.lang==='fr';
 const tr=(a,f)=>isFr()?f:a;
 function applyPrefs(){
@@ -367,6 +377,7 @@ const num=v=>{const n=parseFloat(String(v??'').replace(/\s/g,'').replace(',','.'
 const loc=()=>isFr()?'fr-FR':'en-US';
 const grp=n=>{const r=Math.round(n);return(r<0?'-':'')+Math.abs(r).toLocaleString(loc()).replace(/ /g,' ')};
 const grpTxt=n=>Math.round(n).toLocaleString('en-US');
+const APP_VER=21; // نفس الرقم تاع VERSION في sw.js
 const CUR=()=>tr('دج','DA');
 const DA=n=>`<bdi dir="ltr">${grp(n)}</bdi>&nbsp;${CUR()}`;
 const dec2=a=>(Math.round(a*100)/100).toLocaleString(loc(),{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -1459,6 +1470,7 @@ function settingsHTML(){
   <div class="set-group">
     <div class="set-block"><span class="rowflex">${ic('globe')}<b>${tr('اللغة','Langue')}</b></span><div class="seg"><button data-act="lang" data-v="ar" class="${!isFr()?'on':''}">العربية</button><button data-act="lang" data-v="fr" class="${isFr()?'on':''}">Français</button></div></div>
     <div class="set-block"><span class="rowflex">${ic('moon')}<b>${tr('الوضع','Thème')}</b></span><div class="seg">${[['system',tr('تلقائي','Auto')],['light',tr('فاتح','Clair')],['dark',tr('داكن','Sombre')]].map(([k,l])=>`<button data-act="theme" data-v="${k}" class="${prefs.theme===k?'on':''}">${l}</button>`).join('')}</div></div>
+    <div class="set-block"><span class="rowflex">${ic('bell')}<b>${tr('الأصوات','Sons')}</b></span><div class="seg"><button data-act="snd" data-v="on" class="${prefs.sound!==false?'on':''}">${tr('مفعّلة','Activés')}</button><button data-act="snd" data-v="off" class="${prefs.sound===false?'on':''}">${tr('مطفية','Coupés')}</button></div></div>
   </div>
 
   <h3>${tr('المحل','Magasin')}</h3>
@@ -1484,7 +1496,7 @@ function settingsHTML(){
   <h3 style="color:var(--debt)">${tr('منطقة الخطر','Zone dangereuse')}</h3>
   <div class="set-group"><button class="set-row" data-act="nav-wipe"><span class="t"><span class="ib" style="background:var(--debt-soft);color:var(--debt)">${ic('trash')}</span><span style="color:var(--debt)">${tr('حذف جميع الورشات','Supprimer tous les clients')}<small>${tr('بعد تحميل نسخة احتياطية وكلمة سر المسؤول','Après sauvegarde et mot de passe admin')}</small></span></span>${ic('chev','flip')}</button></div>
   ${installEvt?`<button class="btn full" data-act="install">${ic('install')}${tr('تثبيت التطبيق على الشاشة','Installer l’application')}</button>`:''}
-  <p class="note" style="text-align:center;margin:8px auto 0">${tr('التُّمَيض الشفاف','Tumayd')} · v16</p>
+  <p class="note" style="text-align:center;margin:8px auto 0">${tr('التُّمَيض الشفاف','Tumayd')} · ${tr('النسخة','Version')} <b><bdi dir="ltr">${APP_VER}</bdi></b></p>
   </div>`;
 }
 function importBoxHTML(){
@@ -2314,6 +2326,7 @@ document.addEventListener('click',async e=>{
   const b=e.target.closest('[data-act]');if(!b)return;
   const a=b.dataset.act,id=b.dataset.id;
   if(a==='lang'){prefs.lang=b.dataset.v;savePrefs();if(!$('#gate').hidden){renderGate()}else render();return}
+  if(a==='snd'){prefs.sound=b.dataset.v==='on';savePrefs();render();sound('paid');return}
   if(a==='theme'){prefs.theme=b.dataset.v;savePrefs();render();return}
   if(a==='gate-cloud'){gateMode='cloudlogin';gateErr='';renderGate();return}
   if(a==='gate-setup'){gateMode='setup';gateErr='';renderGate();return}
@@ -2453,8 +2466,8 @@ document.addEventListener('click',async e=>{
   if(a==='new-spay'){spdraft={supplierId:id,amount:'',method:'cash',date:today(),note:''};return go('spay')}
   if(a==='spay-full'){spdraft.amount=String(Math.max(0,Math.round((S.sstats[spdraft.supplierId]||{bal:0}).bal)));$('#spa').value=spdraft.amount;return}
   if(a==='spay-m'){spdraft.method=b.dataset.v;document.querySelectorAll('[data-act=spay-m]').forEach(x=>x.classList.toggle('on',x.dataset.v===spdraft.method));return}
-  if(a==='save-spay'){const amt=Math.round(num(spdraft.amount));if(amt<=0)return toast(tr('اكتب المبلغ.','Saisissez le montant.'));const sid=spdraft.supplierId;
-    if(await write(()=>db.collection('spays').doc().set({supplierId:sid,amount:amt,method:spdraft.method||'cash',date:spdraft.date||today(),note:String(spdraft.note||'').trim(),createdAt:Date.now()}),tr('تم تسجيل الدفع.','Paiement enregistré.'))){spdraft=null;go('sup',{id:sid})}return}
+  if(a==='save-spay'){const amt=Math.round(num(spdraft.amount));if(amt<=0)return toast(tr('اكتب المبلغ.','Saisissez le montant.'));const sid=spdraft.supplierId;const sb0=num((S.sstats[sid]||{}).bal);
+    if(await write(()=>db.collection('spays').doc().set({supplierId:sid,amount:amt,method:spdraft.method||'cash',date:spdraft.date||today(),note:String(spdraft.note||'').trim(),createdAt:Date.now()}),tr('تم تسجيل الدفع.','Paiement enregistré.'))){sound(sb0-amt<=0.5?'paid':'debt');spdraft=null;go('sup',{id:sid})}return}
   if(a==='del-spay'){const p=S.spays[id];if(!p)return;if(!await ask({title:tr('حذف هذا الدفع؟','Supprimer ce paiement ?'),ok:tr('حذف','Supprimer'),body:DA(p.amount)+' · '+fdate(p.date)}))return;await removeDocs(['spays/'+id],tr('تم حذف الدفع','Paiement supprimé'));return}
   if(a==='stmt'){stdraft={id,p:'all',from:today().slice(0,7)+'-01',to:today()};return go('stmt')}
   if(a==='st-copy'){const [f,t]=stmtRange();return copyText(releveText(stdraft.id,f,t),'#copyfall')}
@@ -2571,7 +2584,7 @@ document.addEventListener('click',async e=>{
     const ref=db.collection('clients').doc();const debt=num(cdraft.debt);
     const ok=await write(async()=>{await ref.set({name,owner:cdraft.owner.trim(),phone:cdraft.phone.trim(),limit:Math.round(num(cdraft.limit)),disc,sp,createdAt:Date.now()});
       if(debt>0)await db.collection('bons').doc().set({clientId:ref.id,kind:'opening',date:today(),lines:[],total:Math.round(debt),note:tr('دين قديم من الكراس','Ancien crédit du cahier'),createdAt:Date.now()})},tr('تمت إضافة الورشة.','Client ajouté.'));
-    if(ok){if(cdraft.ret==='bon'&&draft){draft.clientId=ref.id;go('bon')}else go('client',{id:ref.id})}
+    if(ok){sound('add');if(cdraft.ret==='bon'&&draft){draft.clientId=ref.id;go('bon')}else go('client',{id:ref.id})}
     return}
   if(a==='save-bon'){
     const walk=draft.mode==='walk',q=draft.kind==='quote';
@@ -2603,8 +2616,8 @@ document.addEventListener('click',async e=>{
   if(a==='save-pay'){
     if(!pdraft.clientId)return toast(tr('اختر الورشة.','Choisissez le client.'));
     const amt=Math.round(num(pdraft.amount));if(amt<=0)return toast(tr('اكتب المبلغ.','Saisissez le montant.'));
-    const cid=pdraft.clientId;
-    if(await write(()=>db.collection('payments').doc().set({clientId:cid,amount:amt,method:pdraft.method||'cash',date:pdraft.date||today(),note:pdraft.note.trim(),createdAt:Date.now()}),tr('تم تسجيل الدفع.','Paiement enregistré.'))){pdraft=null;go('client',{id:cid})}
+    const cid=pdraft.clientId;const bal0=num((S.stats[cid]||{}).bal);
+    if(await write(()=>db.collection('payments').doc().set({clientId:cid,amount:amt,method:pdraft.method||'cash',date:pdraft.date||today(),note:pdraft.note.trim(),createdAt:Date.now()}),tr('تم تسجيل الدفع.','Paiement enregistré.'))){sound(bal0-amt<=0.5?'paid':'debt');pdraft=null;go('client',{id:cid})}
     return}
   if(a==='save-in'){
     const c=kinCalc();if(c.area<=0)return toast(tr('اكتب عدد الألواح والمقاس.','Saisissez le nombre de plaques et les dimensions.'));if(num(kdraft.costM2)<=0)return toast(tr('اكتب سعر الشراء.','Saisissez le prix d’achat.'));
