@@ -1,5 +1,5 @@
 // دفتر الزجاج — service worker: يخلي التطبيق يحل بلا أنترنت
-const VERSION = 'daftar-v5';
+const VERSION = 'tumayd-v9';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
@@ -30,8 +30,8 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // الخطوط: من الذاكرة، وتتجدد في الخلفية
-  if (url.host === 'fonts.googleapis.com' || url.host === 'fonts.gstatic.com') {
+  // الخطوط ومكتبة Firebase: من الذاكرة، وتتجدد في الخلفية
+  if (url.host === 'fonts.googleapis.com' || url.host === 'fonts.gstatic.com' || (url.host === 'www.gstatic.com' && url.pathname.startsWith('/firebasejs/'))) {
     e.respondWith(
       caches.open(VERSION).then(c => c.match(req).then(hit => {
         const net = fetch(req).then(res => { if (res.ok || res.type === 'opaque') c.put(req, res.clone()); return res; }).catch(() => hit);
