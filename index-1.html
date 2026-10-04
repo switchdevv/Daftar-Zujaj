@@ -150,6 +150,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-
 .line-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:grid;gap:10px}
 .lt{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) auto;gap:8px;align-items:end}
 .ld{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.lu{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
 .lr{display:flex;justify-content:space-between;align-items:center;font-size:.85rem;color:var(--muted);background:var(--sunk);border-radius:9px;padding:7px 10px;gap:8px;flex-wrap:wrap}
 .lr b{color:var(--ink)}
 .avail{font-size:.8rem}
@@ -240,6 +241,27 @@ nav.bottom button.main{transform:translateY(-12px)}
 nav.bottom button.main .ib{width:52px;height:52px;border-radius:17px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;box-shadow:0 6px 16px color-mix(in srgb,var(--accent) 40%,transparent)}
 nav.bottom button.main .ic{width:26px;height:26px;stroke-width:2.2}
 nav.bottom button.main span{color:var(--accent)}
+#print{display:none}
+.rc{max-width:148mm;margin:0 auto;font-family:var(--f-body);color:#111;background:#fff;padding:8mm 6mm;font-size:12px;line-height:1.5}
+.rc-head{display:flex;align-items:center;gap:10px;border-bottom:2px solid #17635e;padding-bottom:8px;margin-bottom:8px}
+.rc-head .mark{width:46px;height:46px;border-radius:12px}
+.rc-head b{font-family:var(--f-disp);font-size:18px;display:block;color:#0f4b47}
+.rc-head small{color:#555;display:block}
+.rc-meta{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:6px 0 10px}
+.rc-meta b{font-size:14px}
+.rc table{width:100%;border-collapse:collapse;font-size:11.5px}
+.rc th{background:#eef5f3;text-align:start;padding:5px 4px;border-bottom:1px solid #bbb;font-weight:600}
+.rc td{padding:5px 4px;border-bottom:1px solid #ddd;font-variant-numeric:tabular-nums}
+.rc .tot{margin-top:8px;display:grid;gap:3px;margin-inline-start:auto;width:60%}
+.rc .tot div{display:flex;justify-content:space-between;gap:10px}
+.rc .tot .g{font-size:15px;font-weight:700;border-top:2px solid #17635e;padding-top:4px}
+.rc-foot{margin-top:14px;text-align:center;color:#555;font-size:11px;border-top:1px dashed #bbb;padding-top:8px}
+@media print{
+  @page{margin:6mm}
+  html,body{background:#fff!important}
+  body.printing #shell,body.printing #gate,body.printing #boot,body.printing #toast{display:none!important}
+  body.printing #print{display:block}
+}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:.88rem;z-index:20;max-width:calc(100% - 32px);text-align:center}
 @media (prefers-reduced-motion:no-preference){.toast{animation:up .18s ease-out}@keyframes up{from{transform:translate(-50%,8px);opacity:0}}}
 @media (max-width:360px){.skgrid,.tiles{grid-template-columns:minmax(0,1fr)}.quick{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -257,6 +279,7 @@ nav.bottom button.main span{color:var(--accent)}
 </div>
 <div id="boot" class="gate"><div class="gate-head"><svg class="mark" viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" fill="#17635e"/></svg></div></div>
 <div id="toast" class="toast" hidden></div>
+<div id="print" aria-hidden="true"></div>
 
 <script>
 /* ====================== prefs & language ====================== */
@@ -361,12 +384,17 @@ const LocalDB=(()=>{
 })();
 
 /* ====================== state ====================== */
-let db=null,dbState='loading',busy=false,query='',cfilter='all';
-const S={types:null,clients:{},bons:{},pays:{},stock:{},auth:null,ok:{c:false,b:false,p:false,k:false,a:false},stats:{},sk:{}};
+let db=null,dbState='loading',busy=false,query='',cfilter='all',ctab='shops';
+const S={types:null,shop:{},clients:{},bons:{},pays:{},stock:{},auth:null,ok:{c:false,b:false,p:false,k:false,a:false},stats:{},sk:{}};
 let view={name:'home'},draft=null,cdraft=null,pdraft=null,tdraft=null,kdraft=null,adraft=null,pendingImport=null,installEvt=null,imp=null;
+let shopDraft={};
 let gateMode=null,gateErr='',recoveryShown=null,unlocked=false;
 
 function types(){return S.types||TYPES0}
+function saveSettings(patch){return db.doc('settings/main').set({types:types(),shop:S.shop||{},...patch})}
+const USES_AR=['طابلة','مرآة','كوافاز','خزانة','نافذة','باب','واجهة محل','دوش','بلكون'];
+const USES_FR=['table','miroir','coiffeuse','armoire','fenêtre','porte','vitrine','douche','balcon'];
+const custName=b=>b&&b.walkin?(b.cname||tr('زبون عادي','Client comptoir')):((S.clients[b&&b.clientId]||{}).name||'?');
 function loaded(){return S.ok.c&&S.ok.b&&S.ok.p&&S.ok.k}
 function compute(){
   const st={};
@@ -511,7 +539,7 @@ function navHTML(){
   <button data-act="nav-clients" class="${on('clients','client','bonview','pay','cform')}">${ic('users')}<span>${tr('الزبائن','Clients')}</span></button>
   <button data-act="nav-bon" class="main"><span class="ib">${ic('plus')}</span><span>${tr('بون','Vente')}</span></button>
   <button data-act="nav-stk" class="${on('stock','kin','kadj')}">${ic('box')}<span>${tr('السطوك','Stock')}</span></button>
-  <button data-act="nav-set" class="${on('set','prices','import','acct')}">${ic('sliders')}<span>${tr('الإعدادات','Réglages')}</span></button>`;
+  <button data-act="nav-set" class="${on('set','prices','import','acct','shop')}">${ic('sliders')}<span>${tr('الإعدادات','Réglages')}</span></button>`;
 }
 const backBtn=(act,label,id)=>`<button class="back" data-act="${act}" ${id?`data-id="${id}"`:''}>${ic('back','flip')}${label}</button>`;
 
@@ -524,11 +552,12 @@ function homeHTML(){
   const td=today(),mo=td.slice(0,7);
   let debt=0,debtors=0,late=0,lateAmt=0,sT=0,pT=0,sM=0,pM=0;
   for(const id in S.stats){const s=S.stats[id];if(s.bal>0){debt+=s.bal;debtors++;if(s.age>30){late++;lateAmt+=s.bal}}}
-  for(const id in S.bons){const b=S.bons[id];if(b.kind==='opening')continue;if(b.date===td)sT+=num(b.total);if(b.date&&b.date.slice(0,7)===mo)sM+=num(b.total)}
+  for(const id in S.bons){const b=S.bons[id];if(b.kind==='opening')continue;const inM=b.date&&b.date.slice(0,7)===mo;if(b.date===td)sT+=num(b.total);if(inM)sM+=num(b.total);
+    if(b.walkin){if(b.date===td)pT+=num(b.total);if(inM)pM+=num(b.total)}}
   for(const id in S.pays){const p=S.pays[id];if(p.date===td)pT+=num(p.amount);if(p.date&&p.date.slice(0,7)===mo)pM+=num(p.amount)}
   const toCall=Object.keys(S.stats).filter(id=>S.stats[id].bal>0&&S.stats[id].age>30).sort((a,b)=>S.stats[b].age-S.stats[a].age||S.stats[b].bal-S.stats[a].bal).slice(0,5);
   const lowStock=Object.keys(S.sk).map(id=>({id,e:S.sk[id],s:stockState(S.sk[id])})).filter(x=>x.s.tracked&&(x.s.cls==='low'||x.s.cls==='out'));
-  const recent=[...Object.entries(S.bons).map(([id,b])=>({k:'bon',id,t:b.createdAt||0,d:b.date,c:b.clientId,a:num(b.total),b})),...Object.entries(S.pays).map(([id,p])=>({k:'pay',id,t:p.createdAt||0,d:p.date,c:p.clientId,a:num(p.amount)}))].sort((x,y)=>y.t-x.t).slice(0,6);
+  const recent=[...Object.entries(S.bons).map(([id,b])=>({k:'bon',id,t:b.createdAt||0,d:b.date,c:b.clientId,a:num(b.total),b,walk:!!b.walkin})),...Object.entries(S.pays).map(([id,p])=>({k:'pay',id,t:p.createdAt||0,d:p.date,c:p.clientId,a:num(p.amount)}))].sort((x,y)=>y.t-x.t).slice(0,6);
   const noClients=!Object.keys(S.clients).length;
   return `<div class="stack">
   <div><h2>${greeting()}</h2><div class="note">${esc(longDate())}</div></div>
@@ -544,10 +573,10 @@ function homeHTML(){
     <div class="tile"><span class="lbl">${tr('مداخيل الشهر','Encaissé ce mois')}</span><span class="v ok">${DA(pM)}</span></div>
   </div>
   <div class="quick">
-    <button class="qa" data-act="nav-bon"><span class="ib">${ic('receipt')}</span>${tr('بون بيع','Nouvelle vente')}</button>
+    <button class="qa" data-act="nav-bon"><span class="ib">${ic('receipt')}</span>${tr('بون ورشة','Vente atelier')}</button>
+    <button class="qa" data-act="walk-bon"><span class="ib">${ic('tag')}</span>${tr('بيع لزبون عادي','Vente comptoir')}</button>
     <button class="qa" data-act="new-pay"><span class="ib">${ic('cash')}</span>${tr('تسجيل دفع','Encaisser')}</button>
     <button class="qa" data-act="new-in"><span class="ib">${ic('inbox')}</span>${tr('دخول سلعة','Entrée stock')}</button>
-    <button class="qa" data-act="add-client"><span class="ib">${ic('userplus')}</span>${tr('ورشة جديدة','Nouveau client')}</button>
   </div>
   ${noClients?`<div class="empty"><p>${tr('مازال ما كاين حتى ورشة. زيد الورشات وحدة بوحدة، ولا استورد الديون من الكراس مرة وحدة.','Aucun client pour l’instant. Ajoutez-les un par un, ou importez les crédits du cahier en une fois.')}</p><div class="rowflex"><button class="btn" data-act="add-client">${ic('userplus')}${tr('زيد ورشة','Ajouter un client')}</button><button class="btn ghost" data-act="nav-import">${ic('scan')}${tr('استيراد من الكراس','Importer du cahier')}</button></div></div>`:''}
   ${toCall.length?`<div class="sec"><h3>${tr('لازم تتصل بيهم','À relancer')}</h3><button class="link" data-act="nav-clients" data-f="late">${tr('الكل','Tout voir')}</button></div>
@@ -559,7 +588,7 @@ function homeHTML(){
   <div class="list">${lowStock.map(x=>`<button class="row" data-act="nav-stk"><span class="rleft"><span class="av ${x.s.cls==='out'?'bad':'warn'}">${ic('box')}</span><span class="rmain"><span class="rname">${esc(x.e.name)}</span><span class="rsub">${tr('باقي','Reste')} ${M2(Math.max(0,x.e.bal))}</span></span></span>${x.s.chip}</button>`).join('')}</div>`:''}
   ${recent.length?`<div class="sec"><h3>${tr('آخر العمليات','Dernières opérations')}</h3></div>
   <div class="list">${recent.map(r=>{const c=S.clients[r.c]||{name:'?'};
-    return r.k==='bon'?`<button class="row" data-act="open-bon" data-id="${r.id}"><span class="rleft"><span class="av">${ic('receipt')}</span><span class="rmain"><span class="rname">${esc(c.name)}</span><span class="rsub">${r.b.kind==='opening'?tr('دين قديم','Ancien crédit'):tr(`بون رقم ${r.b.num}`,`Bon n° ${r.b.num}`)} · ${fdate(r.d)}</span></span></span><span class="amt">${DA(r.a)}</span></button>`
+    return r.k==='bon'?`<button class="row" data-act="open-bon" data-id="${r.id}"><span class="rleft"><span class="av" ${r.walk?'style="background:var(--warn-soft);color:var(--warn)"':''}>${ic(r.walk?'cash':'receipt')}</span><span class="rmain"><span class="rname">${esc(custName(r.b))}</span><span class="rsub">${r.b.kind==='opening'?tr('دين قديم','Ancien crédit'):tr(`بون رقم ${r.b.num}`,`Bon n° ${r.b.num}`)}${r.walk?' · '+tr('كاش','comptant'):''} · ${fdate(r.d)}</span></span></span><span class="amt ${r.walk?'pos':''}">${DA(r.a)}</span></button>`
     :`<button class="row" data-act="open-client" data-id="${r.c}"><span class="rleft"><span class="av" style="background:var(--ok-soft);color:var(--ok)">${ic('cash')}</span><span class="rmain"><span class="rname">${esc(c.name)}</span><span class="rsub">${tr('دفع','Paiement')} · ${fdate(r.d)}</span></span></span><span class="amt pos">+${DA(r.a)}</span></button>`}).join('')}</div>`:''}
   </div>`;
 }
@@ -568,6 +597,7 @@ function chart7(){
   const s=days.map(d=>0),p=days.map(d=>0);
   for(const id in S.bons){const b=S.bons[id];if(b.kind==='opening')continue;const i=days.indexOf(b.date);if(i>=0)s[i]+=num(b.total)}
   for(const id in S.pays){const x=S.pays[id];const i=days.indexOf(x.date);if(i>=0)p[i]+=num(x.amount)}
+  for(const id in S.bons){const b=S.bons[id];if(!b.walkin)continue;const i=days.indexOf(b.date);if(i>=0)p[i]+=num(b.total)}
   const max=Math.max(...s,...p);if(!max)return'';
   const W=320,H=130,top=10,bot=22,ch=H-top-bot,gw=W/7,bw=Math.min(14,gw/3);
   const y=v=>top+ch-(v/max)*ch;
@@ -585,12 +615,26 @@ function chart7(){
 /* ---- clients ---- */
 function clientsHTML(){
   if(!loaded())return `<div class="empty"><p>${tr('جاري التحميل…','Chargement…')}</p></div>`;
-  return `<div class="stack"><div class="rowflex between"><h2>${tr('الزبائن','Clients')}</h2><button class="btn ghost" data-act="add-client">${ic('userplus')}${tr('ورشة','Client')}</button></div>
+  const tabs=`<div class="seg"><button data-act="ctab" data-v="shops" class="${ctab==='shops'?'on':''}">${tr('الورشات','Ateliers')}</button><button data-act="ctab" data-v="walk" class="${ctab==='walk'?'on':''}">${tr('زبائن عاديين','Clients comptoir')}</button></div>`;
+  if(ctab==='walk')return `<div class="stack"><div class="rowflex between"><h2>${tr('الزبائن','Clients')}</h2><button class="btn ghost" data-act="walk-bon">${ic('plus')}${tr('بيع جديد','Nouvelle vente')}</button></div>${tabs}
+  <input id="q" type="search" placeholder="${tr('ابحث بالاسم، الهاتف ولا الاستعمال…','Rechercher nom, téléphone ou usage…')}" value="${esc(query)}" aria-label="${tr('بحث','Recherche')}">
+  <div id="list">${walkListHTML()}</div></div>`;
+  return `<div class="stack"><div class="rowflex between"><h2>${tr('الزبائن','Clients')}</h2><button class="btn ghost" data-act="add-client">${ic('userplus')}${tr('ورشة','Client')}</button></div>${tabs}
   <input id="q" type="search" placeholder="${tr('ابحث بالاسم ولا الهاتف…','Rechercher par nom ou téléphone…')}" value="${esc(query)}" aria-label="${tr('بحث','Recherche')}">
   <div class="chips">${[['all',tr('الكل','Tous')],['debt',tr('عليهم دين','Débiteurs')],['late',tr('متأخرين +30 يوم','Retard +30 j')],['paid',tr('خالصين','Soldés')]].map(([k,l])=>`<button data-act="cfilter" data-v="${k}" class="${cfilter===k?'on':''}">${l}</button>`).join('')}</div>
   <div id="list">${listHTML()}</div></div>`;
 }
+function walkListHTML(){
+  const q=query.trim().toLowerCase();
+  const rows=Object.entries(S.bons).filter(([id,b])=>b.walkin).filter(([id,b])=>!q||[b.cname,b.cphone,b.note,...(b.lines||[]).map(l=>l.use+' '+l.type)].join(' ').toLowerCase().includes(q))
+    .sort((a,b)=>a[1].date<b[1].date?1:a[1].date>b[1].date?-1:(b[1].createdAt||0)-(a[1].createdAt||0));
+  if(!rows.length)return `<div class="empty"><p>${tr('ما كاين حتى بيع لزبون عادي. البيع المباشر (مرآة، طابلة، كوافاز…) يتسجل هنا وينقص من السطوك، بلا ما يدخل في حسابات الورشات.','Aucune vente comptoir. Les ventes directes (miroir, table, coiffeuse…) apparaissent ici et sortent du stock, sans compte client.')}</p><button class="btn" data-act="walk-bon">${ic('plus')}${tr('بيع لزبون عادي','Vente comptoir')}</button></div>`;
+  let tot=0;const mo=today().slice(0,7);for(const [,b] of rows)if(b.date&&b.date.slice(0,7)===mo)tot+=num(b.total);
+  return `<div class="note" style="margin-bottom:8px">${tr('هذا الشهر','Ce mois')}: <b>${DA(tot)}</b></div><div class="list">${rows.map(([id,b])=>{const uses=[...new Set((b.lines||[]).map(l=>l.use).filter(Boolean))].join('، ');
+    return `<button class="row" data-act="open-bon" data-id="${id}"><span class="rleft"><span class="av" style="background:var(--warn-soft);color:var(--warn)">${ic('tag')}</span><span class="rmain"><span class="rname">${esc(b.cname||tr('زبون عادي','Client comptoir'))}</span><span class="rsub">${tr('بون','Bon')} <bdi dir="ltr">${b.num}</bdi> · ${fdate(b.date)}${uses?' · '+esc(uses):''}</span></span></span><span class="amt pos">${DA(b.total)}</span></button>`}).join('')}</div>`;
+}
 function listHTML(){
+  if(ctab==='walk')return walkListHTML();
   const ids=Object.keys(S.clients);
   if(!ids.length)return `<div class="empty"><p>${tr('مازال ما سجلت حتى ورشة. إذا عندها دين قديم في الكراس، اكتبو وقت التسجيل.','Aucun client. Si un client a un ancien crédit dans le cahier, saisissez-le à la création.')}</p><div class="rowflex"><button class="btn" data-act="add-client">${ic('userplus')}${tr('زيد ورشة','Ajouter un client')}</button><button class="btn ghost" data-act="nav-import">${ic('scan')}${tr('استيراد من الكراس','Importer du cahier')}</button></div></div>`;
   const q=query.trim().toLowerCase();
@@ -642,7 +686,7 @@ function releveText(id){
   const L=[tr('زجاج صدام','Vitrerie Saddam'),`${tr('كشف حساب','Relevé')}: ${c.name}`,`${tr('بتاريخ','Le')} ${fdateTxt(today())}`,''];
   for(const x of e){
     if(x.k==='bon'){const b=x.b;L.push(`${fdateTxt(x.date)}  ${b.kind==='opening'?tr('دين قديم','Ancien crédit'):tr('بون','Bon')+' '+(b.num||'')}: ${grpTxt(x.amt)} ${CUR()}`);
-      for(const l of b.lines||[])L.push(`   - ${l.type} ${l.w}x${l.h} cm × ${l.qty} = ${grpTxt(l.amount)} ${CUR()}`)}
+      for(const l of b.lines||[])L.push(`   - ${l.type}${l.use?' ('+l.use+')':''} ${l.w}x${l.h} cm × ${l.qty} = ${grpTxt(l.amount)} ${CUR()}`)}
     else L.push(`${fdateTxt(x.date)}  ${tr('دفع','Paiement')}: -${grpTxt(-x.amt)} ${CUR()}`);
   }
   L.push('',`${tr('الباقي','Reste')}: ${grpTxt(s.bal)} ${CUR()}`);return L.join('\n');
@@ -651,18 +695,44 @@ function bonViewHTML(){
   const b=S.bons[view.id];
   if(!b)return `${backBtn('nav-clients',tr('الزبائن','Clients'))}<div class="empty"><p>${tr('هذا البون تمسح.','Ce bon a été supprimé.')}</p></div>`;
   const c=S.clients[b.clientId]||{name:'?'};
-  const atSale=Object.values(S.pays).filter(p=>p.bonId===view.id).reduce((s,p)=>s+num(p.amount),0);
+  const atSale=b.walkin?num(b.total):Object.values(S.pays).filter(p=>p.bonId===view.id).reduce((s,p)=>s+num(p.amount),0);
   return `<div class="stack">
-  ${backBtn('open-client',esc(c.name),b.clientId)}
+  ${b.walkin?backBtn('nav-walk',tr('زبائن عاديين','Clients comptoir')):backBtn('open-client',esc(c.name),b.clientId)}
+  ${b.walkin?`<div class="rowflex"><span class="chip warn">${tr('زبون عادي · كاش','Client comptoir · comptant')}</span><b>${esc(b.cname||'')}</b>${b.cphone?`<bdi dir="ltr" class="note">${esc(b.cphone)}</bdi>`:''}</div>`:''}
   <h2>${b.kind==='opening'?tr('دين قديم من الكراس','Ancien crédit (cahier)'):`${tr('بون رقم','Bon n°')} <bdi dir="ltr">${b.num}</bdi>`}</h2>
   <div class="note">${fdate(b.date)}${b.note?' · '+esc(b.note):''}</div>
-  ${b.kind==='opening'?'':`<div class="scroll"><table class="tbl"><thead><tr><th>${tr('النوع','Type')}</th><th>${tr('المقاس (سم)','Dim. (cm)')}</th><th>${tr('العدد','Qté')}</th><th>${tr('المساحة','Surface')}</th><th>${tr('سعر م²','Prix m²')}</th><th>${tr('المبلغ','Montant')}</th></tr></thead><tbody>
-  ${(b.lines||[]).map(l=>`<tr><td>${esc(l.type)}</td><td><bdi dir="ltr">${esc(l.w)} × ${esc(l.h)}</bdi></td><td>${esc(l.qty)}</td><td>${M2(l.area)}</td><td>${DA(l.price)}</td><td>${DA(l.amount)}</td></tr>`).join('')}
+  ${b.kind==='opening'?'':`<div class="scroll"><table class="tbl"><thead><tr><th>${tr('النوع','Type')}</th><th>${tr('الاستعمال','Usage')}</th><th>${tr('المقاس (سم)','Dim. (cm)')}</th><th>${tr('العدد','Qté')}</th><th>${tr('المساحة','Surface')}</th><th>${tr('سعر م²','Prix m²')}</th><th>${tr('المبلغ','Montant')}</th></tr></thead><tbody>
+  ${(b.lines||[]).map(l=>`<tr><td>${esc(l.type)}</td><td>${esc(l.use||'')}</td><td><bdi dir="ltr">${esc(l.w)} × ${esc(l.h)}</bdi></td><td>${esc(l.qty)}</td><td>${M2(l.area)}</td><td>${DA(l.price)}</td><td>${DA(l.amount)}</td></tr>`).join('')}
   </tbody></table></div>`}
   <div class="totals"><div class="trow big"><span>${tr('المجموع','Total')}</span><span>${DA(b.total)}</span></div>
   ${b.kind==='opening'?'':`<div class="trow"><span>${tr('دفع وقت البيع','Payé à la vente')}</span><span>${DA(atSale)}</span></div><div class="trow"><span>${tr('الباقي من هذا البون','Reste sur ce bon')}</span><span class="amt ${b.total-atSale>0?'neg':''}">${DA(b.total-atSale)}</span></div>`}</div>
+  ${b.kind==='opening'?'':`<button class="btn full" data-act="print-bon" data-id="${view.id}">${ic('download')}${tr('اطبع البون ولا حفظو PDF','Imprimer ou enregistrer en PDF')}</button>`}
   <div><button class="btn danger" data-act="del-bon" data-id="${view.id}">${tr('امسح هذا البون','Supprimer ce bon')}</button></div>
   </div>`;
+}
+function receiptHTML(id){
+  const b=S.bons[id];if(!b)return'';const sh=S.shop||{};
+  const atSale=b.walkin?num(b.total):Object.values(S.pays).filter(p=>p.bonId===id).reduce((s,p)=>s+num(p.amount),0);
+  const st=!b.walkin&&S.stats[b.clientId];
+  const area=(b.lines||[]).reduce((s,l)=>s+num(l.area),0);
+  return `<div class="rc" dir="${isFr()?'ltr':'rtl'}">
+  <div class="rc-head">${MARK}<div style="flex:1"><b>${tr('زجاج صدام','Vitrerie Saddam')}</b><small>${tr('Vitrerie Saddam','زجاج صدام')}</small>${sh.address?`<small>${esc(sh.address)}</small>`:''}${sh.phone?`<small><bdi dir="ltr">${esc(sh.phone)}</bdi></small>`:''}</div></div>
+  <div class="rc-meta"><div><b>${tr('بون رقم','Bon n°')} <bdi dir="ltr">${b.num}</bdi></b><div>${tr('التاريخ','Date')}: ${fdate(b.date)}</div></div>
+    <div><div>${tr('الزبون','Client')}: <b>${esc(custName(b))}</b></div>${b.walkin&&b.cphone?`<div><bdi dir="ltr">${esc(b.cphone)}</bdi></div>`:''}${!b.walkin&&S.clients[b.clientId]&&S.clients[b.clientId].phone?`<div><bdi dir="ltr">${esc(S.clients[b.clientId].phone)}</bdi></div>`:''}</div></div>
+  <table><thead><tr><th>${tr('النوع','Type')}</th><th>${tr('الاستعمال','Usage')}</th><th>${tr('المقاس سم','Dim. cm')}</th><th>${tr('العدد','Qté')}</th><th>${tr('م²','m²')}</th><th>${tr('سعر م²','Prix m²')}</th><th>${tr('المبلغ','Montant')}</th></tr></thead><tbody>
+  ${(b.lines||[]).map(l=>`<tr><td>${esc(l.type)}</td><td>${esc(l.use||'')}</td><td><bdi dir="ltr">${esc(l.w)}×${esc(l.h)}</bdi></td><td>${esc(l.qty)}</td><td><bdi dir="ltr">${dec2(num(l.area))}</bdi></td><td><bdi dir="ltr">${grp(l.price)}</bdi></td><td><bdi dir="ltr">${grp(l.amount)}</bdi></td></tr>`).join('')}
+  </tbody></table>
+  <div class="tot"><div><span>${tr('المساحة','Surface')}</span><span>${M2(area)}</span></div><div class="g"><span>${tr('المجموع','Total')}</span><span>${DA(b.total)}</span></div>
+  <div><span>${tr('المدفوع','Payé')}</span><span>${DA(atSale)}</span></div><div><span>${tr('الباقي','Reste')}</span><span>${DA(num(b.total)-atSale)}</span></div>
+  ${st?`<div><span>${tr('رصيد الحساب الكلي','Solde total du compte')}</span><span>${DA(st.bal)}</span></div>`:''}</div>
+  ${b.note?`<p>${esc(b.note)}</p>`:''}
+  <div class="rc-foot">${esc(sh.footer||tr('شكراً على ثقتكم','Merci de votre confiance'))}</div></div>`;
+}
+function printBon(id){
+  const el=$('#print');el.innerHTML=receiptHTML(id);document.body.classList.add('printing');
+  const done=()=>{document.body.classList.remove('printing');el.innerHTML='';window.removeEventListener('afterprint',done)};
+  window.addEventListener('afterprint',done);
+  setTimeout(()=>{try{window.print()}catch(_){done();toast(tr('الطباعة ما خدمتش في هذا المتصفح.','Impression indisponible dans ce navigateur.'))}},60);
 }
 
 /* ---- forms ---- */
@@ -677,25 +747,32 @@ function lineHTML(l,i){
   <div class="lt"><div class="field"><label for="lt${i}">${tr('نوع الزجاج','Type de verre')}</label><select id="lt${i}" data-lf="typeId" data-i="${i}">${typeOptions(l.typeId)}</select></div>
   <div class="field"><label for="lp${i}">${tr('سعر م²','Prix m²')}</label><input id="lp${i}" inputmode="decimal" data-lf="price" data-i="${i}" value="${esc(l.price)}"></div>
   <button class="x" data-act="rm-line" data-i="${i}" aria-label="${tr('نحّي السطر','Retirer la ligne')}" ${draft.lines.length<2?'disabled':''}>×</button></div>
+  <div class="lu"><div class="field"><label for="lu${i}">${tr('الاستعمال (اختياري)','Usage (facultatif)')}</label><input id="lu${i}" list="uses" data-lf="use" data-i="${i}" value="${esc(l.use||'')}" placeholder="${tr('طابلة، مرآة، كوافاز…','table, miroir, coiffeuse…')}"></div></div>
   <div class="ld"><div class="field"><label for="lw${i}">${tr('العرض (سم)','Largeur (cm)')}</label><input id="lw${i}" inputmode="decimal" data-lf="w" data-i="${i}" value="${esc(l.w)}" placeholder="120"></div>
   <div class="field"><label for="lh${i}">${tr('الطول (سم)','Hauteur (cm)')}</label><input id="lh${i}" inputmode="decimal" data-lf="h" data-i="${i}" value="${esc(l.h)}" placeholder="80"></div>
   <div class="field"><label for="lq${i}">${tr('العدد','Quantité')}</label><input id="lq${i}" inputmode="numeric" data-lf="qty" data-i="${i}" value="${esc(l.qty)}"></div></div>
   <div class="lr"><span>${tr('المساحة','Surface')} <b id="la${i}"></b></span><span>${tr('المبلغ','Montant')} <b id="lm${i}"></b></span><span class="avail" id="lv${i}"></span></div></div>`;
 }
 function bonFormHTML(){
+  const walk=draft.mode==='walk';
   return `<div class="stack">
-  <h2>${tr('بون بيع جديد','Nouvelle vente')}</h2>
-  <div class="grid2"><div class="field"><label for="bc">${tr('الورشة','Client')}</label><select id="bc">${clientOptions(draft.clientId)}</select></div>
-  <div class="field"><label for="bd">${tr('التاريخ','Date')}</label><input id="bd" type="date" value="${esc(draft.date)}"></div></div>
+  <h2>${walk?tr('بيع لزبون عادي','Vente comptoir'):tr('بون بيع لورشة','Vente à un atelier')}</h2>
+  <div class="seg"><button data-act="bon-mode" data-v="shop" class="${!walk?'on':''}">${tr('ورشة (حساب)','Atelier (compte)')}</button><button data-act="bon-mode" data-v="walk" class="${walk?'on':''}">${tr('زبون عادي (كاش)','Comptoir (comptant)')}</button></div>
+  <datalist id="uses">${(isFr()?USES_FR:USES_AR).map(u=>`<option value="${esc(u)}"></option>`).join('')}</datalist>
+  ${walk?`<div class="grid2"><div class="field"><label for="wn">${tr('اسم الزبون (اختياري)','Nom du client (facultatif)')}</label><input id="wn" value="${esc(draft.cname)}"></div>
+  <div class="field"><label for="wp">${tr('الهاتف (اختياري)','Téléphone (facultatif)')}</label><input id="wp" inputmode="tel" dir="ltr" value="${esc(draft.cphone)}"></div></div>
+  <div class="field"><label for="bd">${tr('التاريخ','Date')}</label><input id="bd" type="date" value="${esc(draft.date)}"></div>`
+  :`<div class="grid2"><div class="field"><label for="bc">${tr('الورشة','Client')}</label><select id="bc">${clientOptions(draft.clientId)}</select></div>
+  <div class="field"><label for="bd">${tr('التاريخ','Date')}</label><input id="bd" type="date" value="${esc(draft.date)}"></div></div>`}
   <div id="bbal" class="note"></div>
   <div class="stack" id="lines">${draft.lines.map(lineHTML).join('')}</div>
   <button class="btn ghost" data-act="add-line">${ic('plus')}${tr('زيد سطر زجاج','Ajouter une ligne')}</button>
   <div class="totals">
     <div class="trow"><span>${tr('المساحة الكل','Surface totale')}</span><b id="ta"></b></div>
     <div class="trow big"><span>${tr('المجموع','Total')}</span><span id="tt"></span></div>
-    <div class="field"><label for="bp">${tr('شحال دفع دروك؟','Montant payé maintenant')}</label><input id="bp" inputmode="decimal" value="${esc(draft.paid)}" placeholder="${tr('0 = كريدي كامل','0 = tout à crédit')}"></div>
+    ${walk?`<div class="note">${tr('الزبون العادي يخلّص كامل. المبلغ يدخل في مداخيل اليوم، والزجاج ينقص من السطوك.','Le client comptoir paie la totalité. Le montant entre dans l’encaissement du jour et le verre sort du stock.')}</div>`:`<div class="field"><label for="bp">${tr('شحال دفع دروك؟','Montant payé maintenant')}</label><input id="bp" inputmode="decimal" value="${esc(draft.paid)}" placeholder="${tr('0 = كريدي كامل','0 = tout à crédit')}"></div>
     <div class="quickpay"><button data-act="paid-zero">${tr('كريدي كامل','Tout à crédit')}</button><button data-act="paid-full">${tr('خلّص كامل','Payé en totalité')}</button></div>
-    <div class="trow"><span>${tr('يبقى عليه من هذا البون','Reste sur ce bon')}</span><b id="tr"></b></div>
+    <div class="trow"><span>${tr('يبقى عليه من هذا البون','Reste sur ce bon')}</span><b id="tr"></b></div>`}
   </div>
   <div class="field"><label for="bn">${tr('ملاحظة (اختياري)','Note (facultatif)')}</label><input id="bn" value="${esc(draft.note)}"></div>
   <button class="btn full" data-act="save-bon">${tr('سجّل البون','Enregistrer la vente')}</button>
@@ -707,6 +784,7 @@ function updBon(){
   draft.lines.forEach((l,i)=>{const c=lineCalc(l);ta+=c.area;const a=$('#la'+i),m=$('#lm'+i),v=$('#lv'+i);if(a)a.innerHTML=M2(c.area);if(m)m.innerHTML=DA(c.amount);
     if(v){const e=S.sk[l.typeId];if(!e||(!e.inA&&!e.adjA)){v.innerHTML='';v.className='avail'}else{const short=need[l.typeId]>e.bal+0.005;v.className='avail'+(short?' short':'');v.innerHTML=(short?tr('ما يكفيش! ','Insuffisant ! '):'')+tr('في السطوك ','En stock ')+M2(e.bal)}}});
   const t=bonTotal();$('#ta').innerHTML=M2(ta);$('#tt').innerHTML=DA(t);
+  if(draft.mode==='walk'){$('#bbal').innerHTML='';return}
   const r=t-num(draft.paid);$('#tr').innerHTML=DA(r);$('#tr').className=r>0?'amt neg':'amt';
   const s=draft.clientId&&S.stats[draft.clientId];
   $('#bbal').innerHTML=s?`${tr('الدين الحالي على هذي الورشة','Crédit actuel de ce client')}: <b class="amt ${s.bal>0?'neg':''}">${DA(s.bal)}</b> · ${tr('بعد هذا البون','après cette vente')} ${DA(s.bal+r)}`:'';
@@ -828,6 +906,7 @@ function settingsHTML(){
 
   <h3>${tr('المحل','Magasin')}</h3>
   <div class="set-group">
+    <button class="set-row" data-act="nav-shop"><span class="t"><span class="ib">${ic('receipt')}</span><span>${tr('معلومات المحل على البون','Infos du magasin sur le bon')}<small>${esc([S.shop&&S.shop.phone,S.shop&&S.shop.address].filter(Boolean).join(' · ')||tr('الهاتف، العنوان، رسالة أسفل البون','Téléphone, adresse, message en bas du bon'))}</small></span></span>${ic('chev','flip')}</button>
     <button class="set-row" data-act="nav-prices"><span class="t"><span class="ib">${ic('tag')}</span><span>${tr('أنواع الزجاج والأسعار','Types de verre et prix')}<small>${types().map(t=>esc(t.name)).join(' · ')}</small></span></span>${ic('chev','flip')}</button>
     <button class="set-row" data-act="nav-import"><span class="t"><span class="ib">${ic('scan')}</span><span>${tr('استيراد الديون من الكراس','Importer les crédits du cahier')}<small>${tr('صوّر الكراس وأدخل كل الديون مرة وحدة','Photographiez le cahier et importez tout d’un coup')}</small></span></span>${ic('chev','flip')}</button>
   </div>
@@ -844,7 +923,7 @@ function settingsHTML(){
     <div id="impbox">${pendingImport?importBoxHTML():''}</div>
   </div></div>
   ${installEvt?`<button class="btn full" data-act="install">${ic('install')}${tr('ثبّت التطبيق في الشاشة','Installer l’application')}</button>`:''}
-  <p class="note" style="text-align:center;margin:8px auto 0">${tr('زجاج صدام','Vitrerie Saddam')} · v4</p>
+  <p class="note" style="text-align:center;margin:8px auto 0">${tr('زجاج صدام','Vitrerie Saddam')} · v5</p>
   </div>`;
 }
 function importBoxHTML(){
@@ -861,6 +940,16 @@ function pricesHTML(){
   <div class="rowflex"><button class="btn ghost" data-act="add-type">${ic('plus')}${tr('نوع جديد','Nouveau type')}</button><button class="btn" data-act="save-types">${tr('سجّل الأسعار','Enregistrer les prix')}</button></div></div>`;
 }
 const typeRowHTML=(t,i)=>`<div class="typerow"><input aria-label="${tr('اسم النوع','Nom du type')}" data-tf="name" data-i="${i}" value="${esc(t.name)}" placeholder="${tr('الاسم','Nom')}"><input aria-label="${tr('السعر','Prix')}" inputmode="decimal" data-tf="price" data-i="${i}" value="${esc(t.price)}" placeholder="${tr('السعر','Prix')}"><button class="x" data-act="rm-type" data-i="${i}" aria-label="${tr('نحّي','Retirer')}" ${tdraft.length<2?'disabled':''}>×</button></div>`;
+function shopHTML(){
+  return `<div class="stack">
+  ${backBtn('nav-set',tr('الإعدادات','Réglages'))}
+  <h2>${tr('معلومات المحل على البون','Infos du magasin sur le bon')}</h2>
+  <p class="note">${tr('تبان في أعلى وأسفل البون المطبوع.','Elles apparaissent en haut et en bas du bon imprimé.')}</p>
+  <div class="field"><label for="sh-phone">${tr('هاتف المحل','Téléphone du magasin')}</label><input id="sh-phone" inputmode="tel" dir="ltr" value="${esc(shopDraft.phone)}"></div>
+  <div class="field"><label for="sh-addr">${tr('العنوان','Adresse')}</label><input id="sh-addr" value="${esc(shopDraft.address)}"></div>
+  <div class="field"><label for="sh-foot">${tr('رسالة أسفل البون','Message en bas du bon')}</label><input id="sh-foot" value="${esc(shopDraft.footer)}" placeholder="${tr('شكراً على ثقتكم','Merci de votre confiance')}"></div>
+  <button class="btn full" data-act="save-shop">${tr('سجّل','Enregistrer')}</button></div>`;
+}
 function acctHTML(){
   const a=S.auth||{};
   return `<div class="stack">
@@ -960,7 +1049,7 @@ function render(){
   $('#boot').hidden=true;$('#gate').hidden=true;$('#shell').hidden=false;
   $('#brand').innerHTML=brandHTML();$('#lockbtn').innerHTML=ic('lock');$('#lockbtn').setAttribute('aria-label',tr('قفل','Verrouiller'));
   const v=view.name,m=$('#main');
-  m.innerHTML=v==='home'?homeHTML():v==='clients'?clientsHTML():v==='client'?clientHTML():v==='bonview'?bonViewHTML():v==='bon'?bonFormHTML():v==='pay'?payFormHTML():v==='cform'?clientFormHTML():v==='stock'?stockHTML():v==='kin'?kinFormHTML():v==='kadj'?kadjFormHTML():v==='prices'?pricesHTML():v==='acct'?acctHTML():v==='import'?importHTML():settingsHTML();
+  m.innerHTML=v==='home'?homeHTML():v==='clients'?clientsHTML():v==='client'?clientHTML():v==='bonview'?bonViewHTML():v==='bon'?bonFormHTML():v==='pay'?payFormHTML():v==='cform'?clientFormHTML():v==='stock'?stockHTML():v==='kin'?kinFormHTML():v==='kadj'?kadjFormHTML():v==='prices'?pricesHTML():v==='acct'?acctHTML():v==='import'?importHTML():v==='shop'?shopHTML():settingsHTML();
   if(v==='bon')updBon();if(v==='pay')updPay();if(v==='kin')updKin();if(v==='kadj')updAdj();
   $('#nav').innerHTML=navHTML();
 }
@@ -977,7 +1066,7 @@ function refresh(){
   else if(v==='bon'){const sel=$('#bc');if(sel&&document.activeElement!==sel)sel.innerHTML=clientOptions(draft.clientId);updBon()}
   else if(v==='pay')updPay();
 }
-function startBon(cid){draft={clientId:cid||'',date:today(),lines:[newLine()],paid:'',note:''};go('bon')}
+function startBon(cid,mode){draft={mode:mode||'shop',clientId:cid||'',cname:'',cphone:'',date:today(),lines:[newLine()],paid:'',note:''};go('bon')}
 
 /* ====================== events ====================== */
 document.addEventListener('submit',async e=>{
@@ -998,6 +1087,7 @@ async function saveAcct(){
 document.addEventListener('input',e=>{
   touch();const t=e.target;
   if(t.id==='q'){query=t.value;$('#list').innerHTML=listHTML();return}
+  if(view.name==='shop'){const k={'sh-phone':'phone','sh-addr':'address','sh-foot':'footer'}[t.id];if(k){shopDraft[k]=t.value;return}}
   if(t.id==='imp-text'&&imp){imp.text=t.value;return}
   if(t.dataset&&t.dataset.ir&&imp&&imp.rows){const r=imp.rows[+t.dataset.i];if(t.dataset.ir==='on')r.on=t.checked;else r[t.dataset.ir]=t.value;
     if(t.dataset.ir==='on'||t.dataset.ir==='debt'){const btn=$('[data-act=imp-save]');const inc=imp.rows.filter(x=>x.on);if(btn)btn.innerHTML=ic('download')+tr(`سجّل ${inc.length} ورشة في الدفتر`,`Importer ${inc.length} clients`)}return}
@@ -1005,7 +1095,7 @@ document.addEventListener('input',e=>{
     if(t.dataset.lf){const l=draft.lines[+t.dataset.i];l[t.dataset.lf]=t.value;
       if(t.dataset.lf==='typeId'){const ty=types().find(x=>x.id===t.value);if(ty){l.price=ty.price;const p=$('#lp'+t.dataset.i);if(p)p.value=ty.price}}
       updBon();return}
-    if(t.id==='bd')draft.date=t.value;if(t.id==='bp'){draft.paid=t.value;updBon()}if(t.id==='bn')draft.note=t.value;
+    if(t.id==='bd')draft.date=t.value;if(t.id==='bp'){draft.paid=t.value;updBon()}if(t.id==='bn')draft.note=t.value;if(t.id==='wn')draft.cname=t.value;if(t.id==='wp')draft.cphone=t.value;
   }
   if(view.name==='pay'&&pdraft){if(t.id==='pa'){pdraft.amount=t.value;updPay()}if(t.id==='pd')pdraft.date=t.value;if(t.id==='pn')pdraft.note=t.value}
   if(view.name==='cform'&&cdraft){const k={cn:'name',co:'owner',cp:'phone',cd:'debt'}[t.id];if(k)cdraft[k]=t.value}
@@ -1043,7 +1133,7 @@ document.addEventListener('click',async e=>{
   if(a==='recovery-ok'){recoveryShown=null;gateMode=null;unlocked=true;touch(true);startApp();return}
   if(a==='lock')return lockNow();
   if(a==='nav-home')return go('home');
-  if(a==='nav-clients'){if(b.dataset.f)cfilter=b.dataset.f;return go('clients')}
+  if(a==='nav-clients'){if(b.dataset.f)cfilter=b.dataset.f;ctab='shops';return go('clients')}
   if(a==='cfilter'){cfilter=b.dataset.v;document.querySelectorAll('[data-act=cfilter]').forEach(x=>x.classList.toggle('on',x.dataset.v===cfilter));$('#list').innerHTML=listHTML();return}
   if(a==='nav-set')return go('set');
   if(a==='nav-acct')return go('acct');
@@ -1051,6 +1141,14 @@ document.addEventListener('click',async e=>{
   if(a==='nav-import'){imp=null;return go('import')}
   if(a==='nav-stk')return go('stock');
   if(a==='nav-bon')return startBon(view.name==='client'?view.id:'');
+  if(a==='walk-bon')return startBon('','walk');
+  if(a==='nav-walk'){ctab='walk';return go('clients')}
+  if(a==='ctab'){ctab=b.dataset.v;query='';return render()}
+  if(a==='bon-mode'){draft.mode=b.dataset.v;return render()}
+  if(a==='print-bon')return printBon(id);
+  if(a==='nav-shop'){shopDraft={phone:'',address:'',footer:'',...(S.shop||{})};return go('shop')}
+  if(a==='save-shop'){const shop={phone:String(shopDraft.phone||'').trim(),address:String(shopDraft.address||'').trim(),footer:String(shopDraft.footer||'').trim()};
+    if(await write(()=>saveSettings({shop}),tr('تسجلت معلومات المحل.','Informations enregistrées.')))go('set');return}
   if(a==='open-client')return go('client',{id});
   if(a==='open-bon')return go('bonview',{id});
   if(a==='new-bon')return startBon(id);
@@ -1096,7 +1194,7 @@ document.addEventListener('click',async e=>{
   if(a==='save-types'){
     const clean=tdraft.map(t=>({id:t.id,name:String(t.name).trim(),price:num(t.price)})).filter(t=>t.name);
     if(!clean.length||clean.some(t=>t.price<=0))return toast(tr('كل نوع لازم عندو اسم وسعر.','Chaque type doit avoir un nom et un prix.'));
-    if(await write(()=>db.doc('settings/main').set({types:clean}),tr('تسجلو الأسعار.','Prix enregistrés.'))){tdraft=clean.map(t=>({...t}));go('set')}
+    if(await write(()=>saveSettings({types:clean}),tr('تسجلو الأسعار.','Prix enregistrés.'))){tdraft=clean.map(t=>({...t}));go('set')}
     return}
   if(a==='save-client'){
     const name=String(cdraft.name).trim();if(!name)return toast(tr('اكتب اسم الورشة.','Saisissez le nom.'));
@@ -1107,15 +1205,18 @@ document.addEventListener('click',async e=>{
     if(ok){if(cdraft.ret==='bon'&&draft){draft.clientId=ref.id;go('bon')}else go('client',{id:ref.id})}
     return}
   if(a==='save-bon'){
-    if(!draft.clientId)return toast(tr('اختار الورشة.','Choisissez le client.'));
-    const lines=draft.lines.filter(l=>num(l.w)>0&&num(l.h)>0&&num(l.qty)>0).map(l=>{const ty=types().find(x=>x.id===l.typeId)||{name:'?'};const c=lineCalc(l);return{typeId:l.typeId,type:ty.name,price:num(l.price),w:num(l.w),h:num(l.h),qty:num(l.qty),area:Math.round(c.area*10000)/10000,amount:c.amount}});
+    const walk=draft.mode==='walk';
+    if(!walk&&!draft.clientId)return toast(tr('اختار الورشة.','Choisissez le client.'));
+    const lines=draft.lines.filter(l=>num(l.w)>0&&num(l.h)>0&&num(l.qty)>0).map(l=>{const ty=types().find(x=>x.id===l.typeId)||{name:'?'};const c=lineCalc(l);return{typeId:l.typeId,type:ty.name,use:String(l.use||'').trim(),price:num(l.price),w:num(l.w),h:num(l.h),qty:num(l.qty),area:Math.round(c.area*10000)/10000,amount:c.amount}});
     if(!lines.length)return toast(tr('اكتب العرض والطول والعدد على الأقل في سطر واحد.','Saisissez largeur, hauteur et quantité sur au moins une ligne.'));
     const total=lines.reduce((s,l)=>s+l.amount,0),paid=Math.round(num(draft.paid));
     const nb=Object.values(S.bons).reduce((m,x)=>Math.max(m,num(x.num)),0)+1;
-    const ref=db.collection('bons').doc();const cid=draft.clientId,date=draft.date||today();
+    const ref=db.collection('bons').doc();const cid=walk?'':draft.clientId,date=draft.date||today();
+    if(walk){const ok=await write(()=>ref.set({clientId:'',walkin:true,cname:draft.cname.trim(),cphone:draft.cphone.trim(),kind:'sale',num:nb,date,lines,total,paid:total,note:draft.note.trim(),createdAt:Date.now()}),tr(`تسجل البون رقم ${nb}.`,`Bon n° ${nb} enregistré.`));
+      if(ok){draft=null;go('bonview',{id:ref.id})}return}
     const ok=await write(async()=>{await ref.set({clientId:cid,kind:'sale',num:nb,date,lines,total,note:draft.note.trim(),createdAt:Date.now()});
       if(paid>0)await db.collection('payments').doc().set({clientId:cid,bonId:ref.id,amount:paid,date,note:tr('دفع وقت البيع · بون ','Payé à la vente · bon ')+nb,createdAt:Date.now()+1})},tr(`تسجل البون رقم ${nb}.`,`Bon n° ${nb} enregistré.`));
-    if(ok){draft=null;go('client',{id:cid})}
+    if(ok){draft=null;go('bonview',{id:ref.id})}
     return}
   if(a==='save-pay'){
     if(!pdraft.clientId)return toast(tr('اختار الورشة.','Choisissez le client.'));
@@ -1128,7 +1229,7 @@ document.addEventListener('click',async e=>{
     const ty=types().find(x=>x.id===kdraft.typeId);if(!ty)return;
     const sell=num(kdraft.sell),newTypes=sell>0&&sell!==num(ty.price)?types().map(x=>x.id===ty.id?{...x,price:sell}:x):null;
     const ok=await write(async()=>{await db.collection('stock').doc().set({kind:'in',typeId:ty.id,type:ty.name,date:kdraft.date||today(),sheets:num(kdraft.sheets),sw:num(kdraft.sw),sh:num(kdraft.sh),area:Math.round(c.area*10000)/10000,costM2:num(kdraft.costM2),cost:c.cost,supplier:kdraft.supplier.trim(),createdAt:Date.now()});
-      if(newTypes)await db.doc('settings/main').set({types:newTypes})},newTypes?tr('تسجلت السلعة وتبدل سعر البيع.','Entrée enregistrée, prix de vente mis à jour.'):tr('تسجلت السلعة.','Entrée enregistrée.'));
+      if(newTypes)await saveSettings({types:newTypes})},newTypes?tr('تسجلت السلعة وتبدل سعر البيع.','Entrée enregistrée, prix de vente mis à jour.'):tr('تسجلت السلعة.','Entrée enregistrée.'));
     if(ok){kdraft=null;go('stock')}return}
   if(a==='save-adj'){
     if(adraft.real==='')return toast(tr('اكتب الكمية الموجودة.','Saisissez le stock réel.'));const e2=S.sk[adraft.typeId]||{bal:0};const d=Math.round((num(adraft.real)-e2.bal)*10000)/10000;
@@ -1137,7 +1238,7 @@ document.addEventListener('click',async e=>{
   if(a==='del-mv'){if(!armed(b))return;await write(()=>db.doc('stock/'+id).delete(),tr('تمسحت.','Supprimé.'));return}
   if(a==='del-pay'){if(!armed(b))return;await write(()=>db.doc('payments/'+id).delete(),tr('تمسح الدفع.','Paiement supprimé.'));return}
   if(a==='del-bon'){if(!armed(b))return;const bon=S.bons[id];const cid=bon&&bon.clientId;const linked=Object.keys(S.pays).filter(p=>S.pays[p].bonId===id);
-    if(await write(async()=>{for(const p of linked)await db.doc('payments/'+p).delete();await db.doc('bons/'+id).delete()},tr('تمسح البون.','Bon supprimé.')))go('client',{id:cid});return}
+    if(await write(async()=>{for(const p of linked)await db.doc('payments/'+p).delete();await db.doc('bons/'+id).delete()},tr('تمسح البون.','Bon supprimé.'))){if(cid)go('client',{id:cid});else{ctab='walk';go('clients')}}return}
   if(a==='del-client'){if(!armed(b))return;
     const bs=Object.keys(S.bons).filter(x=>S.bons[x].clientId===id),ps=Object.keys(S.pays).filter(x=>S.pays[x].clientId===id);
     if(await write(async()=>{for(const p of ps)await db.doc('payments/'+p).delete();for(const x of bs)await db.doc('bons/'+x).delete();await db.doc('clients/'+id).delete()},tr('تمسحت الورشة.','Client supprimé.')))go('clients');return}
@@ -1158,7 +1259,7 @@ applyPrefs();
   try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(_){}
   const asMap=q=>Object.fromEntries(q.docs.map(d=>[d.id,d.data()]));
   db.doc('auth/main').onSnapshot(s=>{S.auth=s.exists?s.data():null;S.ok.a=true;refresh()});
-  db.doc('settings/main').onSnapshot(s=>{S.types=s.exists&&Array.isArray(s.data().types)&&s.data().types.length?s.data().types:null;refresh()});
+  db.doc('settings/main').onSnapshot(s=>{const d=s.exists?s.data():{};S.types=Array.isArray(d.types)&&d.types.length?d.types:null;S.shop=d.shop||{};refresh()});
   db.collection('clients').onSnapshot(q=>{S.clients=asMap(q);S.ok.c=true;refresh()});
   db.collection('bons').onSnapshot(q=>{S.bons=asMap(q);S.ok.b=true;refresh()});
   db.collection('payments').onSnapshot(q=>{S.pays=asMap(q);S.ok.p=true;refresh()});
