@@ -192,6 +192,8 @@ button.le:hover{background:var(--surface2)}
 .tbl th{font-weight:600;color:var(--muted);font-size:.74rem;text-align:start;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
 .tbl td{padding:8px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
 .tbl tr:last-child td{border-bottom:0}
+.tbl.doc{font-size:.86rem}.tbl.doc th,.tbl.doc td{white-space:nowrap;vertical-align:middle;padding:10px 9px}
+.tbl.doc .n{text-align:end;font-variant-numeric:tabular-nums}.tbl.doc .b{font-weight:700}.tbl.doc .w{white-space:normal;min-width:110px;max-width:170px}
 .tbl input{padding:7px 8px;border-radius:8px;min-width:90px}
 .scroll{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
 .typerow{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) auto;gap:8px;align-items:center}
@@ -377,7 +379,7 @@ const num=v=>{const n=parseFloat(String(v??'').replace(/\s/g,'').replace(',','.'
 const loc=()=>isFr()?'fr-FR':'en-US';
 const grp=n=>{const r=Math.round(n);return(r<0?'-':'')+Math.abs(r).toLocaleString(loc()).replace(/ /g,' ')};
 const grpTxt=n=>Math.round(n).toLocaleString('en-US');
-const APP_VER=24; // نفس الرقم تاع VERSION في sw.js
+const APP_VER=27; // نفس الرقم تاع VERSION في sw.js
 const CUR=()=>tr('دج','DA');
 const DA=n=>`<bdi dir="ltr">${grp(n)}</bdi>&nbsp;${CUR()}`;
 const dec2=a=>(Math.round(a*100)/100).toLocaleString(loc(),{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -939,12 +941,6 @@ function homeHTML(){
   return `<div class="stack">${junkBanner()}
   <div><h2>${greeting()}</h2><div class="note">${esc(longDate())}</div></div>
   ${backupBanner()}
-  <div class="tiles">
-    <div class="tile"><span class="lbl">${tr('مبيعات اليوم','Ventes du jour')}</span><span class="v">${DA(sT)}</span></div>
-    <div class="tile"><span class="lbl">${tr('مداخيل اليوم','Encaissé aujourd’hui')}</span><span class="v ok">${DA(pT)}</span></div>
-    <div class="tile"><span class="lbl">${tr('مبيعات الشهر','Ventes du mois')}</span><span class="v">${DA(sM)}</span></div>
-    <div class="tile"><span class="lbl">${tr('مداخيل الشهر','Encaissé ce mois')}</span><span class="v ok">${DA(pM)}</span></div>
-  </div>
   <div class="quick">
     <button class="qa" data-act="nav-bon"><span class="ib">${ic('receipt')}</span>${tr('فاتورة حرفي','Vente atelier')}</button>
     <button class="qa" data-act="walk-bon"><span class="ib">${ic('tag')}</span>${tr('بيع لزبون عادي','Vente comptoir')}</button>
@@ -1166,9 +1162,11 @@ function releveText(id,f='0000-01-01',t='9999-12-31'){
   return L.join('\n');
 }
 function docLinesTable(lines){
-  const hasSvc=(lines||[]).some(l=>num(l.svcAmt)>0);
-  return `<div class="scroll"><table class="tbl"><thead><tr><th>${tr('النوع','Type')}</th><th>${tr('الاستعمال','Usage')}</th><th>${tr('المقاس (سم)','Dim. (cm)')}</th><th>${tr('العدد','Qté')}</th><th>${tr('السعر','Prix')}</th>${hasSvc?`<th>${tr('التشطيب','Façonnage')}</th>`:''}<th>${tr('المبلغ','Montant')}</th></tr></thead><tbody>
-  ${(lines||[]).map(l=>l.lk==='art'?`<tr><td>${esc(l.type)}</td><td></td><td>—</td><td><bdi dir="ltr">${esc(l.qty)}</bdi> ${esc(l.unit||'')}</td><td>${DA(l.price)}</td>${hasSvc?'<td></td>':''}<td>${DA(l.amount)}</td></tr>`:`<tr><td>${esc(l.type)}</td><td>${esc(l.use||'')}</td><td><bdi dir="ltr">${esc(l.w)} × ${esc(l.h)}</bdi></td><td>${esc(l.qty)}</td><td>${DA(l.price)}</td>${hasSvc?`<td>${esc(l.svcText||'')}${num(l.svcAmt)?'<br>'+DA(l.svcAmt):''}</td>`:''}<td>${DA(l.amount)}</td></tr>`).join('')}
+  lines=lines||[];const hasSvc=lines.some(l=>num(l.svcAmt)>0),hasUse=lines.some(l=>String(l.use||'').trim()),n=v=>`<bdi dir="ltr">${grp(v)}</bdi>`;
+  return `<div class="scroll"><table class="tbl doc"><thead><tr><th>${tr('النوع','Type')}</th>${hasUse?`<th>${tr('الاستعمال','Usage')}</th>`:''}<th>${tr('المقاس (سم)','Dim. (cm)')}</th><th class="n">${tr('العدد','Qté')}</th><th class="n">${tr('السعر (دج)','Prix (DA)')}</th>${hasSvc?`<th>${tr('التشطيب','Façonnage')}</th>`:''}<th class="n">${tr('المبلغ (دج)','Montant (DA)')}</th></tr></thead><tbody>
+  ${lines.map(l=>l.lk==='art'
+    ?`<tr><td>${esc(l.type)}</td>${hasUse?'<td></td>':''}<td>—</td><td class="n"><bdi dir="ltr">${esc(l.qty)}</bdi> ${esc(l.unit||'')}</td><td class="n">${n(l.price)}</td>${hasSvc?'<td></td>':''}<td class="n b">${n(l.amount)}</td></tr>`
+    :`<tr><td>${esc(l.type)}</td>${hasUse?`<td>${esc(l.use||'')}</td>`:''}<td><bdi dir="ltr">${esc(l.w)} × ${esc(l.h)}</bdi></td><td class="n"><bdi dir="ltr">${esc(l.qty)}</bdi></td><td class="n">${n(l.price)}</td>${hasSvc?`<td class="w">${esc(l.svcText||'')}${num(l.svcAmt)?` · ${n(l.svcAmt)}`:''}</td>`:''}<td class="n b">${n(l.amount)}</td></tr>`).join('')}
   </tbody></table></div>`;
 }
 function bonViewHTML(){
@@ -1424,7 +1422,7 @@ function articlesHTML(){
   return `<div class="stack">
   <div class="rowflex between"><h2>${tr('المخزون','Stock')}</h2><span class="note">${tr('قيمة السلع بسعر الشراء','Valeur au prix d’achat')}: <b>${DA(val)}</b></span></div>
   ${stkSeg()}
-  <div class="actions"><button class="btn" data-act="new-ain">${ic('inbox')}${tr('إدخال سلع','Entrée d’articles')}</button><button class="btn ghost" data-act="new-art">${ic('plus')}${tr('سلعة جديدة','Nouvel article')}</button></div>
+  <div class="actions"><button class="btn ghost" data-act="new-art">${ic('plus')}${tr('سلعة جديدة','Nouvel article')}</button></div>
   <div class="chips">${ch('all',tr('الكل','Tout'))}${ART_CATS.map(([k,a,f])=>ch(k,tr(a,f))).join('')}</div>
   <div class="searchbox">${ic('search')}<input id="artq" type="search" value="${esc(artQ)}" placeholder="${tr('ابحث عن سلعة…','Rechercher un article…')}"></div>
   ${list.length?`<div class="list">${list.map(([id,a])=>{const e=S.ak[id]||{bal:0},st=artState(id);return `<button class="row" data-act="open-art" data-id="${id}"><span class="rleft"><span class="av ${st.cls==='out'?'bad':st.cls==='low'?'warn':''}">${ic(a.cat==='svc'?'cut':'box')}</span><span class="rmain"><span class="rname">${esc(a.name)} ${st.chip}</span><span class="rsub">${esc(artCatName(a.cat))} · ${tr('حرفي','Atelier')} ${DA(a.price)} · ${tr('عادي','Comptoir')} ${DA(num(a.priceW)||num(a.price))} / ${esc(unitTr(a.unit))}</span></span></span>${artTracked(a)?`<span class="amt">${artQtyTxt(a,e.bal)}</span>`:''}</button>`}).join('')}</div>`
@@ -1447,7 +1445,7 @@ function artHTML(){
     ${a.pack&&num(a.pack.n)>1?`<div class="rowflex between"><span>${esc(unitTr(a.pack.name))} = ${dec2s(a.pack.n)} ${esc(unitTr(a.unit))}</span><b>${tr('حرفي','Atelier')} ${DA(priceOf('art',id,'shop','', 'pack'))} · ${tr('عادي','Comptoir')} ${DA(priceOf('art',id,'walk','','pack'))}</b></div>`:''}
     ${c!==null&&artTracked(a)?`<div class="rowflex between"><span>${tr('آخر سعر شراء','Dernier prix d’achat')}</span><b>${DA(c)} / ${esc(unitTr(a.unit))}</b></div><div class="rowflex between"><span>${tr('الربح في الوحدة (حرفي)','Marge unitaire (atelier)')}</span><b class="amt ${num(a.price)-c<0?'neg':'pos'}">${DA(num(a.price)-c)}</b></div>`:''}
   </div>
-  ${artTracked(a)?`<div class="actions"><button class="btn" data-act="new-ain" data-id="${id}">${ic('inbox')}${tr('إدخال','Entrée')}</button><button class="btn ghost" data-act="new-aadj" data-id="${id}">${ic('scan')}${tr('تعديل الجرد','Ajuster')}</button></div>`:''}
+  ${artTracked(a)?`<div class="actions"><button class="btn ghost" data-act="new-aadj" data-id="${id}">${ic('scan')}${tr('تعديل الجرد','Ajuster')}</button></div>`:''}
   <div class="rowflex"><button class="btn plain" data-act="edit-art" data-id="${id}">${ic('edit')}${tr('تعديل السلعة والأسعار','Modifier l’article et les prix')}</button></div>
   ${artTracked(a)?`<h3>${tr('حركة السلعة','Mouvements')}</h3>${L.length?`<div class="led">${L.map(x=>`<${x.bid?`button data-act="open-bon" data-id="${x.bid}"`:'div'} class="le"><span class="what">${x.label}</span><span class="a" style="color:${x.q<0?'var(--debt)':'var(--ok)'}">${x.q<0?'−':'+'}${dec2s(Math.abs(x.q))}</span><span class="d">${fdate(x.d)}</span>${x.mid?`<button class="btn danger del" data-act="del-amv" data-id="${x.mid}">${tr('حذف','Supprimer')}</button>`:''}</${x.bid?'button':'div'}>`).join('')}</div>`:`<div class="empty"><p>${tr('ما كاين حتى حركة.','Aucun mouvement.')}</p></div>`}`:''}
   <div style="margin-top:12px">${a.archived?`<button class="btn line" data-act="art-unarch" data-id="${id}">${ic('restore')}${tr('رجّعها للقائمة','Restaurer')}</button>`:`<button class="btn danger" data-act="del-art" data-id="${id}">${tr('حذف / أرشفة السلعة','Supprimer / archiver')}</button>`}</div></div>`;
@@ -1474,8 +1472,9 @@ function artFormHTML(){const d=afd,svc=d.cat==='svc';
 function supSelectHTML(idp,sel,newName){return `<div class="grid2"><div class="field"><label for="${idp}sup">${tr('المورّد','Fournisseur')}</label><select id="${idp}sup"><option value="">${tr('— بدون —','— Aucun —')}</option>${Object.entries(S.sups).sort((a,b)=>String(a[1].name).localeCompare(b[1].name,prefs.lang)).map(([id,x])=>`<option value="${id}" ${sel===id?'selected':''}>${esc(x.name)}</option>`).join('')}<option value="__new" ${sel==='__new'?'selected':''}>${tr('+ مورّد جديد…','+ Nouveau fournisseur…')}</option></select></div>
   <div class="field" ${sel==='__new'?'':'hidden'} id="${idp}sn-f"><label for="${idp}sn">${tr('اسم المورّد الجديد','Nom du fournisseur')}</label><input id="${idp}sn" value="${esc(newName||'')}"></div></div>`}
 function ainFormHTML(){const d=aind,a=S.arts[d.articleId],f=artFactor(a,d.u),cost=Math.round(num(d.qty)*num(d.uc));
-  return `<div class="stack">${backBtn(d.back?'open-art':'nav-stk',tr('رجوع','Retour'),d.back)}
-  <h2>${tr('إدخال سلع','Entrée d’articles')}</h2>
+  return `<div class="stack">${backBtn('nav-home',tr('الرئيسية','Accueil'))}
+  <h2>${tr('إدخال سلعة','Entrée de stock')}</h2>
+  <div class="seg"><button data-act="new-in">${tr('زجاج','Verre')}</button><button class="on" aria-pressed="true">${tr('سلع (سيليكون، جوان…)','Articles (silicone, joints…)')}</button></div>
   <div class="grid2"><div class="field"><label for="ai-a">${tr('السلعة','Article')}</label><select id="ai-a">${ART_CATS.filter(c=>c[0]!=='svc').map(([k])=>{const g=activeArts().filter(([,x])=>(x.cat||'oth')===k);return g.length?`<optgroup label="${esc(artCatName(k))}">${g.map(([id,x])=>`<option value="${id}" ${id===d.articleId?'selected':''}>${esc(x.name)}</option>`).join('')}</optgroup>`:''}).join('')}</select></div>
   <div class="field"><label for="ai-d">${tr('التاريخ','Date')}</label><input id="ai-d" type="date" value="${esc(d.date)}"></div></div>
   ${a&&a.pack&&num(a.pack.n)>1?`<div class="seg"><button data-act="ai-u" data-v="pack" class="${d.u==='pack'?'on':''}">${tr('بـ','En ')}${esc(unitTr(a.pack.name))}</button><button data-act="ai-u" data-v="base" class="${d.u!=='pack'?'on':''}">${tr('بـ','En ')}${esc(unitTr(a.unit))}</button></div>`:''}
@@ -1505,7 +1504,7 @@ function stockHTML(){
   return `<div class="stack">
   <div class="rowflex between"><h2>${tr('المخزون','Stock')}</h2><span class="note">${tr('قيمة السلعة بسعر الشراء','Valeur au prix d’achat')}: <b>${DA(val)}</b></span></div>
   ${stkSeg()}
-  <div class="actions"><button class="btn" data-act="new-in">${ic('inbox')}${tr('إدخال سلعة','Entrée de stock')}</button><button class="btn ghost" data-act="new-adj">${ic('scan')}${tr('تعديل الجرد','Ajuster l’inventaire')}</button></div>
+  <div class="actions"><button class="btn ghost" data-act="new-adj">${ic('scan')}${tr('تعديل الجرد','Ajuster l’inventaire')}</button></div>
   <div class="skgrid">${ids.map(id=>{const e=S.sk[id],s=stockState(e);const pct=e.inA?Math.max(0,Math.min(100,e.bal/(e.inA+Math.max(0,e.adjA))*100)):0;
     const arch=(types().find(x=>x.id===id)||{}).archived;
     return `<div class="sk"><div class="nm"><span class="rowflex" style="gap:8px">${tyThumb(id,26)}${esc(e.name)}</span>${arch?`<span class="chip">${tr('مؤرشف','Archivé')}</span>`:s.chip}</div>
@@ -1525,8 +1524,9 @@ function stockHTML(){
 function kinCalc(){const area=num(kdraft.sw)*num(kdraft.sh)/10000*num(kdraft.sheets);return{area,cost:Math.round(area*num(kdraft.costM2))}}
 function kinFormHTML(){
   return `<div class="stack">
-  ${backBtn('nav-stk',tr('المخزون','Stock'))}
+  ${backBtn('nav-home',tr('الرئيسية','Accueil'))}
   <h2>${tr('إدخال سلعة','Entrée de stock')}</h2>
+  <div class="seg"><button class="on" aria-pressed="true">${tr('زجاج','Verre')}</button><button data-act="new-ain">${tr('سلع (سيليكون، جوان…)','Articles (silicone, joints…)')}</button></div>
   <div class="grid2"><div class="field"><label for="kt">${tr('نوع الزجاج','Type de verre')}</label><select id="kt">${typeOptions(kdraft.typeId)}</select></div>
   <div class="field"><label for="kd">${tr('التاريخ','Date')}</label><input id="kd" type="date" value="${esc(kdraft.date)}"></div></div>
   <div class="line-card"><div class="ld">
@@ -1534,23 +1534,17 @@ function kinFormHTML(){
     <div class="field"><label for="kw">${tr('عرض اللوح (سم)','Largeur (cm)')}</label><input id="kw" inputmode="decimal" value="${esc(kdraft.sw)}"></div>
     <div class="field"><label for="kh">${tr('طول اللوح (سم)','Hauteur (cm)')}</label><input id="kh" inputmode="decimal" value="${esc(kdraft.sh)}"></div></div>
     <div class="lr"><span>${tr('المساحة المُدخلة','Surface entrée')} <b id="ka"></b></span><span id="kk"></span></div></div>
-  <div class="grid2"><div class="field"><label for="kmm">${tr('السمك (ملم)','Épaisseur (mm)')}</label><input id="kmm" inputmode="decimal" dir="ltr" value="${esc(kdraft.mm||'')}" placeholder="4"></div>
-  <div class="field"><label>${tr('صورة النوع وتفاصيلو','Photo et détails du type')}</label><button class="btn ghost" data-act="type-edit" data-id="${esc(kdraft.typeId)}" data-ret="kin">${tyThumb(kdraft.typeId,22)||ic('edit')}${tr('تعديل النوع','Modifier le type')}</button></div></div>
   <div class="grid2"><div class="field"><label for="kc">${tr('سعر الشراء (للمتر²)','Prix d’achat (m²)')}</label><input id="kc" inputmode="decimal" value="${esc(kdraft.costM2)}" placeholder="1500"></div>
-  <div class="field"><label for="kp">${tr('سعر البيع العادي للحرفي (م²، اختياري)','Prix artisan par défaut (m², facultatif)')}</label><input id="kp" inputmode="decimal" value="${esc(kdraft.sell)}"></div></div>
+  <div class="field"><label for="kmm">${tr('السمك (ملم)','Épaisseur (mm)')}</label><input id="kmm" inputmode="decimal" dir="ltr" value="${esc(kdraft.mm||'')}" placeholder="4"></div></div>
   <div class="grid2"><div class="field"><label for="ksup">${tr('المورّد','Fournisseur')}</label><select id="ksup"><option value="">${tr('— بدون —','— Aucun —')}</option>${Object.entries(S.sups).sort((a,b)=>String(a[1].name).localeCompare(b[1].name,prefs.lang)).map(([id,x])=>`<option value="${id}" ${kdraft.supplierId===id?'selected':''}>${esc(x.name)}</option>`).join('')}<option value="__new" ${kdraft.supplierId==='__new'?'selected':''}>${tr('+ مورّد جديد…','+ Nouveau fournisseur…')}</option></select></div>
   <div class="field" ${kdraft.supplierId==='__new'?'':'hidden'} id="ksn-f"><label for="ksn">${tr('اسم المورّد الجديد','Nom du fournisseur')}</label><input id="ksn" value="${esc(kdraft.newSup||'')}"></div></div>
   <div class="field" ${kdraft.supplierId?'':'hidden'} id="kpaid-f"><label for="kpaid">${tr('المبلغ المدفوع للمورّد الآن','Montant payé au fournisseur')}</label><input id="kpaid" inputmode="decimal" dir="ltr" value="${esc(kdraft.paid||'')}" placeholder="0"><div class="quickpay" style="margin-top:6px"><button data-act="kpaid-full">${tr('مدفوع كاملاً','Payé en totalité')}</button><button data-act="kpaid-zero">${tr('بالدين','À crédit')}</button></div></div>
-  <p class="note">${tr('كل حرفي عندو سعرو الخاص يبقى كيما هو. هذا يبدّل غير السعر العادي اللي ياخذوه الحرفيين اللي ما عندهمش سعر خاص.','Les artisans à prix spécial gardent le leur ; ceci change seulement le prix par défaut.')}</p>
-  <div class="totals"><div class="trow big"><span>${tr('التكلفة','Coût')}</span><span id="kt2"></span></div><div class="trow"><span>${tr('الربح في كل م²','Marge par m²')}</span><b id="km"></b></div><div class="note" id="kpn"></div></div>
+  <div class="totals"><div class="trow big"><span>${tr('التكلفة','Coût')}</span><span id="kt2"></span></div></div>
   <div class="actions"><button class="btn line" data-act="cancel-form">${tr('إلغاء','Annuler')}</button><button class="btn" data-act="save-in">${tr('حفظ السلعة','Enregistrer l’entrée')}</button></div></div>`;
 }
 function updKin(){
   const c=kinCalc();$('#ka').innerHTML=M2(c.area);
   {const mm=num(kdraft.mm)||mmOf(kdraft.typeId),k=$('#kk');if(k)k.innerHTML=mm>0&&c.area>0?tr('الوزن ','Poids ')+'<b>'+KG(kgOf(c.area,mm))+'</b>':''}$('#kt2').innerHTML=DA(c.cost);
-  const mg=num(kdraft.sell)-num(kdraft.costM2);$('#km').innerHTML=DA(mg);$('#km').className=mg<0?'amt neg':'amt pos';
-  const t=types().find(x=>x.id===kdraft.typeId);
-  $('#kpn').textContent=t&&num(kdraft.sell)!==num(t.price)?tr(`سيتغير سعر البيع من ${grpTxt(t.price)} إلى ${grpTxt(num(kdraft.sell))} دج في الفواتير الجديدة.`,`Le prix de vente passera de ${grpTxt(t.price)} à ${grpTxt(num(kdraft.sell))} DA pour les nouvelles ventes.`):tr('سعر البيع لا يتغير.','Le prix de vente ne change pas.');
 }
 function kadjFormHTML(){
   const e=S.sk[adraft.typeId]||{bal:0};
@@ -1885,6 +1879,24 @@ function statTable(){
       foot:[tr('المجموع','Total'),int(t.n),money(t.s),money(t.r),money(t.p),money(t.b)]}}
   return{head:[],rows:[],foot:[]};
 }
+function statsTopHTML(){
+  const td=today(),mo=td.slice(0,7);let sT=0,pT=0,sM=0,pM=0;
+  for(const b of Object.values(S.bons)){if(b.kind==='opening')continue;const inM=b.date&&b.date.slice(0,7)===mo;if(b.date===td)sT+=num(b.total);if(inM)sM+=num(b.total);if(b.walkin){if(b.date===td)pT+=num(b.total);if(inM)pM+=num(b.total)}}
+  for(const p of Object.values(S.pays)){if(p.date===td)pT+=num(p.amount);if(p.date&&p.date.slice(0,7)===mo)pM+=num(p.amount)}
+  const f=stf.from||'0000-01-01',t=stf.to||'9999-12-31',by={};
+  for(const b of Object.values(S.bons)){if(b.kind==='opening'||b.kind==='return'||!b.date||b.date<f||b.date>t)continue;
+    for(const l of b.lines||[]){if(l.lk==='art')continue;const k=l.typeId||l.type;const x=by[k]||(by[k]={name:(types().find(y=>y.id===l.typeId)||{}).name||l.type||'?',a:0,v:0,q:0});x.a+=num(l.area);x.v+=num(l.amount);x.q+=num(l.qty)}}
+  const top=Object.values(by).sort((a,b)=>b.v-a.v||b.a-a.a).slice(0,5),mx=Math.max(1,...top.map(x=>x.v));
+  return `<div class="tiles">
+    <div class="tile"><span class="lbl">${tr('مبيعات اليوم','Ventes du jour')}</span><span class="v">${DA(sT)}</span></div>
+    <div class="tile"><span class="lbl">${tr('مداخيل اليوم','Encaissé aujourd’hui')}</span><span class="v ok">${DA(pT)}</span></div>
+    <div class="tile"><span class="lbl">${tr('مبيعات الشهر','Ventes du mois')}</span><span class="v">${DA(sM)}</span></div>
+    <div class="tile"><span class="lbl">${tr('مداخيل الشهر','Encaissé ce mois')}</span><span class="v ok">${DA(pM)}</span></div>
+  </div>
+  <h3>${tr('أفضل 5 أنواع تتباع','Top 5 des types vendus')} <span class="note" style="font-weight:400">(${tr('حسب الفترة المختارة','selon la période')})</span></h3>
+  ${top.length?`<div class="card pad stack" style="gap:12px">${top.map((x,i)=>`<div style="display:grid;gap:5px"><div class="rowflex between"><b><bdi dir="ltr">${i+1}.</bdi> ${esc(x.name)}</b><span>${DA(x.v)}</span></div><div class="note">${M2(x.a)} · <bdi dir="ltr">${grp(x.q)}</bdi> ${tr('قطعة','pièces')}</div><div class="bar"><i style="width:${(x.v/mx*100).toFixed(0)}%"></i></div></div>`).join('')}</div>`
+  :`<div class="empty"><p>${tr('ما كاين حتى بيع زجاج في هذي الفترة.','Aucune vente de verre sur cette période.')}</p></div>`}`;
+}
 function statsHTML(){
   stfInit();const T=statTable();
   const tab=(k,l)=>`<button data-act="stf-tab" data-v="${k}" class="${stf.tab===k?'on':''}">${l}</button>`;
@@ -1897,6 +1909,7 @@ function statsHTML(){
     <div class="grid2"><div class="field"><label for="stf-f">${tr('من','Du')}</label><input id="stf-f" type="date" value="${esc(stf.from)}"></div><div class="field"><label for="stf-t">${tr('إلى','Au')}</label><input id="stf-t" type="date" value="${esc(stf.to)}"></div></div>
     <div class="chips">${pre('today',tr('اليوم','Aujourd’hui'))}${pre('month',tr('هذا الشهر','Ce mois'))}${pre('prev',tr('الشهر الماضي','Mois dernier'))}${pre('year',tr('هذا العام','Cette année'))}${pre('all',tr('الكل','Tout'))}</div>
   </div>
+  ${statsTopHTML()}
   <div class="chips">${tab('sale',tr('المبيعات','Ventes'))}${tab('ret',tr('مرتجعات البيع','Retours de vente'))}${tab('buy',tr('شراء الزجاج','Achats verre'))}${tab('abuy',tr('شراء السلع','Achats articles'))}${tab('adj',tr('تعديل الجرد','Ajustements'))}${tab('pay',tr('الدفعات','Encaissements'))}${tab('exp',tr('المصاريف','Charges'))}${tab('cli',tr('حسب الحرفي','Par client'))}</div>
   ${noMode?'':`<div class="seg"><button data-act="stf-mode" data-v="sum" class="${stf.mode==='sum'?'on':''}">${tr('مجمّع','Regroupé')}</button><button data-act="stf-mode" data-v="det" class="${stf.mode==='det'?'on':''}">${tr('بالتفصيل','Détaillé')}</button></div>`}
   ${T.rows.length?`<div class="scroll card" style="padding:0"><table class="tbl stat"><thead><tr>${T.head.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${T.rows.map(r=>`<tr>${r.map(c=>`<td>${cell(c)}</td>`).join('')}</tr>`).join('')}</tbody><tfoot><tr>${T.foot.map(c=>`<td>${cell(c)}</td>`).join('')}</tr></tfoot></table></div>
@@ -2225,61 +2238,160 @@ function reportsHTML(){
   </div>`;
 }
 
-/* ---- cutting plan (guillotine) ---- */
+/* ---- cutting plan (guillotine) — like CutList Optimizer ---- */
 let cutSrc=null;
-function packSheets(pieces,SW,SH){
-  const sheets=[],over=[];const ps=pieces.slice().sort((a,b)=>b.w*b.h-a.w*a.h);
-  const orients=(p,f)=>[[p.w,p.h],[p.h,p.w]].filter(([w,h])=>w<=f.w+1e-9&&h<=f.h+1e-9);
-  const tryPlace=(s,p)=>{let best=null;s.free.forEach((f,i)=>{for(const [w,h] of orients(p,f)){const waste=f.w*f.h-w*h;if(!best||waste<best.waste)best={i,w,h,waste}}});
-    if(!best)return false;const f=s.free.splice(best.i,1)[0];s.used.push({x:f.x,y:f.y,w:best.w,h:best.h});
-    const wr=f.w-best.w,hr=f.h-best.h;
-    if(wr<hr){if(wr>0)s.free.push({x:f.x+best.w,y:f.y,w:wr,h:best.h});if(hr>0)s.free.push({x:f.x,y:f.y+best.h,w:f.w,h:hr})}
-    else{if(wr>0)s.free.push({x:f.x+best.w,y:f.y,w:wr,h:f.h});if(hr>0)s.free.push({x:f.x,y:f.y+best.h,w:best.w,h:hr})}
-    return true};
-  for(const p of ps){if(!orients(p,{w:SW,h:SH}).length){over.push(p);continue}
-    if(!sheets.some(s=>tryPlace(s,p))){const s={free:[{x:0,y:0,w:SW,h:SH}],used:[]};sheets.push(s);tryPlace(s,p)}}
+const CUT_KEY='gg-cut';
+const cf1=v=>{const r=Math.round(num(v)*10)/10;return String(r)};
+const ccm=v=>`<bdi dir="ltr">${cf1(v)}</bdi>`;
+/* one packing pass. pieces: [{w,h,rot,lab,k}] (one per piece), stocks: [{w,h,qty}] (qty 0 = no limit) */
+function gPackOnce(pieces,stocks,kerf,fit,split){
+  const E=1e-6,sheets=[],over=[],left=stocks.map(s=>num(s.qty)>0?num(s.qty):Infinity);
+  const orients=p=>p.rot&&Math.abs(p.w-p.h)>E?[[p.w,p.h],[p.h,p.w]]:[[p.w,p.h]];
+  const fits=(w,h,f)=>w<=f.w+E&&h<=f.h+E;
+  const score=(w,h,f)=>fit==='bssf'?Math.min(f.w-w,f.h-h):fit==='blsf'?Math.max(f.w-w,f.h-h):f.w*f.h-w*h;
+  const best=(s,p)=>{let b=null;s.free.forEach((f,i)=>{for(const [w,h] of orients(p)){if(!fits(w,h,f))continue;const sc=score(w,h,f);if(!b||sc<b.sc-E)b={i,w,h,sc}}});return b};
+  const place=(s,p,b)=>{const f=s.free.splice(b.i,1)[0],w=b.w,h=b.h,rw=f.w-w,bh=f.h-h,k=kerf,n0=s.cuts.length;
+    s.used.push({x:f.x,y:f.y,w,h,lab:p.lab,turned:w!==p.w||h!==p.h});
+    const add=r=>{if(r.w>E&&r.h>E)s.free.push(r)};
+    /* A: cut along the width first (x = w), then the strip (y = h). B: the opposite. */
+    let useA;
+    if(split==='A')useA=true;else if(split==='B')useA=false;
+    else{const aMax=Math.max((rw-k)*f.h,w*(bh-k)),bMax=Math.max(f.w*(bh-k),(rw-k)*h);useA=split==='max'?aMax>=bMax:aMax<bMax}
+    const cut=(panel,axis,at,len,res,sur)=>s.cuts.push({panel,axis,at,len,res,sur});
+    if(useA){
+      if(rw>E){cut({w:f.w,h:f.h},'x',w,f.h,{w,h:f.h},rw-k>E?{w:rw-k,h:f.h}:null);add({x:f.x+w+k,y:f.y,w:rw-k,h:f.h})}
+      if(bh>E){cut({w,h:f.h},'y',h,w,{w,h},bh-k>E?{w,h:bh-k}:null);add({x:f.x,y:f.y+h+k,w,h:bh-k})}
+    }else{
+      if(bh>E){cut({w:f.w,h:f.h},'y',h,f.w,{w:f.w,h},bh-k>E?{w:f.w,h:bh-k}:null);add({x:f.x,y:f.y+h+k,w:f.w,h:bh-k})}
+      if(rw>E){cut({w:f.w,h},'x',w,h,{w,h},rw-k>E?{w:rw-k,h}:null);add({x:f.x+w+k,y:f.y,w:rw-k,h})}
+    }
+    if(s.cuts.length>n0)s.cuts[s.cuts.length-1].piece=true;
+  };
+  const newSheet=si=>({si,SW:num(stocks[si].w),SH:num(stocks[si].h),free:[{x:0,y:0,w:num(stocks[si].w),h:num(stocks[si].h)}],used:[],cuts:[]});
+  pieces.forEach((p,pi)=>{
+    for(const s of sheets){const b=best(s,p);if(b){place(s,p,b);return}}
+    /* new sheet: among the stock sizes still available that can hold this piece, take the one the rest fills best */
+    const cand=stocks.map((st,si)=>si).filter(si=>left[si]>0&&orients(p).some(([w,h])=>fits(w,h,{w:num(stocks[si].w),h:num(stocks[si].h)})));
+    if(!cand.length){over.push(p);return}
+    let pick=cand[0];
+    if(cand.length>1){let bestFill=-1;for(const si of cand){const t=newSheet(si);let a=0;for(const q of pieces.slice(pi)){const b=best(t,q);if(b){place(t,q,b);a+=b.w*b.h}}const fill=a/(t.SW*t.SH);if(fill>bestFill+1e-9){bestFill=fill;pick=si}}}
+    left[pick]--;const s=newSheet(pick);sheets.push(s);place(s,p,best(s,p));
+  });
   return{sheets,over};
 }
+const lexLess=(a,b)=>{for(let i=0;i<a.length;i++){if(a[i]<b[i]-1e-6)return true;if(a[i]>b[i]+1e-6)return false}return false};
+function gPack(pieces,stocks,kerf,pri){
+  const sorts={area:(a,b)=>b.w*b.h-a.w*a.h,long:(a,b)=>Math.max(b.w,b.h)-Math.max(a.w,a.h)||b.w*b.h-a.w*a.h,short:(a,b)=>Math.min(b.w,b.h)-Math.min(a.w,a.h)||b.w*b.h-a.w*a.h,
+    w:(a,b)=>b.w-a.w||b.h-a.h,h:(a,b)=>b.h-a.h||b.w-a.w,per:(a,b)=>(b.w+b.h)-(a.w+a.h)};
+  let bestR=null,bestK=null;
+  for(const so of Object.keys(sorts))for(const fit of ['baf','bssf','blsf'])for(const sp of ['max','min','A','B']){
+    const r=gPackOnce(pieces.slice().sort(sorts[so]),stocks,kerf,fit,sp);
+    const area=r.sheets.reduce((a,s)=>a+s.SW*s.SH,0),cuts=r.sheets.reduce((a,s)=>a+s.cuts.length,0),len=r.sheets.reduce((a,s)=>a+s.cuts.reduce((b,c)=>b+c.len,0),0),
+      big=r.sheets.reduce((a,s)=>a+s.free.reduce((m,f)=>Math.max(m,f.w*f.h),0),0),frag=r.sheets.reduce((a,s)=>a+s.free.length,0);
+    /* least waste: fewest/smallest sheets, then the fewest offcut pieces (waste kept in big reusable pieces), then fewest cuts */
+    const key=pri==='cuts'?[r.over.length,area,cuts,len,frag]:[r.over.length,area,frag,cuts,len,-big];
+    if(!bestK||lexLess(key,bestK)){bestK=key;bestR=r}
+  }
+  return bestR;
+}
+function cutPieces(rows){const ps=[];rows.forEach((p,k)=>{const w=num(p.w),h=num(p.h),q=Math.max(0,Math.round(num(p.qty)));if(w>0&&h>0)for(let i=0;i<q&&ps.length<1000;i++)ps.push({w,h,rot:p.rot!==false,lab:String(p.lab||'').trim(),k})});return ps}
+function cutStats(r){const sh=r.sheets;const tot=sh.reduce((a,s)=>a+s.SW*s.SH,0),used=sh.reduce((a,s)=>a+s.used.reduce((b,u)=>b+u.w*u.h,0),0);
+  return{tot,used,waste:tot-used,cuts:sh.reduce((a,s)=>a+s.cuts.length,0),len:sh.reduce((a,s)=>a+s.cuts.reduce((b,c)=>b+c.len,0),0),pieces:sh.reduce((a,s)=>a+s.used.length,0)}}
+const cm2=a=>`<bdi dir="ltr">${(a/10000).toLocaleString('en-US',{maximumFractionDigits:2,minimumFractionDigits:2})}</bdi> ${tr('م²','m²')}`;
+const cpc=(a,b)=>`<bdi dir="ltr">${b>0?Math.round(a/b*100):0}%</bdi>`;
+function sheetSVG(s,i){
+  const SW=s.SW,SH=s.SH,M=Math.max(SW,SH),fs=Math.max(6,M/34),pad=fs*2.8;
+  const lbl=(u)=>{const out=[];const fw=Math.min(fs,u.w/4.2,u.h/1.6),fh=Math.min(fs,u.h/4.2,u.w/1.6);
+    if(fw>=4.5)out.push(`<text x="${u.x+u.w/2}" y="${u.y+fw*1.05}" text-anchor="middle" dominant-baseline="hanging" font-size="${fw.toFixed(1)}" fill="var(--ink)" direction="ltr">${cf1(u.w)}</text>`);
+    if(fh>=4.5)out.push(`<text transform="translate(${u.x+fh*1.05} ${u.y+u.h/2}) rotate(-90)" text-anchor="middle" dominant-baseline="hanging" font-size="${fh.toFixed(1)}" fill="var(--ink)" direction="ltr">${cf1(u.h)}</text>`);
+    if(u.lab){const fl=Math.min(fs*.95,u.w/Math.max(4,u.lab.length*0.62),u.h/3);if(fl>=4.5)out.push(`<text x="${u.x+u.w/2}" y="${u.y+u.h/2}" text-anchor="middle" dominant-baseline="central" font-size="${fl.toFixed(1)}" font-weight="700" fill="var(--accent)">${esc(u.lab)}</text>`)}
+    return out.join('')};
+  const off=s.free.map(f=>{const ff=Math.min(fs*.85,f.w/4.5,f.h/2.2);return `<rect x="${f.x}" y="${f.y}" width="${f.w}" height="${f.h}" fill="url(#hatch${i})" stroke="var(--faint)" stroke-width="${(M/600).toFixed(2)}"/>${ff>=4.5?`<text x="${f.x+f.w/2}" y="${f.y+f.h/2}" text-anchor="middle" dominant-baseline="central" font-size="${ff.toFixed(1)}" fill="var(--faint)" direction="ltr">${cf1(f.w)}×${cf1(f.h)}</text>`:''}`}).join('');
+  const sw=(M/320).toFixed(2);
+  return `<svg viewBox="${-pad} ${-pad} ${SW+pad*2} ${SH+pad*2}" role="img" aria-label="${tr('مخطط اللوح','Plan de la plaque')} ${i+1}">
+  <defs><pattern id="hatch${i}" patternUnits="userSpaceOnUse" width="${(M/60).toFixed(1)}" height="${(M/60).toFixed(1)}" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="${(M/60).toFixed(1)}" stroke="var(--faint)" stroke-width="${(M/700).toFixed(2)}" opacity=".55"/></pattern></defs>
+  <rect x="0" y="0" width="${SW}" height="${SH}" fill="var(--sunk)" stroke="var(--ink)" stroke-width="${sw}"/>
+  ${off}
+  ${s.used.map(u=>`<rect x="${u.x}" y="${u.y}" width="${u.w}" height="${u.h}" fill="var(--edge)" stroke="var(--accent)" stroke-width="${sw}"/>${lbl(u)}`).join('')}
+  <line x1="0" y1="${-pad*.3}" x2="${SW}" y2="${-pad*.3}" stroke="var(--debt)" stroke-width="${sw}"/><text x="${SW/2}" y="${-pad*.45}" text-anchor="middle" font-size="${fs.toFixed(1)}" fill="var(--debt)" direction="ltr">${cf1(SW)}</text>
+  <line x1="${SW+pad*.3}" y1="0" x2="${SW+pad*.3}" y2="${SH}" stroke="var(--debt)" stroke-width="${sw}"/><text transform="translate(${SW+pad*.45} ${SH/2}) rotate(-90)" text-anchor="middle" dominant-baseline="hanging" font-size="${fs.toFixed(1)}" fill="var(--debt)" direction="ltr">${cf1(SH)}</text>
+  </svg>`;
+}
+function cutResultHTML(r,kerf,pri){
+  const st=cutStats(r),row=(a,b)=>`<div class="trow"><span>${a}</span><b>${b}</b></div>`;
+  const used={};r.sheets.forEach(s=>{const k=cf1(s.SW)+'×'+cf1(s.SH);used[k]=(used[k]||0)+1});
+  return `${r.over.length?`<div class="banner">${ic('alert')}<span>${tr('قطع أكبر من كل الألواح، ما تحسبتش','Pièces plus grandes que les plaques, ignorées')}: ${[...new Set(r.over.map(p=>cf1(p.w)+'×'+cf1(p.h)))].map(x=>`<bdi dir="ltr">${x}</bdi>`).join('، ')}</span></div>`:''}
+  ${r.sheets.length?`<div class="totals"><div class="trow big"><span>${tr('الإحصائيات العامة','Statistiques globales')}</span><span></span></div>
+    ${row(tr('الألواح المستعملة','Plaques utilisées'),Object.entries(used).map(([k,n])=>`<bdi dir="ltr">${k} ×${n}</bdi>`).join('، '))}
+    ${row(tr('المساحة المستعملة','Surface utilisée'),`${cm2(st.used)} · ${cpc(st.used,st.tot)}`)}
+    ${row(tr('الفضلات','Chutes'),`${cm2(st.waste)} · ${cpc(st.waste,st.tot)}`)}
+    ${row(tr('عدد القطع','Pièces'),`<bdi dir="ltr">${st.pieces}</bdi>`)}
+    ${row(tr('عدد القصات','Nb de coupes'),`<bdi dir="ltr">${st.cuts}</bdi>`)}
+    ${row(tr('الطول الكلي للقص','Longueur de coupe totale'),`${ccm(st.len)} ${tr('سم','cm')}`)}
+    ${row(tr('سمك القص','Épaisseur de coupe'),`<bdi dir="ltr">${cf1(kerf*10)}</bdi> ${tr('ملم','mm')}`)}
+    ${row(tr('الأولوية','Priorité'),pri==='cuts'?tr('أقل قصات','Moins de coupes'):tr('أقل فضلات','Moins de chutes'))}</div>`:''}
+  ${r.sheets.map((s,i)=>{const a=s.SW*s.SH,u=s.used.reduce((b,x)=>b+x.w*x.h,0),len=s.cuts.reduce((b,c)=>b+c.len,0),pct=u/a*100;
+    return `<div class="card pad stack" style="gap:10px">
+    <div class="rowflex between"><b>${tr('لوح','Plaque')} <bdi dir="ltr">${i+1}</bdi> · <bdi dir="ltr">${cf1(s.SW)}×${cf1(s.SH)}</bdi></b><span class="chip ${pct>=75?'ok':pct>=50?'warn':'bad'}">${tr('الاستغلال','Utilisation')} <bdi dir="ltr">${pct.toFixed(0)}%</bdi></span></div>
+    <div class="cutbox">${sheetSVG(s,i)}</div>
+    <details><summary class="note" style="cursor:pointer">${tr('إحصائيات اللوح','Statistiques de la plaque')}</summary><div class="totals" style="margin-top:8px">
+      ${row(tr('المساحة المستعملة','Surface utilisée'),`${cm2(u)} · ${cpc(u,a)}`)}${row(tr('الفضلات','Chutes'),`${cm2(a-u)} · ${cpc(a-u,a)}`)}
+      ${row(tr('القصات','Coupes'),`<bdi dir="ltr">${s.cuts.length}</bdi>`)}${row(tr('طول القص','Longueur de coupe'),`${ccm(len)} ${tr('سم','cm')}`)}
+      ${row(tr('القطع','Pièces'),`<bdi dir="ltr">${s.used.length}</bdi>`)}${row(tr('قطع الفضلات','Chutes'),`<bdi dir="ltr">${s.free.length}</bdi>`)}</div></details>
+    <details ${r.sheets.length===1?'open':''}><summary class="note" style="cursor:pointer">${tr('القصات بالترتيب','Coupes dans l’ordre')} (<bdi dir="ltr">${s.cuts.length}</bdi>)</summary>
+      <div class="scroll" style="margin-top:8px"><table class="tbl doc"><thead><tr><th>#</th><th>${tr('اللوح','Panneau')}</th><th>${tr('القصة','Coupe')}</th><th>${tr('النتيجة','Résultat')}</th></tr></thead><tbody>
+      ${s.cuts.map((c,j)=>`<tr><td class="n"><bdi dir="ltr">${j+1}</bdi></td><td><bdi dir="ltr">${cf1(c.panel.w)}×${cf1(c.panel.h)}</bdi></td><td><bdi dir="ltr">${c.axis}=${cf1(c.at)}</bdi></td><td class="w" style="min-width:0"><bdi dir="ltr">${c.piece?`<b>${cf1(c.res.w)}×${cf1(c.res.h)}</b>`:`${cf1(c.res.w)}×${cf1(c.res.h)}`}</bdi>${c.sur?`<br><span class="note" style="font-size:.78rem">${tr('يبقى','reste')} <bdi dir="ltr">${cf1(c.sur.w)}×${cf1(c.sur.h)}</bdi></span>`:''}</td></tr>`).join('')}
+      </tbody></table></div>
+      <p class="note" style="margin:6px 0 0">${tr('x = قصة بالعرض من اليسار، y = قصة بالطول من الفوق. القطعة الجاهزة بالخط العريض.','x = coupe depuis la gauche, y = depuis le haut. Pièce finie en gras.')}</p></details>
+    </div>`}).join('')}`;
+}
+function cutSave(){try{const c=cutSrc;if(c&&c.k==='free')localStorage.setItem(CUT_KEY,JSON.stringify({pieces:c.pieces,stocks:c.stocks,kerf:c.kerf,pri:c.pri}))}catch(_){}}
+function cutLoad(){let d=null;try{d=JSON.parse(localStorage.getItem(CUT_KEY)||'null')}catch(_){}
+  const t=activeTypes()[0],e=t&&S.sk[t.id],sw=e&&e.last&&num(e.last.sw)>0?num(e.last.sw):SHEET0.w,sh=e&&e.last&&num(e.last.sh)>0?num(e.last.sh):SHEET0.h;
+  return{k:'free',pieces:d&&d.pieces&&d.pieces.length?d.pieces:[{w:'',h:'',qty:'1',lab:'',rot:true}],stocks:d&&d.stocks&&d.stocks.length?d.stocks:[{w:String(sw),h:String(sh),qty:''}],kerf:d?String(d.kerf||'0'):'0',pri:d&&d.pri==='cuts'?'cuts':'waste',show:false}}
 function cutHTML(){
   if(cutSrc&&cutSrc.k==='free')return cutFreeHTML();
   const src=cutSrc&&(cutSrc.k==='quote'?S.quotes[cutSrc.id]:S.bons[cutSrc.id]);
   const back=`<button class="back" data-act="${cutSrc&&cutSrc.k==='quote'?'open-quote':'open-bon'}" data-id="${cutSrc?cutSrc.id:''}">${ic('back','flip')}${tr('رجوع','Retour')}</button>`;
   if(!src)return `${back}<div class="empty"><p>${tr('المستند غير موجود.','Document introuvable.')}</p></div>`;
-  const groups={};for(const l of src.lines||[]){if(l.lk==='art')continue;const g=groups[l.typeId]||(groups[l.typeId]={name:l.type,pieces:[]});for(let i=0;i<num(l.qty);i++)g.pieces.push({w:num(l.w),h:num(l.h)})}
+  const groups={};for(const l of src.lines||[]){if(l.lk==='art')continue;const g=groups[l.typeId]||(groups[l.typeId]={name:l.type,rows:[]});g.rows.push({w:num(l.w),h:num(l.h),qty:num(l.qty),lab:String(l.use||'').trim(),rot:true})}
   return `<div class="stack">${back}
   <h2>${tr('مخطط القص','Plan de découpe')}</h2>
-  <p class="note">${tr('اقتراح لترتيب القطع على الألواح بقصّات مستقيمة من طرف إلى طرف. مقاس اللوح من آخر إدخال لكل نوع، وإلا 321×225. سُمك خط القص غير محسوب.','Placement proposé en coupes guillotine. Format : dernier achat du type, sinon 321×225. Épaisseur de coupe non comptée.')}</p>
-  ${cutCards(groups)}
+  <p class="note">${tr('مقاس اللوح من آخر إدخال لكل نوع، وإلا 321×225. تقدر تبدّل المقاسات والخيارات من «فتح في أداة القص».','Format : dernier achat du type, sinon 321×225. Modifiez tout via « Ouvrir dans l’outil ».')}</p>
+  ${Object.entries(groups).map(([tid,g])=>{const e=S.sk[tid],SW=e&&e.last&&num(e.last.sw)>0?num(e.last.sw):SHEET0.w,SH=e&&e.last&&num(e.last.sh)>0?num(e.last.sh):SHEET0.h;
+    const r=gPack(cutPieces(g.rows),[{w:SW,h:SH,qty:0}],0,'waste');
+    return `<div class="stack" style="gap:10px"><div class="rowflex between"><h3 style="margin:0">${esc(g.name)}</h3><button class="btn plain" data-act="cut-open" data-tid="${esc(tid)}">${ic('edit')}${tr('فتح في أداة القص','Ouvrir dans l’outil')}</button></div>${cutResultHTML(r,0,'waste')}</div>`}).join('')}
   </div>`;
 }
-
-function cutCards(groups){return Object.entries(groups).map(([tid,g])=>{const e=S.sk[tid];const SW=g.SW||(e&&e.last?num(e.last.sw):SHEET0.w),SH=g.SH||(e&&e.last?num(e.last.sh):SHEET0.h);const r=packSheets(g.pieces,SW,SH);
-    return `<div class="card pad stack" style="gap:10px"><div class="rowflex between"><b>${esc(g.name)}</b><span class="note">${tr('اللوح','Plaque')} <bdi dir="ltr">${SW}×${SH}</bdi> · <bdi dir="ltr">${r.sheets.length}</bdi> ${tr('لوح','plaque(s)')}</span></div>
-    ${r.over.length?`<div class="banner">${ic('alert')}<span>${tr('قطع أكبر من اللوح','Pièces plus grandes que la plaque')}: ${r.over.map(p=>`<bdi dir="ltr">${p.w}×${p.h}</bdi>`).join('، ')}</span></div>`:''}
-    ${r.sheets.map((s,i)=>{const used=s.used.reduce((a,u)=>a+u.w*u.h,0)/(SW*SH)*100;const off=s.free.filter(f=>Math.min(f.w,f.h)>=20).sort((a,b)=>b.w*b.h-a.w*a.h).slice(0,4);
-      return `<div><div class="rowflex between"><span>${tr('لوح','Plaque')} <bdi dir="ltr">${i+1}</bdi></span><span class="chip ${used>=75?'ok':used>=50?'warn':'bad'}">${tr('الاستغلال','Utilisation')} <bdi dir="ltr">${used.toFixed(0)}%</bdi></span></div>
-      <div class="cutbox"><svg viewBox="-3 -3 ${SW+6} ${SH+6}" role="img" aria-label="${tr('مخطط اللوح','Plan de la plaque')} ${i+1}"><rect x="0" y="0" width="${SW}" height="${SH}" fill="var(--sunk)" stroke="var(--faint)" stroke-width="1.5"/>
-      ${s.used.map(u=>`<rect x="${u.x}" y="${u.y}" width="${u.w}" height="${u.h}" fill="var(--edge)" stroke="var(--accent)" stroke-width="1.4"/>${u.w>=36&&u.h>=16?`<text x="${u.x+u.w/2}" y="${u.y+u.h/2}" text-anchor="middle" dominant-baseline="central" font-size="${Math.max(7,Math.min(16,u.h/2.6,u.w/5.5)).toFixed(1)}" font-weight="600" fill="var(--ink)" direction="ltr">${u.w}×${u.h}</text>`:''}`).join('')}</svg></div>
-      ${off.length?`<div class="note">${tr('بقايا قابلة للاستعمال','Chutes réutilisables')}: ${off.map(f=>`<bdi dir="ltr">${Math.round(f.w)}×${Math.round(f.h)}</bdi>`).join('، ')}</div>`:''}</div>`}).join('')}</div>`}).join('')}
-function cutFreeHTML(){const c=cutSrc,tys=types().filter(t=>!t.archived);let res='';
-  if(c.show){const ps=[];for(const p of c.pieces){const w=num(p.w),h=num(p.h),q=Math.max(0,Math.round(num(p.qty)));if(w>0&&h>0)for(let i=0;i<q&&i<500;i++)ps.push({w,h})}
-    const ty=tys.find(x=>x.id===c.tid);
-    res=ps.length&&num(c.SW)>0&&num(c.SH)>0?cutCards({free:{name:ty?ty.name:tr('القطع','Pièces'),pieces:ps,SW:num(c.SW),SH:num(c.SH)}})
-      :`<div class="banner">${ic('alert')}<span>${tr('اكتب مقاس اللوح ومقاس قطعة وحدة على الأقل.','Saisissez le format de plaque et au moins une pièce.')}</span></div>`}
+function cutFreeHTML(){const c=cutSrc,tys=activeTypes();let res='';
+  if(c.show){const ps=cutPieces(c.pieces),stocks=c.stocks.filter(s=>num(s.w)>0&&num(s.h)>0).map(s=>({w:num(s.w),h:num(s.h),qty:Math.max(0,Math.round(num(s.qty)))})),kerf=Math.max(0,num(c.kerf))/10;
+    res=!ps.length||!stocks.length?`<div class="banner">${ic('alert')}<span>${tr('اكتب مقاس لوح واحد ومقاس قطعة وحدة على الأقل.','Saisissez au moins une plaque et une pièce.')}</span></div>`:cutResultHTML(gPack(ps,stocks,kerf,c.pri),kerf,c.pri)}
+  const g='display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 52px minmax(0,1fr) 36px 36px;gap:5px;align-items:center';
+  const gs='display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 64px 36px;gap:5px;align-items:center';
+  const hd=t=>`<span class="note" style="font-size:.74rem">${t}</span>`;
+  const inp=(attr,v,ph,mode)=>`<input ${attr} inputmode="${mode||'decimal'}" dir="ltr" value="${esc(v)}" placeholder="${ph}" style="padding:8px 7px;min-width:0">`;
   return `<div class="stack">${backBtn('nav-home',tr('الرئيسية','Accueil'))}
   <h2>${tr('مخطط القص','Plan de découpe')}</h2>
-  <p class="note">${tr('اكتب مقاس اللوح والقطع بالسنتيم، ويعطيك كيفاش ترتّبهم على الألواح بقصّات مستقيمة.','Saisissez la plaque et les pièces en cm : le plan les range en coupes droites.')}</p>
-  <div class="card pad stack" style="gap:10px"><b>${tr('اللوح','Plaque')}</b>
-    ${tys.length?`<div class="field"><label for="cu-ty">${tr('النوع (اختياري، ياخذ مقاس آخر لوح دخل)','Type (facultatif, reprend le dernier format acheté)')}</label><select id="cu-ty"><option value="">${tr('مقاس يدوي','Format manuel')}</option>${tys.map(x=>`<option value="${esc(x.id)}" ${c.tid===x.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select></div>`:''}
-    <div class="grid2"><div class="field"><label for="cu-sw">${tr('العرض (سم)','Largeur (cm)')}</label><input id="cu-sw" inputmode="decimal" dir="ltr" value="${esc(c.SW)}"></div><div class="field"><label for="cu-sh">${tr('الطول (سم)','Hauteur (cm)')}</label><input id="cu-sh" inputmode="decimal" dir="ltr" value="${esc(c.SH)}"></div></div>
-  </div>
-  <div class="card pad stack" style="gap:10px"><b>${tr('القطع','Pièces')}</b>
-    ${c.pieces.map((p,i)=>`<div class="rowflex" style="gap:8px;align-items:flex-end">
-      <div class="field" style="flex:1;min-width:0"><label for="cu-w${i}">${tr('العرض','Larg.')}</label><input id="cu-w${i}" data-cu="w" data-i="${i}" inputmode="decimal" dir="ltr" value="${esc(p.w)}" placeholder="50"></div>
-      <div class="field" style="flex:1;min-width:0"><label for="cu-h${i}">${tr('الطول','Haut.')}</label><input id="cu-h${i}" data-cu="h" data-i="${i}" inputmode="decimal" dir="ltr" value="${esc(p.h)}" placeholder="80"></div>
-      <div class="field" style="width:64px"><label for="cu-q${i}">${tr('العدد','Qté')}</label><input id="cu-q${i}" data-cu="qty" data-i="${i}" inputmode="numeric" dir="ltr" value="${esc(p.qty)}"></div>
-      <button class="mini-btn" data-act="cu-del" data-i="${i}" aria-label="${tr('حذف القطعة','Supprimer la pièce')}">${ic('trash')}</button></div>`).join('')}
+  <div class="card pad stack" style="gap:8px"><b>${tr('القطع','Pièces')} <span class="note">(${tr('سم','cm')})</span></b>
+    <div style="${g}">${hd(tr('العرض','Larg.'))}${hd(tr('الطول','Long.'))}${hd(tr('العدد','Qté'))}${hd(tr('الاسم','Étiquette'))}${hd(tr('دوران','Rot.'))}<span></span></div>
+    ${c.pieces.map((p,i)=>`<div style="${g}">${inp(`data-cu="w" data-i="${i}" aria-label="${tr('العرض','Largeur')} ${i+1}"`,p.w,'50')}${inp(`data-cu="h" data-i="${i}" aria-label="${tr('الطول','Longueur')} ${i+1}"`,p.h,'80')}${inp(`data-cu="qty" data-i="${i}" aria-label="${tr('العدد','Quantité')} ${i+1}"`,p.qty,'1','numeric')}
+      <input data-cu="lab" data-i="${i}" value="${esc(p.lab||'')}" placeholder="${tr('اختياري','facult.')}" aria-label="${tr('الاسم','Étiquette')} ${i+1}" style="padding:8px 7px;min-width:0">
+      <button class="mini-btn" data-act="cu-rot" data-i="${i}" aria-pressed="${p.rot!==false}" aria-label="${tr('يقدر يدور','Rotation autorisée')}" style="${p.rot!==false?'color:var(--accent)':'opacity:.45'}">⇄</button>
+      <button class="mini-btn" style="color:var(--debt)" data-act="cu-del" data-i="${i}" aria-label="${tr('حذف القطعة','Supprimer la pièce')}">${ic('trash')}</button></div>`).join('')}
     <button class="btn ghost" data-act="cu-add">${ic('plus')}${tr('زيد قطعة','Ajouter une pièce')}</button>
+    <p class="note" style="margin:0">${tr('⇄ مفعّل = القطعة تقدر تدور باش تخرج أحسن. طفيه للزجاج المرسوم اللي عندو اتجاه.','⇄ actif = la pièce peut pivoter. Désactivez pour le verre à motif orienté.')}</p>
+  </div>
+  <div class="card pad stack" style="gap:8px"><b>${tr('ألواح المخزون','Plaques en stock')} <span class="note">(${tr('سم','cm')})</span></b>
+    <div style="${gs}">${hd(tr('العرض','Larg.'))}${hd(tr('الطول','Long.'))}${hd(tr('العدد','Qté'))}<span></span></div>
+    ${c.stocks.map((s,i)=>`<div style="${gs}">${inp(`data-cs="w" data-i="${i}" aria-label="${tr('عرض اللوح','Largeur plaque')} ${i+1}"`,s.w,'321')}${inp(`data-cs="h" data-i="${i}" aria-label="${tr('طول اللوح','Longueur plaque')} ${i+1}"`,s.h,'225')}${inp(`data-cs="qty" data-i="${i}" aria-label="${tr('عدد الألواح','Nombre')} ${i+1}"`,s.qty,'∞','numeric')}
+      <button class="mini-btn" style="color:var(--debt)" data-act="cu-sdel" data-i="${i}" aria-label="${tr('حذف اللوح','Supprimer la plaque')}">${ic('trash')}</button></div>`).join('')}
+    <div class="grid2"><button class="btn ghost" data-act="cu-sadd">${ic('plus')}${tr('زيد لوح','Ajouter une plaque')}</button>
+    ${tys.length?`<select id="cu-ty" aria-label="${tr('زيد لوح من نوع','Ajouter le format d’un type')}"><option value="">${tr('مقاس نوع من المخزون…','Format d’un type…')}</option>${tys.map(x=>{const e=S.sk[x.id];return `<option value="${esc(x.id)}">${esc(x.name)}${e&&e.last?` · ${cf1(e.last.sw)}×${cf1(e.last.sh)}`:''}</option>`}).join('')}</select>`:''}</div>
+    <p class="note" style="margin:0">${tr('العدد فارغ = ما عندوش حد.','Quantité vide = illimitée.')}</p>
+  </div>
+  <div class="card pad stack" style="gap:10px"><b>${tr('الخيارات','Options')}</b>
+    <div class="grid2"><div class="field"><label for="cu-kerf">${tr('سمك القص (ملم)','Épaisseur de coupe (mm)')}</label><input id="cu-kerf" inputmode="decimal" dir="ltr" value="${esc(c.kerf)}" placeholder="0"></div>
+    <div class="field"><label>${tr('الأولوية','Priorité')}</label><div class="seg"><button data-act="cu-pri" data-v="waste" class="${c.pri!=='cuts'?'on':''}">${tr('أقل فضلات','Moins de chutes')}</button><button data-act="cu-pri" data-v="cuts" class="${c.pri==='cuts'?'on':''}">${tr('أقل قصات','Moins de coupes')}</button></div></div></div>
   </div>
   <button class="btn full" data-act="cu-run">${ic('cut')}${tr('احسب مخطط القص','Calculer le plan')}</button>
   <div id="cu-res" class="stack">${res}</div></div>`;
@@ -2474,7 +2586,7 @@ document.addEventListener('input',e=>{
   if(view.name==='sform'&&sfdraft){const k={sfn:'name',sfp:'phone',sfo:'opening'}[t.id];if(k){sfdraft[k]=t.value;return}}
   if(view.name==='spay'&&spdraft){const k={spa:'amount',spd:'date',spn:'note'}[t.id];if(k){spdraft[k]=t.value;return}}
   if(view.name==='stmt'&&stdraft){if(t.id==='stf')stdraft.from=t.value;if(t.id==='stt')stdraft.to=t.value}
-  if(view.name==='cut'&&cutSrc&&cutSrc.k==='free'){if(t.dataset.cu){const p=cutSrc.pieces[+t.dataset.i];if(p)p[t.dataset.cu]=t.value;return}if(t.id==='cu-sw'){cutSrc.SW=t.value;return}if(t.id==='cu-sh'){cutSrc.SH=t.value;return}}
+  if(view.name==='cut'&&cutSrc&&cutSrc.k==='free'){if(t.dataset.cu){const p=cutSrc.pieces[+t.dataset.i];if(p)p[t.dataset.cu]=t.value;cutSave();return}if(t.dataset.cs){const x=cutSrc.stocks[+t.dataset.i];if(x)x[t.dataset.cs]=t.value;cutSave();return}if(t.id==='cu-kerf'){cutSrc.kerf=t.value;cutSave();return}}
   if(view.name==='shop'){const k={'sh-name':'name','sh-phone':'phone','sh-addr':'address','sh-foot':'footer','sh-rc':'rc','sh-nif':'nif','sh-nis':'nis','sh-ai':'ai','sh-act':'activity','sh-rib':'rib'}[t.id];if(k){shopDraft[k]=t.value;return}}
   if(t.id==='imp-text'&&imp){imp.text=t.value;return}
   if(t.dataset&&t.dataset.ir&&imp&&imp.rows){const r=imp.rows[+t.dataset.i];if(t.dataset.ir==='on')r.on=t.checked;else r[t.dataset.ir]=t.value;
@@ -2508,7 +2620,8 @@ document.addEventListener('change',e=>{
   if(t.id==='sh-logo'&&t.files&&t.files[0]&&shopDraft){const f=t.files[0];t.value='';shrinkImage(f).then(u=>{if(!u)return toast(tr('ما قدرتش نقرا الصورة.','Image illisible.'));shopDraft.logo=u;render()});return}
   if(t.id==='pe-img'&&t.files&&t.files[0]&&pedit){const f=t.files[0];t.value='';shrinkTypeImg(f).then(u=>{if(!u)return toast(tr('ما قدرتش نقرا الصورة.','Image illisible.'));pedit.img=u;render()});return}
   if(t.id==='dbf'||t.id==='dbt'){if(t.value){dbv[t.id==='dbf'?'from':'to']=t.value;render()}return}
-  if(t.id==='cu-ty'&&cutSrc){cutSrc.tid=t.value;const e=S.sk[t.value];if(e&&e.last&&num(e.last.sw)>0){cutSrc.SW=num(e.last.sw);cutSrc.SH=num(e.last.sh)}return render()}
+  if(t.id==='cu-ty'&&cutSrc&&cutSrc.k==='free'){if(!t.value)return;const e=S.sk[t.value];const sw=e&&e.last&&num(e.last.sw)>0?num(e.last.sw):SHEET0.w,sh=e&&e.last&&num(e.last.sh)>0?num(e.last.sh):SHEET0.h;
+    const blank=cutSrc.stocks.findIndex(x=>!num(x.w)&&!num(x.h));const row={w:String(sw),h:String(sh),qty:''};if(blank>=0)cutSrc.stocks[blank]=row;else cutSrc.stocks.push(row);cutSave();return render()}
   if(t.id==='stf-f'||t.id==='stf-t'){if(t.value){stf[t.id==='stf-f'?'from':'to']=t.value;stf.pre='';render()}return}
   if(t.id==='lockSel'){prefs.lock=+t.value;savePrefs();if(prefs.lock>0)touch(true);toast(tr('تم الحفظ.','Enregistré.'));return}
   if(t.id==='imp-file'&&t.files&&t.files[0]){const f=t.files[0];t.value='';readImportFile(f).then(txt=>{if(txt===null)return;imp.text=txt;imp.rows=parseCSV(txt);$('#imp-text').value=txt;$('#imp-rows').innerHTML=impRowsHTML()}).catch(()=>toast(tr('تعذّرت قراءة الملف.','Lecture du fichier impossible.')));return}
@@ -2725,10 +2838,17 @@ document.addEventListener('click',async e=>{
   if(a==='wc-mm'){wcalc.mm=b.dataset.v;wcalc.tid='';return render()}
   if(a==='wc-sheet'){const e=wcalc.tid&&S.sk[wcalc.tid];wcalc.w=String(e&&e.last&&num(e.last.sw)?num(e.last.sw):SHEET0.w);wcalc.h=String(e&&e.last&&num(e.last.sh)?num(e.last.sh):SHEET0.h);wcalc.qty='1';return render()}
   if(a==='wc-m2'){wcalc.w='100';wcalc.h='100';wcalc.qty='1';return render()}
-  if(a==='cut-free'){cutSrc={k:'free',tid:'',SW:SHEET0.w,SH:SHEET0.h,pieces:[{w:'',h:'',qty:1}],show:false};return go('cut')}
-  if(a==='cu-add'){cutSrc.pieces.push({w:'',h:'',qty:1});return render()}
-  if(a==='cu-del'){cutSrc.pieces.splice(+b.dataset.i,1);if(!cutSrc.pieces.length)cutSrc.pieces.push({w:'',h:'',qty:1});return render()}
-  if(a==='cu-run'){cutSrc.show=true;render();const r=$('#cu-res');if(r&&r.scrollIntoView)r.scrollIntoView({behavior:'smooth',block:'start'});return}
+  if(a==='cut-free'){cutSrc=cutLoad();return go('cut')}
+  if(a==='cut-open'){const src=cutSrc&&(cutSrc.k==='quote'?S.quotes[cutSrc.id]:S.bons[cutSrc.id]);const tid=b.dataset.tid;if(!src)return;
+    const e=S.sk[tid],sw=e&&e.last&&num(e.last.sw)>0?num(e.last.sw):SHEET0.w,sh=e&&e.last&&num(e.last.sh)>0?num(e.last.sh):SHEET0.h;
+    cutSrc={k:'free',pieces:(src.lines||[]).filter(l=>l.lk!=='art'&&l.typeId===tid).map(l=>({w:String(num(l.w)),h:String(num(l.h)),qty:String(num(l.qty)),lab:String(l.use||''),rot:true})),stocks:[{w:String(sw),h:String(sh),qty:''}],kerf:'0',pri:'waste',show:true};cutSave();return go('cut')}
+  if(a==='cu-rot'){const p=cutSrc.pieces[+b.dataset.i];if(p)p.rot=p.rot===false;cutSave();return render()}
+  if(a==='cu-sadd'){cutSrc.stocks.push({w:'',h:'',qty:''});cutSave();return render()}
+  if(a==='cu-sdel'){cutSrc.stocks.splice(+b.dataset.i,1);if(!cutSrc.stocks.length)cutSrc.stocks.push({w:String(SHEET0.w),h:String(SHEET0.h),qty:''});cutSave();return render()}
+  if(a==='cu-pri'){cutSrc.pri=b.dataset.v==='cuts'?'cuts':'waste';cutSave();return render()}
+  if(a==='cu-add'){cutSrc.pieces.push({w:'',h:'',qty:'1',lab:'',rot:true});cutSave();render();const ins=document.querySelectorAll('[data-cu="w"]');if(ins.length)ins[ins.length-1].focus();return}
+  if(a==='cu-del'){cutSrc.pieces.splice(+b.dataset.i,1);if(!cutSrc.pieces.length)cutSrc.pieces.push({w:'',h:'',qty:'1',lab:'',rot:true});cutSave();return render()}
+  if(a==='cu-run'){cutSrc.show=true;cutSave();render();const r=$('#cu-res');if(r&&r.scrollIntoView)r.scrollIntoView({behavior:'smooth',block:'start'});return}
   if(a==='nav-debts')return go('debts');
   if(a==='db-tab'){dbv.tab=b.dataset.v;return render()}
   if(a==='db-p'){dbv.p=b.dataset.v;if(dbv.p==='custom'&&!dbv.from){dbv.from=today().slice(0,7)+'-01';dbv.to=today()}return render()}
