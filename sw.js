@@ -1,5 +1,5 @@
 // دفتر الزجاج — service worker: يخلي التطبيق يحل بلا أنترنت
-const VERSION = 'tumayd-v27';
+const VERSION = 'tumayd-v28';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
