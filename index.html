@@ -336,7 +336,7 @@ nav.bottom button.main span{color:var(--accent)}
   <main class="app" id="main"></main>
   <nav class="bottom"><div class="in" id="nav"></div></nav>
 </div>
-<div id="boot" class="gate"><div class="gate-head"><svg class="mark" viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" fill="#17635e"/></svg></div></div>
+<div id="boot" class="gate"><div class="gate-head"><svg class="mark" viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" fill="#10262e"/></svg></div></div>
 <div id="toast" class="toast" hidden></div>
 <div id="print" aria-hidden="true"></div>
 <div id="modal" class="modal" hidden></div>
@@ -455,7 +455,7 @@ const ICONS={
   logout:'<path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 8l-4 4 4 4M6 12h10"/>'
 };
 const ic=(n,cls='')=>`<svg class="ic ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]||''}</svg>`;
-const MARK=`<svg class="mark" viewBox="0 0 512 512" aria-hidden="true"><defs><clipPath id="mkp"><rect x="130" y="118" width="252" height="276" rx="12"/></clipPath></defs><rect width="512" height="512" fill="#17635e"/><rect x="112" y="100" width="288" height="312" rx="24" fill="#e4f1ee"/><g clip-path="url(#mkp)"><rect x="130" y="118" width="252" height="276" fill="#6fb7a8"/><path d="M130 118 L318 118 C150 118 140 252 256 256 C372 260 362 394 194 394 L130 394 Z" fill="#a9dccf"/><path d="M292 238 L370 160 L370 184 L316 238 Z" fill="#fff" opacity=".35"/><path d="M330 238 L370 198 L370 206 L338 238 Z" fill="#fff" opacity=".3"/><path d="M318 118 C150 118 140 252 256 256 C372 260 362 394 194 394" fill="none" stroke="#fff" stroke-width="14" stroke-linecap="round"/></g><circle cx="318" cy="118" r="13" fill="#17635e" stroke="#fff" stroke-width="6"/></svg>`;
+const MARK=`<svg class="mark" viewBox="0 0 512 512" aria-hidden="true"><defs><linearGradient id="mkRef" x1="0" y1="274" x2="0" y2="112" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#8fd6e1" stop-opacity=".85"/><stop offset="1" stop-color="#8fd6e1" stop-opacity="0"/></linearGradient><linearGradient id="mkFl" x1="136" y1="0" x2="376" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#8fd6e1" stop-opacity="0"/><stop offset=".5" stop-color="#8fd6e1"/><stop offset="1" stop-color="#8fd6e1" stop-opacity="0"/></linearGradient></defs><rect width="512" height="512" fill="#10262e"/><path d="M311.15 124.85A78 78 0 1 0 334 180H280" fill="none" stroke="#eef6f7" stroke-width="32"/><path d="M311.15 124.85A78 78 0 1 0 334 180H280" fill="none" stroke="url(#mkRef)" stroke-width="32" transform="translate(0 562) scale(1 -1)"/><rect x="136" y="279" width="240" height="4" fill="url(#mkFl)"/></svg>`;
 
 function ask({title,body,ok,danger=true,cancel,icon}){
   return new Promise(res=>{const m=$('#modal');
@@ -1004,7 +1004,7 @@ function clientHTML(){
   ${num(c.limit)>0?`<div class="card pad" style="display:grid;gap:6px"><div class="rowflex between"><span class="note">${tr('حد الدين','Limite de crédit')}: <b>${DA(c.limit)}</b></span><span class="${s.bal>c.limit?'chip bad':'note'}">${s.bal>c.limit?tr('تجاوز الحد','Limite dépassée'):tr('المتاح','Disponible')+' '+DA(c.limit-s.bal)}</span></div><div class="bar"><i class="${s.bal>c.limit?'out':s.bal>c.limit*.8?'low':''}" style="width:${Math.min(100,Math.max(0,s.bal/c.limit*100)).toFixed(0)}%"></i></div></div>`:''}
   ${num(c.disc)>0||Object.keys(c.sp||{}).length?`<div class="rowflex" style="gap:6px;flex-wrap:wrap">${num(c.disc)>0?`<span class="chip ok">${tr('تخفيض','Remise')} <bdi dir="ltr">${num(c.disc)}%</bdi></span>`:''}${Object.keys(c.sp||{}).length?`<span class="chip ok">${tr('أسعار خاصة','Prix spéciaux')}: ${Object.keys(c.sp).length}</span>`:''}</div>`:''}
   <div class="actions"><button class="btn" data-act="new-bon" data-id="${id}">${ic('receipt')}${tr('فاتورة جديدة','Nouvelle vente')}</button><button class="btn ghost" data-act="new-pay" data-id="${id}">${ic('cash')}${tr('تسجيل دفع','Encaisser')}</button></div>
-  <div class="rowflex"><button class="btn plain" data-act="stmt" data-id="${id}">${ic('print')}${tr('طباعة كشف الحساب','Imprimer le relevé')}</button>${s.bal>0&&wa?`<a class="btn plain" target="_blank" rel="noopener" href="${waText(c.phone,tr(`السلام عليكم ${c.owner||c.name}، نذكّركم بأن المبلغ المتبقي في حسابكم لدى ${shopName()} هو ${grpTxt(s.bal)} دج. شكراً على تعاملكم.`,`Bonjour ${c.owner||c.name}, nous vous rappelons que le solde de votre compte chez ${shopName()} est de ${grpTxt(s.bal)} DA. Merci.`))}">${ic('bell')}${tr('تذكير بالدين','Rappel de crédit')}</a>`:''}<button class="btn plain" data-act="copy" data-id="${id}">${ic('copy')}${tr('نسخ كشف الحساب','Copier le relevé')}</button>${wa?`<a class="btn plain" href="${wa}?text=${encodeURIComponent(releveText(id))}" target="_blank" rel="noopener">${ic('chat')}${tr('إرسال عبر واتساب','Envoyer par WhatsApp')}</a>`:''}<button class="btn plain" data-act="edit-client" data-id="${id}">${ic('key')}${tr('تعديل المعلومات','Modifier')}</button></div>
+  <div class="rowflex"><button class="btn plain" data-act="stmt" data-id="${id}">${ic('doc')}${tr('كشف الحساب','Relevé de compte')}</button>${s.bal>0&&wa?`<a class="btn plain" target="_blank" rel="noopener" href="${waText(c.phone,tr(`السلام عليكم ${c.owner||c.name}، نذكّركم بأن المبلغ المتبقي في حسابكم لدى ${shopName()} هو ${grpTxt(s.bal)} دج. شكراً على تعاملكم.`,`Bonjour ${c.owner||c.name}, nous vous rappelons que le solde de votre compte chez ${shopName()} est de ${grpTxt(s.bal)} DA. Merci.`))}">${ic('bell')}${tr('تذكير بالدين','Rappel de crédit')}</a>`:''}${wa?`<a class="btn plain" href="${wa}?text=${encodeURIComponent(releveText(id))}" target="_blank" rel="noopener">${ic('chat')}${tr('إرسال عبر واتساب','Envoyer par WhatsApp')}</a>`:''}<button class="btn plain" data-act="edit-client" data-id="${id}">${ic('key')}${tr('تعديل المعلومات','Modifier')}</button></div>
   <div id="copyfall"></div>
   <h3>${tr('كشف الحساب (الأحدث فوق)','Relevé (le plus récent en haut)')}</h3>
   ${e.length?`<div class="led">${e.map(x=>x.k==='bon'
@@ -1014,15 +1014,26 @@ function clientHTML(){
   <div style="margin-top:14px"><button class="btn danger" data-act="del-client" data-id="${id}">${tr('حذف الورشة وكل حساباتها','Supprimer le client et son historique')}</button></div>
   </div>`;
 }
-function releveText(id){
-  const c=S.clients[id],s=S.stats[id]||{bal:0};const e=entries(id);
-  const L=[shopName(),`${tr('كشف حساب','Relevé')}: ${c.name}`,`${tr('بتاريخ','Le')} ${fdateTxt(today())}`,''];
-  for(const x of e){
-    if(x.k==='bon'){const b=x.b;L.push(`${fdateTxt(x.date)}  ${b.kind==='opening'?tr('دين قديم','Ancien crédit'):tr('فاتورة','Facture')+' '+(b.num||'')}: ${grpTxt(x.amt)} ${CUR()}`);
-      for(const l of b.lines||[])L.push(`   - ${l.type}${l.use?' ('+l.use+')':''} ${l.w}x${l.h} cm × ${l.qty} = ${grpTxt(l.amount)} ${CUR()}`)}
-    else L.push(`${fdateTxt(x.date)}  ${tr('دفع','Paiement')}: -${grpTxt(-x.amt)} ${CUR()}`);
+function releveText(id,f='0000-01-01',t='9999-12-31'){
+  const c=S.clients[id]||{name:'?'};const all=entries(id);const per=f>'0000-01-01';
+  let open=0;const rows=[];for(const x of all){if(x.date<f)open+=x.amt;else if(x.date<=t)rows.push(x)}
+  const L=[shopName(),`${tr('كشف حساب','Relevé')}: ${c.name}`];
+  if(c.owner)L.push(`${tr('صاحب الورشة','Responsable')}: ${c.owner}`);
+  if(c.phone)L.push(`${tr('الهاتف','Tél')}: ${c.phone}`);
+  if(per)L.push(`${tr('من','Du')} ${fdateTxt(f)} ${tr('إلى','au')} ${fdateTxt(t)}`);
+  L.push(`${tr('بتاريخ','Le')} ${fdateTxt(today())}`,'');
+  let run=open;
+  if(per)L.push(`${tr('الرصيد السابق','Solde antérieur')}: ${grpTxt(open)} ${CUR()}`,'');
+  const money=v=>`${v<0?'-'+grpTxt(-v):grpTxt(v)} ${CUR()}`;
+  for(const x of rows){run+=x.amt;
+    if(x.k==='bon'){const bb=x.b;const lbl=bb.kind==='opening'?tr('دين قديم','Ancien crédit'):bb.kind==='return'?tr('مرتجع','Retour')+' '+(bb.num||''):tr('فاتورة','Facture')+' '+(bb.num||'');
+      L.push(`${fdateTxt(x.date)}  ${lbl}: ${money(x.amt)}  | ${tr('الرصيد','Solde')}: ${money(run)}`);
+      for(const l of bb.lines||[])L.push(l.lk==='art'?`   - ${l.type} × ${l.qty} ${l.unit||''} = ${grpTxt(l.amount)} ${CUR()}`:`   - ${l.type}${l.use?' ('+l.use+')':''} ${l.w}x${l.h} cm × ${l.qty} = ${grpTxt(l.amount)} ${CUR()}`)}
+    else L.push(`${fdateTxt(x.date)}  ${tr('دفع','Paiement')}${x.p.method?' ('+payMName(x.p.method)+')':''}: ${money(x.amt)}  | ${tr('الرصيد','Solde')}: ${money(run)}`);
   }
-  L.push('',`${tr('الباقي','Reste')}: ${grpTxt(s.bal)} ${CUR()}`);return L.join('\n');
+  if(!rows.length)L.push(tr('ما كاين حتى عملية في هذي الفترة.','Aucune opération sur cette période.'));
+  L.push('',`${tr('الرصيد المتبقي','Solde restant')}: ${money(run)}`,`${tr('أُوقف هذا الكشف على مبلغ','Arrêté le présent relevé à la somme de')}: ${amountWords(run)}`);
+  return L.join('\n');
 }
 function docLinesTable(lines){
   const hasSvc=(lines||[]).some(l=>num(l.svcAmt)>0);
@@ -1859,10 +1870,11 @@ function stmtHTML(){
   const c=S.clients[stdraft.id]||{name:'?'};
   const ch=v=>`<button data-act="st-p" data-v="${v[0]}" class="${stdraft.p===v[0]?'on':''}">${v[1]}</button>`;
   return `<div class="stack">${backBtn('open-client',esc(c.name),stdraft.id)}
-  <h2>${tr('طباعة كشف الحساب','Imprimer le relevé')}</h2>
+  ${c.owner||c.phone?`<div class="note">${c.owner?`${tr('صاحب الورشة','Responsable')}: <b>${esc(c.owner)}</b>`:''}${c.owner&&c.phone?' · ':''}${c.phone?`<a href="tel:${esc(String(c.phone).replace(/[^\d+]/g,''))}"><bdi dir="ltr">${esc(c.phone)}</bdi></a>`:''}</div>`:''}
+  <h2>${tr('كشف الحساب','Relevé de compte')}</h2>
   <div class="chips" style="flex-wrap:wrap">${[['all',tr('كل الحساب','Tout')],['month',tr('هذا الشهر','Ce mois')],['prev',tr('الشهر الماضي','Mois dernier')],['custom',tr('فترة مخصصة','Période')]].map(ch).join('')}</div>
   ${stdraft.p==='custom'?`<div class="grid2"><div class="field"><label for="stf">${tr('من','Du')}</label><input id="stf" type="date" value="${esc(stdraft.from)}"></div><div class="field"><label for="stt">${tr('إلى','Au')}</label><input id="stt" type="date" value="${esc(stdraft.to)}"></div></div>`:''}
-  <button class="btn full" data-act="st-print">${ic('print')}${tr('طباعة / PDF','Imprimer / PDF')}</button></div>`;
+  <div class="grid2"><button class="btn" data-act="st-print">${ic('print')}${tr('طباعة / PDF','Imprimer / PDF')}</button><button class="btn ghost" data-act="st-copy">${ic('copy')}${tr('نسخ','Copier')}</button></div><div id="copyfall"></div></div>`;
 }
 function stmtRange(){const td=today();if(stdraft.p==='month')return[td.slice(0,7)+'-01',td];if(stdraft.p==='prev'){const x=new Date();x.setDate(1);x.setMonth(x.getMonth()-1);const a=dstr(x);const y=new Date(x.getFullYear(),x.getMonth()+1,0);return[a,dstr(y)]}if(stdraft.p==='custom')return[stdraft.from||'0000-01-01',stdraft.to||td];return['0000-01-01','9999-12-31']}
 function stmtPrintHTML(){
@@ -1871,7 +1883,7 @@ function stmtPrintHTML(){
   let run=open;const body=rows.map(x=>{run+=x.amt;const lbl=x.k==='bon'?(x.b.kind==='opening'?tr('دين قديم','Ancien crédit'):x.b.kind==='return'?tr('مرتجع','Retour')+' '+x.b.num:tr('فاتورة','Facture')+' '+x.b.num):tr('دفع','Paiement')+(x.p.method?' · '+payMName(x.p.method):'');
     return `<tr><td><bdi dir="ltr">${fdateTxt(x.date)}</bdi></td><td>${esc(lbl)}</td><td><bdi dir="ltr">${x.amt>0?grp(x.amt):''}</bdi></td><td><bdi dir="ltr">${x.amt<0?grp(-x.amt):''}</bdi></td><td><bdi dir="ltr">${grp(run)}</bdi></td></tr>`}).join('');
   return `<div class="rc" dir="${isFr()?'ltr':'rtl'}">${rcHead(false)}
-  <div class="rc-meta"><div><b>${tr('كشف حساب','Relevé de compte')}</b><div>${tr('الزبون','Client')}: <b>${esc(c.name)}</b></div></div><div>${f>'0000-01-01'?`<div>${tr('من','Du')} <bdi dir="ltr">${fdateTxt(f)}</bdi> ${tr('إلى','au')} <bdi dir="ltr">${fdateTxt(t)}</bdi></div>`:''}<div>${tr('بتاريخ','Édité le')} <bdi dir="ltr">${fdateTxt(today())}</bdi></div></div></div>
+  <div class="rc-meta"><div><b>${tr('كشف حساب','Relevé de compte')}</b><div>${tr('الزبون','Client')}: <b>${esc(c.name)}</b></div>${c.owner?`<div>${tr('صاحب الورشة','Responsable')}: ${esc(c.owner)}</div>`:''}${c.phone?`<div>${tr('الهاتف','Tél')}: <bdi dir="ltr">${esc(c.phone)}</bdi></div>`:''}</div><div>${f>'0000-01-01'?`<div>${tr('من','Du')} <bdi dir="ltr">${fdateTxt(f)}</bdi> ${tr('إلى','au')} <bdi dir="ltr">${fdateTxt(t)}</bdi></div>`:''}<div>${tr('بتاريخ','Édité le')} <bdi dir="ltr">${fdateTxt(today())}</bdi></div></div></div>
   <table><thead><tr><th>${tr('التاريخ','Date')}</th><th>${tr('العملية','Opération')}</th><th>${tr('مدين','Débit')}</th><th>${tr('دائن','Crédit')}</th><th>${tr('الرصيد','Solde')}</th></tr></thead><tbody>
   ${f>'0000-01-01'?`<tr><td></td><td><b>${tr('الرصيد السابق','Solde antérieur')}</b></td><td></td><td></td><td><bdi dir="ltr">${grp(open)}</bdi></td></tr>`:''}${body}</tbody></table>
   <div class="tot"><div class="g"><span>${tr('الرصيد المتبقي','Solde restant')}</span><span>${DA(run)}</span></div></div>
@@ -2445,6 +2457,7 @@ document.addEventListener('click',async e=>{
     if(await write(()=>db.collection('spays').doc().set({supplierId:sid,amount:amt,method:spdraft.method||'cash',date:spdraft.date||today(),note:String(spdraft.note||'').trim(),createdAt:Date.now()}),tr('تم تسجيل الدفع.','Paiement enregistré.'))){spdraft=null;go('sup',{id:sid})}return}
   if(a==='del-spay'){const p=S.spays[id];if(!p)return;if(!await ask({title:tr('حذف هذا الدفع؟','Supprimer ce paiement ?'),ok:tr('حذف','Supprimer'),body:DA(p.amount)+' · '+fdate(p.date)}))return;await removeDocs(['spays/'+id],tr('تم حذف الدفع','Paiement supprimé'));return}
   if(a==='stmt'){stdraft={id,p:'all',from:today().slice(0,7)+'-01',to:today()};return go('stmt')}
+  if(a==='st-copy'){const [f,t]=stmtRange();return copyText(releveText(stdraft.id,f,t),'#copyfall')}
   if(a==='st-p'){stdraft.p=b.dataset.v;return render()}
   if(a==='st-print')return printHTML(stmtPrintHTML());
   if(a==='nav-cloud'){cdl.err='';return go('cloud')}
@@ -2517,7 +2530,7 @@ document.addEventListener('click',async e=>{
   if(a==='pay-full'){const s=S.stats[pdraft.clientId]||{bal:0};pdraft.amount=String(Math.max(0,Math.round(s.bal)));$('#pa').value=pdraft.amount;updPay();return}
   if(a==='add-type'){tdraft.push({id:'t'+Date.now().toString(36),name:'',price:''});const i=tdraft.length-1;$('#tl').insertAdjacentHTML('beforeend',typeRowHTML(tdraft[i],i));document.querySelectorAll('#tl .x').forEach(x=>x.disabled=false);return}
   if(a==='rm-type'){tdraft.splice(+b.dataset.i,1);render();return}
-  if(a==='copy')return copyText(releveText(id),'#copyfall');
+  if(a==='copy'){stdraft={id,p:'all',from:today().slice(0,7)+'-01',to:today()};return go('stmt')}
   if(a==='copy-prompt')return copyText(isFr()?CLAUDE_PROMPT_FR:CLAUDE_PROMPT_AR,'#cprompt');
   if(a==='imp-parse'){imp.rows=parseCSV(imp.text);$('#imp-rows').innerHTML=impRowsHTML();if(imp.rows.length)$('#imp-rows').scrollIntoView({behavior:'smooth',block:'start'});return}
   if(a==='imp-save'){
