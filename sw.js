@@ -1,6 +1,6 @@
 // دفتر الزجاج — service worker: يخلي التطبيق يحل بلا أنترنت
-const VERSION = 'tumayd-v40';
-const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './IBMPlexSansArabic-Regular.woff2', './IBMPlexSansArabic-Medium.woff2', './IBMPlexSansArabic-SemiBold.woff2', './IBMPlexSansArabic-Bold.woff2'];
+const VERSION = 'tumayd-v35';
+const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));

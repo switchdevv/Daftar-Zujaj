@@ -1,14 +1,14 @@
 {
   "name": "GG",
   "short_name": "GG",
-  "description": "Gessoum Glass: فواتير، ديون الورشات، ومخزون الزجاج",
+  "description": "Guessoum Glass: فواتير، ديون الحرفيين، ومخزون الزجاج",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#f3f4f6",
+  "background_color": "#edf2f1",
   "theme_color": "#17635e",
   "icons": [
     {
