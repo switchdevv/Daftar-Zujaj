@@ -458,6 +458,14 @@ nav.bottom button.main .ib{border-radius:20px;width:56px;height:56px}
 body.formv nav.bottom{display:none}
 body.formv .app{padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
 .sbt{font-weight:800;white-space:nowrap}
+.opts{display:flex;gap:8px;flex-wrap:wrap}
+.opt{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--muted);font-weight:700;font-size:.85rem;transition:background .15s,color .15s}
+.opt .ic{width:18px;height:18px}
+.opt em{font-style:normal;font-weight:800;color:var(--accent)}
+.opt.has{color:var(--ink)}
+.opt.on{background:var(--accent);border-color:transparent;color:var(--accent-ink)}.opt.on em{color:var(--accent-ink)}
+.optbox{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:14px;display:grid;gap:10px;animation:obin .16s ease-out}
+@keyframes obin{from{opacity:0;transform:translateY(-4px)}}
 .stickybar{position:sticky;bottom:0;z-index:4;background:var(--bg);margin-inline:-16px;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));box-shadow:0 -6px 16px rgba(17,24,39,.06)}
 @media (min-width:900px){.stickybar{margin-inline:0;border-radius:18px}}
 </style>
@@ -514,7 +522,7 @@ const num=v=>{const n=parseFloat(String(v??'').replace(/\s/g,'').replace(',','.'
 const loc=()=>isFr()?'fr-FR':'en-US';
 const grp=n=>{const r=Math.round(n);return(r<0?'-':'')+Math.abs(r).toLocaleString(loc()).replace(/ /g,' ')};
 const grpTxt=n=>Math.round(n).toLocaleString('en-US');
-const APP_VER=38; // نفس الرقم تاع VERSION في sw.js
+const APP_VER=39; // نفس الرقم تاع VERSION في sw.js
 const CUR=()=>tr('دج','DA');
 const DA=n=>`<bdi dir="ltr">${grp(n)}</bdi>&nbsp;${CUR()}`;
 const dec2=a=>(Math.round(a*100)/100).toLocaleString(loc(),{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -1142,17 +1150,17 @@ const GUIDE=[
   p:['Le bouton « ? » en haut explique la page où vous êtes.','Pour revenir : bouton retour du téléphone, ou glisser depuis le bord de l’écran.']}},
 {id:'bon',icon:'receipt',views:['bon','bonview','journal','ret'],
  ar:{t:'فاتورة حرفي (بالكريدي)',i:'الفاتورة تُسجّل ما أخذه الحرفي، تُخصم من المخزون، وتُضاف إلى دينه.',
-  s:['اضغط «فاتورة حرفي» واختر الحرفي والتاريخ.','اختر نوع الزجاج، ثم اكتب العرض والطول بالسنتيم والعدد. المساحة والمبلغ يُحسبان وحدهم.','«+ زجاج» لسطر آخر، و«+ سلعة / خدمة» للسيليكون، الجوان، التشطيب…','إذا دفع شيئاً الآن اكتبه في «المبلغ المدفوع الآن». الباقي يدخل في الدين.','يمكنك تحديد موعد تسديد: عند حلوله يرنّ التطبيق وينبّهك.','«حفظ الفاتورة». من صفحة الفاتورة تقدر تطبعها، ترسلها بالواتساب، تعدّلها أو تسجّل مرتجعاً.'],
+  s:['اضغط «فاتورة حرفي» واختر الحرفي والتاريخ.','اختر نوع الزجاج، ثم اكتب العرض والطول بالسنتيم والعدد. المساحة والمبلغ يُحسبان وحدهم.','«+ زجاج» لسطر آخر، و«+ سلعة / خدمة» للسيليكون، الجوان… وإذا السلعة ما كانتش، اختار «＋ سلعة جديدة» وزيدها من هنا.','الإيقونات تحت: «دفع الآن» إذا خلّص شوية (الباقي يدخل في الدين)، «تخفيض»، «موعد التسديد» (التطبيق يرنّ كي يجي)، «ملاحظة»، و«التاريخ» إذا ماشي اليوم.','«حفظ الفاتورة». من صفحة الفاتورة تقدر تطبعها، ترسلها بالواتساب، تعدّلها أو تسجّل مرتجعاً.'],
   p:['إذا تجاوز الحرفي سقف الدين، ينبّهك التطبيق قبل الحفظ.','إذا الزجاج ما يكفيش في المخزون، ما يخليكش تحفظ: أدخل السلعة أولاً.','«سجل الفواتير» فيه كل الفواتير مع فلاتر (اليوم، الشهر، قيد التحضير…).','المرتجع: من صفحة الفاتورة ← «مرتجع». يُخصم من دين الحرفي، وتختار هل الزجاج يرجع للمخزون ولا تالف.']},
  fr:{t:'Facture atelier (à crédit)',i:'La facture enregistre ce que l’atelier a pris, sort du stock et s’ajoute à son crédit.',
-  s:['Touchez « Vente atelier », choisissez l’atelier et la date.','Choisissez le verre, puis largeur et hauteur en cm et la quantité. Surface et montant se calculent seuls.','« + Verre » pour une autre ligne, « + Article / service » pour silicone, joint, façonnage…','S’il paie maintenant, saisissez le montant payé. Le reste va au crédit.','Vous pouvez fixer une échéance : l’application sonne le jour venu.','« Enregistrer ». Depuis la facture : imprimer, envoyer par WhatsApp, modifier ou faire un retour.'],
+  s:['Touchez « Vente atelier », choisissez l’atelier et la date.','Choisissez le verre, puis largeur et hauteur en cm et la quantité. Surface et montant se calculent seuls.','« + Verre » pour une autre ligne, « + Article / service » pour silicone, joint… S’il manque, choisissez « ＋ Nouvel article ».','Les icônes en bas : « Payé » (le reste va au crédit), « Remise », « Échéance » (l’application sonne), « Note », et « Date » si ce n’est pas aujourd’hui.','« Enregistrer ». Depuis la facture : imprimer, envoyer par WhatsApp, modifier ou faire un retour.'],
   p:['Si l’atelier dépasse son plafond, l’application vous prévient avant d’enregistrer.','Si le verre manque en stock, la vente est bloquée : faites d’abord une entrée stock.','« Journal des factures » liste toutes les factures avec filtres.','Retour : depuis la facture ← « Retour ». Il est déduit du crédit ; le verre revient en stock ou part en casse.']}},
 {id:'walk',icon:'tag',views:[],
  ar:{t:'بيع لزبون عادي (نقداً)',i:'للزبائن العابرين (مرآة، طاولة، تسريحة…). يُخصم من المخزون ويدخل في الصندوق، ولا يدخل في حسابات الحرفيين.',
-  s:['اضغط «بيع لزبون عادي».','أضف الأسطر كيما فاتورة الحرفي.','إذا دفع كل شيء اضغط «مدفوع كاملاً».','إذا بقي عليه شيء، اكتب اسمه وهاتفه باش يبان في الديون.'],
+  s:['اضغط «بيع لزبون عادي».','أضف الأسطر كيما فاتورة الحرفي.','بلا ما تدير والو، تتسجّل مدفوعة كاملة.','إذا بقي عليه شيء: «دفع جزء» واكتب شحال دفع، واكتب اسمو وهاتفو فوق باش يبان في الديون.'],
   p:['هذه المبيعات تجدها في «الزبائن» ← تبويب «زبائن عاديون».']},
  fr:{t:'Vente comptoir (comptant)',i:'Pour les clients de passage (miroir, table, coiffeuse…). Sort du stock, entre en caisse, hors comptes des ateliers.',
-  s:['Touchez « Vente comptoir ».','Ajoutez les lignes comme une facture atelier.','S’il paie tout, touchez « Payé en totalité ».','S’il reste un montant dû, saisissez son nom et téléphone pour le suivre.'],
+  s:['Touchez « Vente comptoir ».','Ajoutez les lignes comme une facture atelier.','Par défaut, la vente est payée en totalité.','S’il reste un montant dû : « Acompte », puis nom et téléphone en haut.'],
   p:['Ces ventes sont dans « Clients » ← onglet comptoir.']}},
 {id:'quote',icon:'doc',views:['quotes','quoteview'],
  ar:{t:'عرض السعر (Devis)',i:'عرض السعر لا يُخصم من المخزون ولا يُسجَّل كدين. تعطيه للزبون قبل ما يوافق.',
@@ -1729,7 +1737,7 @@ function svcBlock(l,i){
   return `<div class="svc"><span class="note">${tr('التشطيب','Façonnage')}:</span>${sv.map(x=>x.unit==='ml'?`<button type="button" class="svc-chip ${(l.svc||{})[x.id]?'on':''}" data-act="svc-toggle" data-i="${i}" data-s="${esc(x.id)}">${esc(svcName(x))}</button>`:`<label class="svc-n">${esc(svcName(x))} <input inputmode="numeric" data-svc="${esc(x.id)}" data-i="${i}" value="${esc((l.svc||{})[x.id]||'')}" placeholder="0"></label>`).join('')}</div>`;
 }
 function artOptions(sel){const list=activeArts();if(sel&&S.arts[sel]&&S.arts[sel].archived)list.push([sel,S.arts[sel]]);
-  return ART_CATS.map(([k])=>{const g=list.filter(([,a])=>(a.cat||'oth')===k);return g.length?`<optgroup label="${esc(artCatName(k))}">${g.map(([id,a])=>`<option value="${id}" ${id===sel?'selected':''}>${esc(a.name)}</option>`).join('')}</optgroup>`:''}).join('')}
+  return (isStaff()?'':`<option value="__new">＋ ${tr('سلعة جديدة…','Nouvel article…')}</option>`)+ART_CATS.map(([k])=>{const g=list.filter(([,a])=>(a.cat||'oth')===k);return g.length?`<optgroup label="${esc(artCatName(k))}">${g.map(([id,a])=>`<option value="${id}" ${id===sel?'selected':''}>${esc(a.name)}</option>`).join('')}</optgroup>`:''}).join('')}
 function artLineHTML(l,i){const a=S.arts[l.articleId];
   return `<div class="line-card art" data-i="${i}">
   <div class="lt"><div class="field"><label for="lt${i}">${tr('السلعة','Article')}</label><select id="lt${i}" data-lf="articleId" data-i="${i}">${artOptions(l.articleId)}</select></div>
@@ -1744,13 +1752,39 @@ function lineHTML(l,i){
   <div class="lt"><div class="field"><label for="lt${i}">${tr('نوع الزجاج','Type de verre')}</label><select id="lt${i}" data-lf="typeId" data-i="${i}">${typeOptions(l.typeId)}</select></div>
   <div class="field"><label for="lp${i}">${tr('سعر م²','Prix m²')}</label><input id="lp${i}" inputmode="decimal" data-lf="price" data-i="${i}" value="${esc(l.price)}"></div>
   <button class="x" data-act="rm-line" data-i="${i}" aria-label="${tr('إزالة السطر','Retirer la ligne')}" ${draft.lines.length<2?'disabled':''}>×</button></div>
-  <div class="lu"><div class="field"><label for="lu${i}">${tr('الاستعمال (اختياري)','Usage (facultatif)')}</label><input id="lu${i}" list="uses" data-lf="use" data-i="${i}" value="${esc(l.use||'')}" placeholder="${tr('طاولة، مرآة، تسريحة…','table, miroir, coiffeuse…')}"></div></div>
+  ${draft.mode!=='walk'?'':`<div class="lu"><div class="field"><label for="lu${i}">${tr('الاستعمال (اختياري)','Usage (facultatif)')}</label><input id="lu${i}" list="uses" data-lf="use" data-i="${i}" value="${esc(l.use||'')}" placeholder="${tr('طاولة، مرآة، تسريحة…','table, miroir, coiffeuse…')}"></div></div>`}
   <div class="ld"><div class="field"><label for="lw${i}">${tr('العرض (سم)','Largeur (cm)')}</label><input id="lw${i}" inputmode="decimal" data-lf="w" data-i="${i}" value="${esc(l.w)}" placeholder="120"></div>
   <div class="field"><label for="lh${i}">${tr('الطول (سم)','Hauteur (cm)')}</label><input id="lh${i}" inputmode="decimal" data-lf="h" data-i="${i}" value="${esc(l.h)}" placeholder="80"></div>
   <div class="field"><label for="lq${i}">${tr('العدد','Quantité')}</label><input id="lq${i}" inputmode="numeric" data-lf="qty" data-i="${i}" value="${esc(l.qty)}"></div></div>
   ${svcBlock(l,i)}
   <div class="lr"><span>${tr('المساحة','Surface')} <b id="la${i}"></b></span><span id="lk${i}"></span><span>${tr('المبلغ','Montant')} <b id="lm${i}"></b></span><span class="note" id="ls${i}"></span><span class="avail" id="lv${i}"></span></div></div>`;
 }
+/* خيارات مخبّية ورا إيقونات: تضغط تبان، تضغط تختفي */
+let optOpen=new Set(),optView='';
+/* سلعة جديدة من الفاتورة مباشرة */
+function quickArt(i){const m=$('#modal');let cat='sil';
+  m.innerHTML=`<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="qa-t"><span class="sico info">${ic('box')}</span><h2 id="qa-t">${tr('سلعة جديدة','Nouvel article')}</h2>
+  <div class="field"><label for="qa-n">${tr('الاسم','Nom')}</label><input id="qa-n" placeholder="${tr('سيليكون شفاف، جوان 4مم…','Silicone transparent…')}"></div>
+  <div class="chips" style="flex-wrap:wrap" id="qa-c">${ART_CATS.map(([k,ar,fr])=>`<button type="button" data-qc="${k}" class="${k===cat?'on':''}">${tr(ar,fr)}</button>`).join('')}</div>
+  <div class="grid2"><div class="field"><label for="qa-u">${tr('الوحدة','Unité')}</label><select id="qa-u">${UNITS.map(u=>`<option value="${esc(u[0])}">${esc(tr(u[0],u[1]))}</option>`).join('')}</select></div>
+  <div class="field"><label for="qa-p">${tr('السعر','Prix')}</label><input id="qa-p" inputmode="decimal" dir="ltr" placeholder="0"></div></div>
+  <p class="err" id="qa-e"></p>
+  <div class="actions"><button class="btn line" data-m="0">${tr('إلغاء','Annuler')}</button><button class="btn" data-m="1">${tr('زيدها','Ajouter')}</button></div></div>`;
+  m.hidden=false;setTimeout(()=>{const x=$('#qa-n');if(x)x.focus()},40);
+  const done=()=>{m.hidden=true;m.innerHTML='';m.onclick=null};
+  m.onclick=async e=>{e.stopPropagation();const qc=e.target.closest('[data-qc]');if(qc){cat=qc.dataset.qc;m.querySelectorAll('[data-qc]').forEach(x=>x.classList.toggle('on',x===qc));if(cat==='svc')$('#qa-u').value='خدمة';return}
+    const b=e.target.closest('[data-m]');if(!b){if(e.target===m)done();return}if(b.dataset.m==='0')return done();
+    const name=$('#qa-n').value.trim(),price=num($('#qa-p').value),unit=$('#qa-u').value,er=$('#qa-e');
+    if(!name)return er.textContent=tr('اكتب الاسم.','Saisissez le nom.');if(!(price>0))return er.textContent=tr('اكتب السعر.','Saisissez le prix.');
+    if(Object.values(S.arts).some(x=>!x.archived&&normName(x.name)===normName(name)))return er.textContent=tr('هاد الاسم كاين من قبل.','Ce nom existe déjà.');
+    const ref=db.collection('articles').doc(),nref=Object.keys(S.arts).length+1;
+    if(!await write(()=>ref.set({name,cat,unit,pack:null,cost:0,price,priceW:0,packPrice:0,packPriceW:0,alert:0,ref:'A-'+String(nref).padStart(4,'0'),archived:false,createdAt:Date.now()}),tr('تزادت السلعة.','Article ajouté.')))return;
+    done();if(!draft)return;let k=i;if(k<0){draft.lines.push(newArtLine());k=draft.lines.length-1}
+    const l=draft.lines[k];l.lk='art';l.articleId=ref.id;l.u='base';l.manual=false;l.price=String(price);if(!l.qty)l.qty='1';
+    const wrap=$('#lines');if(wrap)wrap.innerHTML=draft.lines.map(lineHTML).join('');updBon()};
+}
+function optBtn(k,icn,label,val){const on=optOpen.has(k);return `<button type="button" class="opt ${on?'on':''} ${val?'has':''}" data-act="opt" data-k="${k}" aria-expanded="${on}">${ic(icn)}<span>${label}</span>${val?`<em>${val}</em>`:''}</button>`}
+function optBox(k,inner){return `<div class="optbox" data-ob="${k}" ${optOpen.has(k)?'':'hidden'}>${inner}</div>`}
 function bonFormHTML(){
   const walk=draft.mode==='walk',q=draft.kind==='quote';
   return `<div class="stack">
@@ -1758,31 +1792,27 @@ function bonFormHTML(){
   ${draft.fromQuote?`<div class="banner info">${ic('doc')}<span>${tr('من عرض السعر رقم','Depuis le devis n°')} <bdi dir="ltr">${(S.quotes[draft.fromQuote]||{}).num||''}</bdi></span></div>`:''}
   <div class="seg"><button data-act="bon-mode" data-v="shop" class="${!walk?'on':''}">${q?tr('حرفي','Atelier'):tr('حرفي (حساب)','Atelier (compte)')}</button><button data-act="bon-mode" data-v="walk" class="${walk?'on':''}">${q?tr('زبون عادي','Particulier'):tr('زبون عادي (نقداً)','Comptoir (comptant)')}</button></div>
   <datalist id="uses">${(isFr()?USES_FR:USES_AR).map(u=>`<option value="${esc(u)}"></option>`).join('')}</datalist>
-  ${walk?`<div class="grid2"><div class="field"><label for="wn">${tr('اسم الزبون (اختياري)','Nom du client (facultatif)')}</label><input id="wn" value="${esc(draft.cname)}"></div>
-  <div class="field"><label for="wp">${tr('الهاتف (اختياري)','Téléphone (facultatif)')}</label><input id="wp" inputmode="tel" dir="ltr" value="${esc(draft.cphone)}"></div></div>
-  <div class="field"><label for="bd">${tr('التاريخ','Date')}</label><input id="bd" type="date" value="${esc(draft.date)}"></div>`
-  :`<div class="grid2"><div class="field"><label for="bc">${tr('الحرفي','Client')}</label><select id="bc">${clientOptions(draft.clientId)}</select></div>
-  <div class="field"><label for="bd">${tr('التاريخ','Date')}</label><input id="bd" type="date" value="${esc(draft.date)}"></div></div>`}
+  ${walk?`<div class="grid2"><div class="field"><label for="wn">${tr('اسم الزبون','Nom du client')}</label><input id="wn" value="${esc(draft.cname)}" placeholder="${tr('اختياري','facultatif')}"></div>
+  <div class="field"><label for="wp">${tr('الهاتف','Téléphone')}</label><input id="wp" inputmode="tel" dir="ltr" value="${esc(draft.cphone)}" placeholder="${tr('اختياري','facultatif')}"></div></div>`
+  :`<div class="field"><label for="bc">${tr('الحرفي','Client')}</label><select id="bc">${clientOptions(draft.clientId)}</select></div>`}
   <div id="bbal" class="note"></div>
   <div class="stack" id="lines">${draft.lines.map(lineHTML).join('')}</div>
   <div class="actions"><button class="btn ghost" data-act="add-line">${ic('plus')}${tr('زجاج','Verre')}</button><button class="btn ghost" data-act="add-art">${ic('plus')}${tr('سلعة / خدمة','Article / service')}</button></div>
-  <div class="totals">
-    <div class="trow"><span>${tr('المساحة المفوترة','Surface facturée')}</span><b id="ta"></b></div>
-    <div class="trow" id="tkr" hidden><span>${tr('الوزن التقريبي','Poids approximatif')}</span><b id="tk"></b></div>
-    <div class="field"><label for="bdisc">${tr('تخفيض (دج، اختياري)','Remise (DA, facultatif)')}</label><input id="bdisc" inputmode="decimal" dir="ltr" value="${esc(draft.disc||'')}" placeholder="0"></div>
-    <div class="trow big"><span>${tr('المجموع','Total')}</span><span id="tt"></span></div>
-    ${q?`<div class="note">${tr('عرض السعر لا يُخصم من المخزون ولا يُسجَّل كدين.','Le devis ne touche ni au stock ni au crédit.')}</div>`
-    :walk?`<div class="field"><label for="wpaid">${tr('المبلغ المدفوع الآن','Montant payé maintenant')}</label><input id="wpaid" inputmode="decimal" dir="ltr" value="${esc(draft.wpaid||'')}" placeholder="${tr('فارغ = مدفوع كاملاً','vide = payé en totalité')}"></div>
-    <div class="quickpay"><button data-act="wp-full">${tr('مدفوع كاملاً','Payé en totalité')}</button><button data-act="wp-zero">${tr('الكل دَيناً','Tout à crédit')}</button></div>
-    <div class="trow"><span>${tr('الباقي على الزبون','Reste dû par le client')}</span><b id="wrem"></b></div>
-    <div class="note">${tr('إذا بقي عليه شيء، اكتب اسمه وهاتفه في الأعلى ليظهر في الديون.','S’il reste un montant dû, indiquez nom et téléphone pour le suivre dans les crédits.')}</div>`
-    :draft.editId?`<div class="note">${tr('الدفعات لا تتغير عند التعديل. سجّل أي دفع جديد من صفحة الحرفي.','Les paiements ne changent pas. Enregistrez tout nouveau paiement depuis la fiche client.')}</div><b id="tr" hidden></b>`
-    :`<div class="field"><label for="bp">${tr('المبلغ المدفوع الآن','Montant payé maintenant')}</label><input id="bp" inputmode="decimal" value="${esc(draft.paid)}" placeholder="${tr('0 = كامل المبلغ دَيناً','0 = tout à crédit')}"></div>
-    <div class="quickpay"><button data-act="paid-zero">${tr('الكل دَيناً','Tout à crédit')}</button><button data-act="paid-full">${tr('مدفوع كاملاً','Payé en totalité')}</button></div>
-    <div class="trow"><span>${tr('الباقي من هذه الفاتورة','Reste sur cette facture')}</span><b id="tr"></b></div>
-    <div class="field"><label for="bdu">${tr('موعد التسديد المتفق عليه (اختياري)','Échéance convenue (facultatif)')}</label><div class="grid2"><input id="bdu" type="date" value="${esc(draft.due||'')}" aria-label="${tr('تاريخ التسديد','Date d’échéance')}"><input id="bdut" type="time" value="${esc(draft.dueT||'')}" aria-label="${tr('وقت التسديد','Heure d’échéance')}"></div><span class="note">${tr('عند حلول الموعد دون تسديد، يرنّ التطبيق وينبّهك.','À l’heure dite, si ce n’est pas payé, l’application sonne.')}</span></div>`}
+  <div class="opts">
+    ${optBtn('date','cal',tr('التاريخ','Date'),draft.date&&draft.date!==today()?fdateTxt(draft.date):'')}
+    ${q||draft.editId&&!walk?'':optBtn('paid','cash',walk?tr('دفع جزء','Acompte'):tr('دفع الآن','Payé'),walk?(draft.wpaid!==''&&draft.wpaid!=null?grp(num(draft.wpaid)):''):(num(draft.paid)>0?grp(num(draft.paid)):''))}
+    ${optBtn('disc','tag',tr('تخفيض','Remise'),num(draft.disc)>0?grp(num(draft.disc)):'')}
+    ${q||walk?'':optBtn('due','clock',tr('موعد التسديد','Échéance'),draft.due?fdateTxt(draft.due):'')}
+    ${optBtn('note','note',tr('ملاحظة','Note'),draft.note?'•':'')}
   </div>
-  <div class="field"><label for="bn">${tr('ملاحظة (اختياري)','Note (facultatif)')}</label><input id="bn" value="${esc(draft.note)}"></div>
+  ${optBox('date',`<div class="field"><label for="bd">${tr('التاريخ','Date')}</label><input id="bd" type="date" value="${esc(draft.date)}"></div>`)}
+  ${q?'':walk?optBox('paid',`<div class="field"><label for="wpaid">${tr('شحال دفع؟','Montant payé')}</label><input id="wpaid" inputmode="decimal" dir="ltr" value="${esc(draft.wpaid||'')}" placeholder="${tr('فارغ = دفع كامل','vide = payé en totalité')}"></div><div class="trow"><span>${tr('الباقي عليه','Reste dû')}</span><b id="wrem"></b></div><span class="note">${tr('اكتب اسمو وهاتفو فوق باش يبان في الديون.','Indiquez nom et téléphone pour le suivre.')}</span>`)
+    :draft.editId?`<b id="tr" hidden></b>`
+    :optBox('paid',`<div class="field"><label for="bp">${tr('شحال دفع الآن؟','Montant payé maintenant')}</label><input id="bp" inputmode="decimal" dir="ltr" value="${esc(draft.paid)}" placeholder="0"></div><div class="trow"><span>${tr('الباقي يدخل في الدين','Reste en crédit')}</span><b id="tr"></b></div>`)}
+  ${optBox('disc',`<div class="field"><label for="bdisc">${tr('التخفيض (دج)','Remise (DA)')}</label><input id="bdisc" inputmode="decimal" dir="ltr" value="${esc(draft.disc||'')}" placeholder="0"></div>`)}
+  ${q||walk?'':optBox('due',`<div class="field"><label for="bdu">${tr('موعد التسديد','Échéance')}</label><div class="grid2"><input id="bdu" type="date" value="${esc(draft.due||'')}" aria-label="${tr('التاريخ','Date')}"><input id="bdut" type="time" value="${esc(draft.dueT||'')}" aria-label="${tr('الساعة','Heure')}"></div><span class="note">${tr('كي يجي الموعد وما خلّصش، التطبيق يرنّ.','À l’échéance, l’application sonne si ce n’est pas payé.')}</span></div>`)}
+  ${optBox('note',`<div class="field"><label for="bn">${tr('ملاحظة','Note')}</label><input id="bn" value="${esc(draft.note)}"></div>`)}
+  <div class="totals"><div class="trow big"><span>${tr('المجموع','Total')}</span><span id="tt"></span></div>${q?`<span class="note">${tr('العرض ما يدخلش في المخزون ولا في الدين.','Le devis ne touche ni au stock ni au crédit.')}</span>`:''}</div>
   <div class="actions"><button class="btn line" data-act="cancel-form">${tr('إلغاء','Annuler')}</button><button class="btn" data-act="save-bon">${q?tr('حفظ العرض','Enregistrer le devis'):tr('حفظ الفاتورة','Enregistrer la vente')}<span class="sbt" id="sbt"></span></button></div>
   </div>`;
 }
@@ -1800,9 +1830,9 @@ function updBon(){
       if(av<=0.005){v.className='avail short';v.innerHTML=tr('غير متوفر في المخزون','Non disponible en stock')}
       else{const short=need[l.typeId]>av+0.005;v.className='avail'+(short?' short':'');v.innerHTML=(short?tr('كمية لا تكفي · ','Quantité insuffisante · '):'')+tr('في المخزون ','En stock ')+M2(av)+(mm>0?' · '+KG(kgOf(av,mm)):'')}}});
   const tkr=$('#tkr');if(tkr){tkr.hidden=!(tk>0);$('#tk').innerHTML=tk>0?KG(tk)+(tkMiss?` <small class="note">${tr('(دون الأنواع التي ليس لها سمك)','(hors types sans épaisseur)')}</small>`:''):''}
-  const t=bonTotal();$('#ta').innerHTML=M2(ta);{const sb=$('#sbt');if(sb)sb.innerHTML=t>0?' · '+DA(t):''}$('#tt').innerHTML=DA(t)+(num(draft.disc)>0?` <small class="note">(${DA(bonSub())} − ${DA(num(draft.disc))})</small>`:'');
+  const t=bonTotal();{const e_=$('#ta');if(e_)e_.innerHTML=M2(ta)}{const sb=$('#sbt');if(sb)sb.innerHTML=t>0?' · '+DA(t):''}$('#tt').innerHTML=DA(t)+(num(draft.disc)>0?` <small class="note">(${DA(bonSub())} − ${DA(num(draft.disc))})</small>`:'');
   if(draft.mode==='walk'||draft.kind==='quote'){$('#bbal').innerHTML='';return}
-  const r=t-num(draft.paid);$('#tr').innerHTML=DA(r);$('#tr').className=r>0?'amt neg':'amt';
+  const r=t-num(draft.paid);{const e_=$('#tr');if(e_){e_.innerHTML=DA(r);e_.className=r>0?'amt neg':'amt'}}
   const s=draft.clientId&&S.stats[draft.clientId],c=S.clients[draft.clientId];
   let h=s?`${tr('الدين الحالي على هذا الحرفي','Crédit actuel de ce client')}: <b class="amt ${s.bal>0?'neg':''}">${DA(s.bal)}</b> · ${tr('بعد هذه الفاتورة','après cette vente')} ${DA(s.bal+r)}`:'';
   const lim=c&&num(c.limit);if(s&&lim>0&&s.bal+r>lim)h+=`<div class="banner" style="margin-top:8px">${ic('alert')}<span>${tr(`تجاوز سقف الدين (${grpTxt(lim)} دج) بـ `,`Dépasse la limite de crédit (${grpTxt(lim)} DA) de `)}${DA(s.bal+r-lim)}</span></div>`;
@@ -1817,9 +1847,10 @@ function payFormHTML(){
   <div class="balbox"><div><div class="note">${pdraft.editId?tr('الدين دون هذا الفارسمو','Crédit sans ce versement'):tr('الدين الحالي','Crédit actuel')}</div><div class="amt ${s.bal>0?'neg':''}" style="font-size:1.4rem" id="pbal">${DA(s.bal)}</div></div></div>
   <div class="field"><label for="pa">${tr('المبلغ المدفوع','Montant payé')}</label><input id="pa" inputmode="decimal" value="${esc(pdraft.amount)}" placeholder="10000"></div>
   <div class="quickpay"><button data-act="pay-full">${tr('تسديد الدين كاملاً','Solder tout le crédit')}</button></div>
-  <div class="field"><label>${tr('طريقة الدفع','Mode de paiement')}</label><div class="chips" style="flex-wrap:wrap">${PAY_M.map(m=>`<button data-act="pay-m" data-v="${m[0]}" class="${(pdraft.method||'cash')===m[0]?'on':''}">${tr(m[1],m[2])}</button>`).join('')}</div></div>
-  <div class="grid2"><div class="field"><label for="pd">${tr('التاريخ','Date')}</label><input id="pd" type="date" value="${esc(pdraft.date)}"></div>
-  <div class="field"><label for="pn">${tr('ملاحظة','Note')}</label><input id="pn" value="${esc(pdraft.note)}" placeholder="${tr('نقداً، شيك…','Espèces, chèque…')}"></div></div>
+  <div class="opts">${optBtn('pm','wallet',payMName(pdraft.method||'cash'),'')}${optBtn('pdate','cal',tr('التاريخ','Date'),pdraft.date&&pdraft.date!==today()?fdateTxt(pdraft.date):'')}${optBtn('pnote','note',tr('ملاحظة','Note'),pdraft.note?'•':'')}</div>
+  ${optBox('pm',`<div class="chips" style="flex-wrap:wrap">${PAY_M.map(m=>`<button data-act="pay-m" data-v="${m[0]}" class="${(pdraft.method||'cash')===m[0]?'on':''}">${tr(m[1],m[2])}</button>`).join('')}</div>`)}
+  ${optBox('pdate',`<div class="field"><label for="pd">${tr('التاريخ','Date')}</label><input id="pd" type="date" value="${esc(pdraft.date)}"></div>`)}
+  ${optBox('pnote',`<div class="field"><label for="pn">${tr('ملاحظة','Note')}</label><input id="pn" value="${esc(pdraft.note)}"></div>`)}
   <div id="prest" class="note"></div>
   <div class="actions"><button class="btn line" data-act="cancel-form">${tr('رجوع','Retour')}</button><button class="btn" data-act="save-pay">${tr('حفظ الفارسمو','Enregistrer le versement')}</button></div>
   ${pdraft.editId?`<button class="btn danger" data-act="del-pay" data-id="${pdraft.editId}">${ic('trash')}${tr('حذف هذا الفارسمو','Supprimer ce versement')}</button>`:''}</div>`;
@@ -1831,18 +1862,19 @@ function clientFormHTML(){
   ${ed?backBtn('open-client',tr('رجوع','Retour'),cdraft.id):backBtn(cdraft.ret==='bon'?'back-bon':'nav-clients',tr('رجوع','Retour'))}
   <h2>${ed?tr('تعديل معلومات الحرفي','Modifier le client'):tr('حرفي جديد','Nouveau client')}</h2>
   <div class="field"><label for="cn">${tr('اسم الحرفي','Nom de l’atelier')}</label><input id="cn" value="${esc(cdraft.name)}"></div>
-  <div class="grid2"><div class="field"><label for="co">${tr('المسؤول','Responsable')}</label><input id="co" value="${esc(cdraft.owner)}"></div>
-  <div class="field"><label for="cp">${tr('الهاتف','Téléphone')}</label><input id="cp" inputmode="tel" dir="ltr" value="${esc(cdraft.phone)}" placeholder="0550 00 00 00"></div></div>
-  <div class="field"><label for="cl">${tr('سقف الدين (اختياري)','Limite de crédit (facultatif)')}</label><input id="cl" inputmode="decimal" dir="ltr" value="${esc(cdraft.limit||'')}" placeholder="${tr('مثلاً 200000','ex. 200000')}"><span class="note">${tr('ينبّهك التطبيق عندما يتجاوز الدين هذا المبلغ.','L’application vous alerte quand le crédit dépasse ce montant.')}</span></div>
-  <div class="card pad stack" style="gap:10px"><b>${tr('أسعار هذا الحرفي (اختياري)','Prix spéciaux pour ce client (facultatif)')}</b>
+  <div class="field"><label for="cp">${tr('الهاتف','Téléphone')}</label><input id="cp" inputmode="tel" dir="ltr" value="${esc(cdraft.phone)}" placeholder="0550 00 00 00"></div>
+  <div class="opts">${optBtn('cown','users',tr('المسؤول','Responsable'),cdraft.owner?esc(cdraft.owner):'')}${optBtn('clim','target',tr('سقف الدين','Plafond'),num(cdraft.limit)>0?grp(num(cdraft.limit)):'')}${optBtn('cpr','tag',tr('أسعار خاصة','Prix spéciaux'),num(cdraft.disc)>0||Object.values(cdraft.sp||{}).some(v=>num(v)>0)?'•':'')}${optBtn('crel','alert',tr('التعامل','Relation'),cdraft.beh||cdraft.stopped?'•':'')}${ed?'':optBtn('cdebt','receipt',tr('دين قديم','Ancien crédit'),num(cdraft.debt)>0?grp(num(cdraft.debt)):'')}</div>
+  ${optBox('cown',`<div class="field"><label for="co">${tr('المسؤول','Responsable')}</label><input id="co" value="${esc(cdraft.owner)}"></div>`)}
+  ${optBox('clim',`<div class="field"><label for="cl">${tr('سقف الدين (اختياري)','Limite de crédit (facultatif)')}</label><input id="cl" inputmode="decimal" dir="ltr" value="${esc(cdraft.limit||'')}" placeholder="${tr('مثلاً 200000','ex. 200000')}"><span class="note">${tr('ينبّهك التطبيق عندما يتجاوز الدين هذا المبلغ.','L’application vous alerte quand le crédit dépasse ce montant.')}</span></div>`)}
+  ${optBox('cpr',`
     <div class="field"><label for="cdisc">${tr('تخفيض على كل الأسعار %','Remise sur tous les prix %')}</label><input id="cdisc" inputmode="decimal" dir="ltr" value="${esc(cdraft.disc||'')}" placeholder="0"></div>
     <details open><summary class="note" style="cursor:pointer">${tr('سعر محدد لأنواع معيّنة (يغلب على التخفيض)','Prix fixe pour certains produits (prioritaire sur la remise)')}</summary>
     <div class="stack" style="gap:6px;margin-top:8px">${activeTypes().map(t=>`<div class="rowflex between" style="gap:10px"><span style="flex:1">${esc(t.name)} <small class="note">/${tr('م²','m²')} · ${tr('عادي','normal')} ${grp(t.price)}</small></span><input data-sp="${esc(t.id)}" inputmode="decimal" dir="ltr" style="width:110px" value="${esc((cdraft.sp||{})[t.id]||'')}" placeholder="${grp(t.price)}"></div>`).join('')}
-    ${activeArts().map(([aid,x])=>`<div class="rowflex between" style="gap:10px"><span style="flex:1">${esc(x.name)} <small class="note">/${esc(unitTr(x.unit))} · ${tr('عادي','normal')} ${grp(x.price)}</small></span><input data-sp="a:${aid}" inputmode="decimal" dir="ltr" style="width:110px" value="${esc((cdraft.sp||{})['a:'+aid]||'')}" placeholder="${grp(x.price)}"></div>`).join('')}</div></details></div>
-  <div class="card pad stack" style="gap:10px"><b>${tr('التعامل مع هذا الحرفي','Relation avec ce client')}</b>
+    ${activeArts().map(([aid,x])=>`<div class="rowflex between" style="gap:10px"><span style="flex:1">${esc(x.name)} <small class="note">/${esc(unitTr(x.unit))} · ${tr('عادي','normal')} ${grp(x.price)}</small></span><input data-sp="a:${aid}" inputmode="decimal" dir="ltr" style="width:110px" value="${esc((cdraft.sp||{})['a:'+aid]||'')}" placeholder="${grp(x.price)}"></div>`).join('')}</div></details>`)}
+  ${optBox('crel',`
     <div class="field"><label for="cbeh">${tr('طريقة الدفع','Comportement de paiement')}</label><select id="cbeh">${[['',tr('تلقائي (حسب دفعاته)','Automatique (selon ses paiements)')],['good',tr('يدفع بانتظام','Paie bien')],['mid',tr('متوسط','Moyen')],['bad',tr('يتماطل في الدفع','Paie mal')]].map(([v,l])=>`<option value="${v}" ${(cdraft.beh||'')===v?'selected':''}>${l}</option>`).join('')}</select></div>
-    <label class="rowflex" style="gap:10px;align-items:center"><input type="checkbox" id="cstop" ${cdraft.stopped?'checked':''} style="width:20px;height:20px">${tr('لم أعد أتعامل معه (يبقى دينه في الديون)','Je ne travaille plus avec lui (son crédit reste visible)')}</label></div>
-  ${ed?'':`<div class="field"><label for="cd">${tr('دين قديم من الكراس (إن وُجد)','Ancien crédit du cahier (s’il y en a)')}</label><input id="cd" inputmode="decimal" value="${esc(cdraft.debt)}" placeholder="0"></div>`}
+    <label class="rowflex" style="gap:10px;align-items:center"><input type="checkbox" id="cstop" ${cdraft.stopped?'checked':''} style="width:20px;height:20px">${tr('لم أعد أتعامل معه (يبقى دينه في الديون)','Je ne travaille plus avec lui (son crédit reste visible)')}</label>`)}
+  ${ed?'':optBox('cdebt',`<div class="field"><label for="cd">${tr('دين قديم من الكراس (إن وُجد)','Ancien crédit du cahier (s’il y en a)')}</label><input id="cd" inputmode="decimal" value="${esc(cdraft.debt)}" placeholder="0"></div>`)}
   <div class="actions"><button class="btn line" data-act="cancel-form">${tr('إلغاء','Annuler')}</button><button class="btn" data-act="save-client">${ed?tr('حفظ التعديل','Enregistrer'):tr('إضافة الحرفي','Ajouter le client')}</button></div></div>`;
 }
 
@@ -2761,10 +2793,11 @@ function expFormHTML(){
   const used=[...new Set(Object.values(S.exps).map(x=>String(x.label||'').trim()).filter(Boolean))],sug=[...new Set([...used,...EXP_CATS.slice(0,5).map(c=>tr(c[1],c[2]))])];
   return `<div class="stack">${backBtn('nav-cash',tr('الصندوق','Caisse'))}
   <h2>${tr('مصروف جديد','Nouvelle dépense')}</h2>
-  <div class="field"><label for="ea">${tr('المبلغ (بالدينار دج، وليس بالسنتيم)','Montant (en DA)')}</label><input id="ea" inputmode="decimal" dir="ltr" value="${esc(edraft.amount)}" placeholder="2500"><span class="note" id="ea-w">${num(edraft.amount)>0?DA(Math.round(num(edraft.amount))):''}</span></div>
-  <div class="field"><label for="el">${tr('نوع المصروف','Nature de la dépense')}</label><input id="el" list="exp-sug" value="${esc(edraft.label||'')}" placeholder="${tr('اكتب ما تريد: نقل، غداء، كراء…','Libre : transport, repas, loyer…')}"><datalist id="exp-sug">${sug.map(x=>`<option value="${esc(x)}"></option>`).join('')}</datalist></div>
-  <div class="grid2"><div class="field"><label for="ed">${tr('التاريخ','Date')}</label><input id="ed" type="date" value="${esc(edraft.date)}"></div><div class="field"><label for="et">${tr('الوقت','Heure')}</label><input id="et" type="time" value="${esc(edraft.time||'')}"></div></div>
-  <div class="field"><label for="en">${tr('ملاحظة (اختياري)','Note (facultatif)')}</label><input id="en" value="${esc(edraft.note)}"></div>
+  <div class="field"><label for="ea">${tr('المبلغ (دج)','Montant (DA)')}</label><input id="ea" inputmode="decimal" dir="ltr" value="${esc(edraft.amount)}" placeholder="2500"><span class="note" id="ea-w">${num(edraft.amount)>0?DA(Math.round(num(edraft.amount))):''}</span></div>
+  <div class="field"><label for="el">${tr('نوع المصروف','Nature de la dépense')}</label><input id="el" list="exp-sug" value="${esc(edraft.label||'')}" placeholder="${tr('نقل، غداء، كراء…','Transport, repas, loyer…')}"><datalist id="exp-sug">${sug.map(x=>`<option value="${esc(x)}"></option>`).join('')}</datalist></div>
+  <div class="opts">${optBtn('edate','cal',tr('التاريخ','Date'),edraft.date&&edraft.date!==today()?fdateTxt(edraft.date):'')}${optBtn('enote','note',tr('ملاحظة','Note'),edraft.note?'•':'')}</div>
+  ${optBox('edate',`<div class="grid2"><div class="field"><label for="ed">${tr('التاريخ','Date')}</label><input id="ed" type="date" value="${esc(edraft.date)}"></div><div class="field"><label for="et">${tr('الوقت','Heure')}</label><input id="et" type="time" value="${esc(edraft.time||'')}"></div></div>`)}
+  ${optBox('enote',`<div class="field"><label for="en">${tr('ملاحظة','Note')}</label><input id="en" value="${esc(edraft.note)}"></div>`)}
   <div class="actions"><button class="btn line" data-act="cancel-form">${tr('إلغاء','Annuler')}</button><button class="btn" data-act="save-exp">${tr('حفظ','Enregistrer')}</button></div></div>`;
 }
 /* وصل المصروف: صفحة + طباعة / PDF */
@@ -3107,7 +3140,7 @@ function render(){
 const FORM_VIEWS=new Set(['close','poform','staff','me','dnote','bon','pay','cform','kin','kadj','exp','ret','sform','spay','tedit','aform','ain','aadj','wipe','odebt','climit','cprice','nform','svcs','import','shop','acct']);
 let navStack=[],navSilent=false;
 const vkey=v=>v?v.name+'|'+(v.id||''):'';
-function go(name,args={}){try{closePop()}catch(_){}leaveAdmin(name);if(name!=='wipe')wdraft=null;const prev=view;view={name,...args};
+function go(name,args={}){try{closePop()}catch(_){}if(name!==optView){optOpen=new Set();optView=name}leaveAdmin(name);if(name!=='wipe')wdraft=null;const prev=view;view={name,...args};
   if(!navSilent&&prev&&prev.name){const k=vkey(view),i=navStack.findIndex(x=>vkey(x)===k);
     if(i>=0)navStack=navStack.slice(0,i);else if(vkey(prev)!==k&&!FORM_VIEWS.has(prev.name)){navStack.push(prev);if(navStack.length>60)navStack.shift()}}
   if(name==='home')navStack=[];
@@ -3335,6 +3368,7 @@ document.addEventListener('change',e=>{
   if(t.id==='at'&&adraft){adraft.typeId=t.value;updAdj()}
   if(t.id==='bc'&&draft){if(t.value==='__new'){t.value=draft.clientId||'';cdraft={name:'',owner:'',phone:'',debt:'',ret:'bon'};go('cform');return}draft.clientId=t.value;reprice();updBon()}
   if(t.dataset&&t.dataset.lf==='typeId'&&draft){const l=draft.lines[+t.dataset.i];if(l.typeId!==t.value){l.typeId=t.value;l.manual=false;l.price=priceOf('glass',l.typeId,draft.mode,draft.clientId);const p=$('#lp'+t.dataset.i);if(p)p.value=l.price;updBon()}}
+  if(t.dataset&&t.dataset.lf==='articleId'&&t.value==='__new'&&draft){const i=+t.dataset.i;t.value=draft.lines[i].articleId||'';return quickArt(i)}
   if(t.dataset&&(t.dataset.lf==='articleId'||t.dataset.lf==='u')&&draft){const i=+t.dataset.i,l=draft.lines[i];if(t.dataset.lf==='articleId'){l.articleId=t.value;l.u='base'}else l.u=t.value;l.manual=false;l.price=priceOf('art',l.articleId,draft.mode,draft.clientId,l.u);
     const card=document.querySelector(`.line-card[data-i="${i}"]`);if(card){card.outerHTML=artLineHTML(l,i)}updBon()}
 });
@@ -3869,6 +3903,7 @@ document.addEventListener('click',async e=>{
   if(a==='nav-clients'){if(b.dataset.f)cfilter=b.dataset.f;ctab='shops';return go('clients')}
   if(a==='cfilter'){cfilter=b.dataset.v;document.querySelectorAll('[data-act=cfilter]').forEach(x=>x.classList.toggle('on',x.dataset.v===cfilter));$('#list').innerHTML=listHTML();return}
   if(a==='nav-set')return go('set');
+  if(a==='opt'){const k=b.dataset.k,box=document.querySelector(`#main [data-ob="${k}"]`);if(!box)return;const on=box.hidden;box.hidden=!on;b.classList.toggle('on',on);b.setAttribute('aria-expanded',on);if(on){optOpen.add(k);const x=box.querySelector('input,select,textarea');if(x)setTimeout(()=>{try{x.focus()}catch(_){}},30)}else{optOpen.delete(k);if(view.name==='bon'||view.name==='pay'||view.name==='exp'||view.name==='cform')render()}return}
   if(a==='nav-more')return go('more');
   if(a==='nav-setsec')return go('setsec');
   if(a==='nav-setbk')return go('setbk');
@@ -4156,7 +4191,7 @@ document.addEventListener('click',async e=>{
   if(a==='kpaid-zero'){kdraft.paid='0';$('#kpaid').value='0';return}
   if(a==='new-in'){const t=activeTypes()[0],e2=S.sk[t.id];kdraft={supplierId:b.dataset.sup||'',paid:'',typeId:t.id,date:today(),sheets:'',sw:String(e2&&e2.last?e2.last.sw:SHEET0.w),sh:String(e2&&e2.last?e2.last.sh:SHEET0.h),costM2:e2&&e2.last?String(e2.last.costM2):'',sell:String(t.price),mm:String(mmOf(t.id)||''),supplier:''};return go('kin')}
   if(a==='new-adj'){adraft={typeId:activeTypes()[0].id,date:today(),real:'',note:''};return go('kadj')}
-  if(a==='add-art'){if(!activeArts().length)return toast(tr('لا توجد أي سلعة. أضفها من المخزون ← السلع.','Aucun article. Ajoutez-en dans Stock ← Articles.'));
+  if(a==='add-art'){if(!activeArts().length){if(isStaff())return toast(tr('لا توجد أي سلعة.','Aucun article.'));return quickArt(-1)}
     draft.lines.push(newArtLine());$('#lines').insertAdjacentHTML('beforeend',lineHTML(draft.lines.at(-1),draft.lines.length-1));document.querySelectorAll('.line-card .x').forEach(x=>x.disabled=draft.lines.length<2);updBon();$('#lq'+(draft.lines.length-1)).focus();return}
   if(a==='add-line'){const nl=newLine();nl.price=priceOf('glass',nl.typeId,draft.mode,draft.clientId);draft.lines.push(nl);$('#lines').insertAdjacentHTML('beforeend',lineHTML(draft.lines.at(-1),draft.lines.length-1));document.querySelectorAll('.line-card .x').forEach(x=>x.disabled=draft.lines.length<2);updBon();$('#lw'+(draft.lines.length-1)).focus();return}
   if(a==='rm-line'){draft.lines.splice(+b.dataset.i,1);$('#lines').innerHTML=draft.lines.map(lineHTML).join('');updBon();return}
