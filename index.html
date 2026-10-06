@@ -479,6 +479,15 @@ body.formv .app{padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
 input.subuse{padding:7px 10px;font-size:.85rem}
 .adddim{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:9px;border:1px dashed var(--accent);border-radius:12px;background:var(--accent-soft);color:var(--accent);font:inherit;font-weight:600;font-size:.86rem;margin-top:-4px;cursor:pointer}
 .adddim .note{font-weight:400}
+.line-card .lr{display:none}
+.opts.tbar{display:grid;grid-template-columns:repeat(auto-fit,minmax(58px,1fr));gap:2px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:5px;box-shadow:var(--shadow)}
+.tbar .opt{flex-direction:column;justify-content:center;gap:3px;min-height:60px;padding:6px 2px;border:0;border-radius:12px;font-size:.72rem;background:none;color:var(--accent);text-align:center;line-height:1.15}
+.tbar .opt .ic{width:22px;height:22px}
+.tbar .opt em{font-size:.68rem;font-weight:700;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tbar .opt.has{color:var(--accent)}
+.tbar .opt.on{background:var(--accent);color:var(--accent-ink)}
+.bsum{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);border:1px solid var(--line);padding:12px 14px;display:grid;gap:8px}
+.sumrow{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-size:.88rem}
 </style>
 </head>
 <body>
@@ -533,7 +542,7 @@ const num=v=>{const n=parseFloat(String(v??'').replace(/\s/g,'').replace(',','.'
 const loc=()=>isFr()?'fr-FR':'en-US';
 const grp=n=>{const r=Math.round(n);return(r<0?'-':'')+Math.abs(r).toLocaleString(loc()).replace(/ /g,' ')};
 const grpTxt=n=>Math.round(n).toLocaleString('en-US');
-const APP_VER=41; // نفس الرقم تاع VERSION في sw.js
+const APP_VER=42; // نفس الرقم تاع VERSION في sw.js
 const CUR=()=>tr('دج','DA');
 const DA=n=>`<bdi dir="ltr">${grp(n)}</bdi>&nbsp;${CUR()}`;
 const dec2=a=>(Math.round(a*100)/100).toLocaleString(loc(),{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -1774,7 +1783,7 @@ function glassLineHTML(l,i){
   ${draft.mode!=='walk'?'':`<div class="lu"><div class="field"><label for="lu${i}">${tr('الاستعمال (اختياري)','Usage (facultatif)')}</label><input id="lu${i}" list="uses" data-lf="use" data-i="${i}" value="${esc(l.use||'')}" placeholder="${tr('طاولة، مرآة، تسريحة…','table, miroir, coiffeuse…')}"></div></div>`}
   <div class="ld"><div class="field"><label for="lw${i}">${tr('العرض (سم)','Largeur (cm)')}</label><input id="lw${i}" inputmode="decimal" data-lf="w" data-i="${i}" value="${esc(l.w)}" placeholder="120"></div>
   <div class="field"><label for="lh${i}">${tr('الطول (سم)','Hauteur (cm)')}</label><input id="lh${i}" inputmode="decimal" data-lf="h" data-i="${i}" value="${esc(l.h)}" placeholder="80"></div>
-  <div class="field"><label for="lq${i}">${tr('العدد','Quantité')}</label><input id="lq${i}" inputmode="numeric" data-lf="qty" data-i="${i}" value="${esc(l.qty)}"></div></div>
+  <div class="field"><label for="lq${i}">${tr('العدد','Quantité')}</label><input id="lq${i}" inputmode="numeric" data-lf="qty" data-i="${i}" value="${String(l.qty)==='1'?'':esc(l.qty)}" placeholder="1"></div></div>
   ${svcBlock(l,i)}
   <div class="lr"><span>${tr('المساحة','Surface')} <b id="la${i}"></b></span><span id="lk${i}"></span><span>${tr('المبلغ','Montant')} <b id="lm${i}"></b></span><span class="note" id="ls${i}"></span><span class="avail" id="lv${i}"></span></div></div>`;
 }
@@ -1817,7 +1826,8 @@ function bonFormHTML(){
   <div id="bbal" class="note"></div>
   <div class="stack" id="lines">${draft.lines.map(lineHTML).join('')}</div>
   <div class="actions"><button class="btn ghost" data-act="add-line">${ic('plus')}${tr('نوع زجاج آخر','Autre type de verre')}</button><button class="btn ghost" data-act="add-art">${ic('plus')}${tr('سلعة / خدمة','Article / service')}</button></div>
-  <div class="opts">
+  <div class="bsum" id="bsum" hidden></div>
+  <div class="opts tbar" role="toolbar">
     ${optBtn('date','cal',tr('التاريخ','Date'),draft.date&&draft.date!==today()?fdateTxt(draft.date):'')}
     ${q||draft.editId&&!walk?'':optBtn('paid','cash',walk?tr('دفع جزء','Acompte'):tr('دفع الآن','Payé'),walk?(draft.wpaid!==''&&draft.wpaid!=null?grp(num(draft.wpaid)):''):(num(draft.paid)>0?grp(num(draft.paid)):''))}
     ${optBtn('disc','tag',tr('تخفيض','Remise'),num(draft.disc)>0?grp(num(draft.disc)):'')}
@@ -3908,7 +3918,7 @@ function subLineHTML(l,i){const h=grpHead(i),k=i-h+1;
   return `<div class="line-card sub" data-i="${i}">
   <div class="ld4"><span class="dimn">${k}</span><input id="lw${i}" inputmode="decimal" data-lf="w" data-i="${i}" value="${esc(l.w)}" placeholder="${tr('العرض','Larg.')}" aria-label="${tr('العرض (سم)','Largeur (cm)')} ${k}">
   <input id="lh${i}" inputmode="decimal" data-lf="h" data-i="${i}" value="${esc(l.h)}" placeholder="${tr('الطول','Haut.')}" aria-label="${tr('الطول (سم)','Hauteur (cm)')} ${k}">
-  <input id="lq${i}" inputmode="numeric" data-lf="qty" data-i="${i}" value="${esc(l.qty)}" placeholder="${tr('العدد','Qté')}" aria-label="${tr('العدد','Quantité')} ${k}">
+  <input id="lq${i}" inputmode="numeric" data-lf="qty" data-i="${i}" value="${String(l.qty)==='1'?'':esc(l.qty)}" placeholder="${tr('العدد 1','Qté 1')}" aria-label="${tr('العدد','Quantité')} ${k}">
   <button class="x" data-act="rm-line" data-i="${i}" aria-label="${tr('إزالة القياس','Retirer la mesure')}">×</button></div>
   ${draft.mode!=='walk'?'':`<input class="subuse" list="uses" data-lf="use" data-i="${i}" value="${esc(l.use||'')}" placeholder="${tr('الاستعمال (اختياري)','Usage (facultatif)')}" aria-label="${tr('الاستعمال','Usage')} ${k}">`}
   ${svcBlock(l,i)}
@@ -3999,6 +4009,24 @@ document.addEventListener('change',e=>{const t=e.target;if(view.name==='bon'&&dr
 /* Enter في خانة العدد = قياس جديد */
 document.addEventListener('keydown',e=>{const t=e.target;if(e.key!=='Enter'||view.name!=='bon'||!draft||!t.dataset||t.dataset.lf!=='qty')return;const i=+t.dataset.i,l=draft.lines[i];if(!l||l.lk==='art')return;
   const nx=draft.lines[i+1];e.preventDefault();if(nx&&nx.sub){const el=$('#lw'+(i+1));if(el)el.focus();return}if(num(l.w)>0&&num(l.h)>0)addDim(i)});
+
+/* ====================== v42: ملخّص الفاتورة في الأخير + العدد فارغ = 1 ====================== */
+function updSum(){const el=$('#bsum');if(!el||!draft||view.name!=='bon')return;
+  const need={},needA={};let ta=0,tk=0,filled=0;
+  for(const l of draft.lines){if(l.lk==='art'){if(S.arts[l.articleId]&&num(l.qty)>0){filled++;needA[l.articleId]=(needA[l.articleId]||0)+num(l.qty)*artFactor(S.arts[l.articleId],l.u)}continue}
+    const c=lineCalc(l);if(!(c.area>0))continue;filled++;ta+=c.bill;need[l.typeId]=(need[l.typeId]||0)+c.area;const mm=mmOf(l.typeId);if(mm>0)tk+=kgOf(c.area,mm)}
+  if(!filled){el.hidden=true;el.innerHTML='';return}
+  const q=draft.kind==='quote',o=draft.editId&&S.bons[draft.editId],rows=[];
+  for(const tid in need){const ty=types().find(x=>x.id===tid)||{name:'?'};let back=0;if(o&&o.kind!=='return')for(const x of o.lines||[])if(x.lk!=='art'&&x.typeId===tid)back+=num(x.area);
+    const av=num((S.sk[tid]||{}).bal)+back,short=need[tid]>av+0.005;
+    rows.push(`<div class="sumrow"><span><b>${esc(ty.name)}</b> · ${M2(need[tid])}</span>${q?'':`<span class="${short?'chip bad':'note'}">${av<=0.005?tr('غير متوفر','Non disponible'):short?tr('لا يكفي · في المخزون ','Insuffisant · stock ')+M2(av):tr('في المخزون ','En stock ')+M2(av)}</span>`}</div>`)}
+  for(const aid in needA){const a=S.arts[aid],e=S.ak[aid];if(!artTracked(a)||!e||(!e.inQ&&!e.adjQ)||q)continue;const short=needA[aid]>e.bal+0.0001;
+    rows.push(`<div class="sumrow"><span><b>${esc(a.name)}</b></span><span class="${short?'chip bad':'note'}">${short?tr('لا يكفي · ','Insuffisant · '):''}${tr('في المخزون ','En stock ')}${artQtyTxt(a,e.bal)}</span></div>`)}
+  el.hidden=false;
+  el.innerHTML=`<div class="sumrow"><span>${tr('المساحة المفوترة','Surface facturée')}</span><b>${M2(ta)}</b></div>${tk>0?`<div class="sumrow"><span>${tr('الوزن التقريبي','Poids approx.')}</span><b>${KG(tk)}</b></div>`:''}${rows.join('')}`}
+{const _u=updBon;updBon=function(){_u();try{updSum()}catch(_){}}}
+document.addEventListener('input',e=>{const t=e.target;if(view.name!=='bon'||!draft||!t.dataset||t.dataset.lf!=='qty')return;const l=draft.lines[+t.dataset.i];
+  if(l&&l.lk!=='art'&&String(t.value).trim()===''){l.qty=1;updBon()}});
 
 function backupFile(){const data={app:'daftar-zujaj',version:2,exportedAt:new Date().toISOString(),docs:LocalDB.dump()};return new File([JSON.stringify(data)],`tumayd-backup-${today()}.json`,{type:'application/json'})}
 function downloadFile(f){const u=URL.createObjectURL(f);const a=document.createElement('a');a.href=u;a.download=f.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}
