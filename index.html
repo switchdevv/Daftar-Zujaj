@@ -488,6 +488,29 @@ input.subuse{padding:7px 10px;font-size:.85rem}
 .tbar .opt.on{background:var(--accent);color:var(--accent-ink)}
 .bsum{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);border:1px solid var(--line);padding:12px 14px;display:grid;gap:8px}
 .sumrow{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-size:.88rem}
+.gcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px;display:grid;gap:8px;box-shadow:var(--shadow)}
+.ghd{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) 40px;gap:6px;align-items:center}
+.ghd select,.ghd input{min-height:40px;padding:6px 10px}
+.ghd .x{width:40px;height:40px}
+.mlist{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.mrow{display:grid;grid-template-columns:20px minmax(0,1fr) auto 32px;gap:6px;align-items:center;padding:4px 8px;min-height:36px;border-bottom:1px solid var(--line);font-size:.9rem;cursor:pointer;background:var(--surface)}
+.mrow:nth-child(even){background:var(--surface2)}
+.mrow:last-child{border-bottom:0}
+.mrow .mn{color:var(--muted);font-size:.75rem;text-align:center}
+.mrow .md{font-weight:700;min-width:0}
+.mrow .md small{font-weight:400;color:var(--muted);font-size:.75rem}
+.mrow .ma{color:var(--muted);font-size:.8rem}
+.mrow .mdel{border:0;background:none;color:var(--debt);width:32px;height:30px;display:grid;place-items:center;padding:0}
+.mrow .mdel .ic{width:17px;height:17px}
+.mrow.editing{outline:3px solid #e8a400;outline-offset:-3px;background:#fff6dc}
+.entry{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) 44px;gap:6px;border-radius:12px;padding:3px;transition:outline-color .15s;outline:3px solid transparent;outline-offset:2px}
+.entry:focus-within,.entry.editing{outline-color:#e8a400}
+.entry input{min-height:40px;padding:6px 10px;min-width:0}
+.eplus{height:40px;border:0;border-radius:11px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;padding:0}
+.eplus .ic{width:22px;height:22px;stroke-width:2.6}
+.gsum{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:.8rem;color:var(--muted)}
+.gsum b{color:var(--ink);font-size:.9rem}
+.tbar .opt .emo{font-size:1.35rem;line-height:1}
 </style>
 </head>
 <body>
@@ -542,7 +565,7 @@ const num=v=>{const n=parseFloat(String(v??'').replace(/\s/g,'').replace(',','.'
 const loc=()=>isFr()?'fr-FR':'en-US';
 const grp=n=>{const r=Math.round(n);return(r<0?'-':'')+Math.abs(r).toLocaleString(loc()).replace(/ /g,' ')};
 const grpTxt=n=>Math.round(n).toLocaleString('en-US');
-const APP_VER=42; // نفس الرقم تاع VERSION في sw.js
+const APP_VER=43; // نفس الرقم تاع VERSION في sw.js
 const CUR=()=>tr('دج','DA');
 const DA=n=>`<bdi dir="ltr">${grp(n)}</bdi>&nbsp;${CUR()}`;
 const dec2=a=>(Math.round(a*100)/100).toLocaleString(loc(),{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -1773,8 +1796,7 @@ function artLineHTML(l,i){const a=S.arts[l.articleId];
   <div class="lr"><span>${tr('المبلغ','Montant')} <b id="lm${i}"></b></span><span class="note" id="ls${i}"></span><span class="avail" id="lv${i}"></span></div></div>`}
 function lineHTML(l,i){
   if(l.lk==='art')return artLineHTML(l,i);
-  if(l.sub)return subLineHTML(l,i)+addDimBtn(i);
-  return glassLineHTML(l,i)+addDimBtn(i)}
+  ensureGroups();return grpFirst(l.g)===i?groupHTML(l.g):''}
 function glassLineHTML(l,i){
   return `<div class="line-card" data-i="${i}">
   <div class="lt"><div class="field"><label for="lt${i}">${tr('نوع الزجاج','Type de verre')}</label><select id="lt${i}" data-lf="typeId" data-i="${i}">${typeOptions(l.typeId)}</select></div>
@@ -1811,7 +1833,7 @@ function quickArt(i){const m=$('#modal');let cat='sil';
     const l=draft.lines[k];l.lk='art';l.articleId=ref.id;l.u='base';l.manual=false;l.price=String(price);if(!l.qty)l.qty='1';
     const wrap=$('#lines');if(wrap)wrap.innerHTML=draft.lines.map(lineHTML).join('');updBon()};
 }
-function optBtn(k,icn,label,val){const on=optOpen.has(k);return `<button type="button" class="opt ${on?'on':''} ${val?'has':''}" data-act="opt" data-k="${k}" aria-expanded="${on}">${ic(icn)}<span>${label}</span>${val?`<em>${val}</em>`:''}</button>`}
+function optBtn(k,icn,label,val){const on=optOpen.has(k);return `<button type="button" class="opt ${on?'on':''} ${val?'has':''}" data-act="opt" data-k="${k}" aria-expanded="${on}">${String(icn).startsWith('e:')?`<span class="emo" aria-hidden="true">${icn.slice(2)}</span>`:ic(icn)}<span>${label}</span>${val?`<em>${val}</em>`:''}</button>`}
 function optBox(k,inner){return `<div class="optbox" data-ob="${k}" ${optOpen.has(k)?'':'hidden'}>${inner}</div>`}
 function bonFormHTML(){
   const walk=draft.mode==='walk',q=draft.kind==='quote';
@@ -1828,11 +1850,11 @@ function bonFormHTML(){
   <div class="actions"><button class="btn ghost" data-act="add-line">${ic('plus')}${tr('نوع زجاج آخر','Autre type de verre')}</button><button class="btn ghost" data-act="add-art">${ic('plus')}${tr('سلعة / خدمة','Article / service')}</button></div>
   <div class="bsum" id="bsum" hidden></div>
   <div class="opts tbar" role="toolbar">
-    ${optBtn('date','cal',tr('التاريخ','Date'),draft.date&&draft.date!==today()?fdateTxt(draft.date):'')}
-    ${q||draft.editId&&!walk?'':optBtn('paid','cash',walk?tr('دفع جزء','Acompte'):tr('دفع الآن','Payé'),walk?(draft.wpaid!==''&&draft.wpaid!=null?grp(num(draft.wpaid)):''):(num(draft.paid)>0?grp(num(draft.paid)):''))}
-    ${optBtn('disc','tag',tr('تخفيض','Remise'),num(draft.disc)>0?grp(num(draft.disc)):'')}
-    ${q||walk?'':optBtn('due','clock',tr('موعد التسديد','Échéance'),draft.due?fdateTxt(draft.due):'')}
-    ${optBtn('note','note',tr('ملاحظة','Note'),draft.note?'•':'')}
+    ${optBtn('date','e:📅',tr('التاريخ','Date'),draft.date&&draft.date!==today()?fdateTxt(draft.date):'')}
+    ${q||draft.editId&&!walk?'':optBtn('paid','e:💵',walk?tr('دفع جزء','Acompte'):tr('دفع الآن','Payé'),walk?(draft.wpaid!==''&&draft.wpaid!=null?grp(num(draft.wpaid)):''):(num(draft.paid)>0?grp(num(draft.paid)):''))}
+    ${optBtn('disc','e:🏷️',tr('تخفيض','Remise'),num(draft.disc)>0?grp(num(draft.disc)):'')}
+    ${q||walk?'':optBtn('due','e:⏰',tr('الموعد','Échéance'),draft.due?fdateTxt(draft.due):'')}
+    ${optBtn('note','e:📝',tr('ملاحظة','Note'),draft.note?'•':'')}
   </div>
   ${optBox('date',`<div class="field"><label for="bd">${tr('التاريخ','Date')}</label><input id="bd" type="date" value="${esc(draft.date)}"></div>`)}
   ${q?'':walk?optBox('paid',`<div class="field"><label for="wpaid">${tr('شحال دفع؟','Montant payé')}</label><input id="wpaid" inputmode="decimal" dir="ltr" value="${esc(draft.wpaid||'')}" placeholder="${tr('فارغ = دفع كامل','vide = payé en totalité')}"></div><div class="trow"><span>${tr('الباقي عليه','Reste dû')}</span><b id="wrem"></b></div><span class="note">${tr('اكتب اسمو وهاتفو فوق باش يبان في الديون.','Indiquez nom et téléphone pour le suivre.')}</span>`)
@@ -1842,7 +1864,7 @@ function bonFormHTML(){
   ${q||walk?'':optBox('due',`<div class="field"><label for="bdu">${tr('موعد التسديد','Échéance')}</label><div class="grid2"><input id="bdu" type="date" value="${esc(draft.due||'')}" aria-label="${tr('التاريخ','Date')}"><input id="bdut" type="time" value="${esc(draft.dueT||'')}" aria-label="${tr('الساعة','Heure')}"></div><span class="note">${tr('كي يجي الموعد وما خلّصش، التطبيق يرنّ.','À l’échéance, l’application sonne si ce n’est pas payé.')}</span></div>`)}
   ${optBox('note',`<div class="field"><label for="bn">${tr('ملاحظة','Note')}</label><input id="bn" value="${esc(draft.note)}"></div>`)}
   <div class="totals"><div class="trow big"><span>${tr('المجموع','Total')}</span><span id="tt"></span></div>${q?`<span class="note">${tr('العرض ما يدخلش في المخزون ولا في الدين.','Le devis ne touche ni au stock ni au crédit.')}</span>`:''}</div>
-  <div class="actions"><button class="btn line" data-act="cancel-form">${tr('إلغاء','Annuler')}</button><button class="btn" data-act="save-bon">${q?tr('حفظ العرض','Enregistrer le devis'):tr('حفظ الفاتورة','Enregistrer la vente')}<span class="sbt" id="sbt"></span></button></div>
+  <div class="actions"><button class="btn line" data-act="cancel-form">${tr('إلغاء','Annuler')}</button><button class="btn" data-act="save-bon">${tr('حفظ','Enregistrer')}</button></div>
   </div>`;
 }
 function bonSub(){return draft.lines.reduce((s,l)=>s+lineCalc(l).amount,0)}
@@ -4028,6 +4050,57 @@ function updSum(){const el=$('#bsum');if(!el||!draft||view.name!=='bon')return;
 document.addEventListener('input',e=>{const t=e.target;if(view.name!=='bon'||!draft||!t.dataset||t.dataset.lf!=='qty')return;const l=draft.lines[+t.dataset.i];
   if(l&&l.lk!=='art'&&String(t.value).trim()===''){l.qty=1;updBon()}});
 
+/* ====================== v43: كل نوع زجاج = كارطة صغيرة، سطر كتابة واحد + زر «+» ====================== */
+let gSeq=0;
+function ensureGroups(){if(!draft)return;let prev=null;for(const l of draft.lines){if(l.lk==='art'){prev=null;continue}
+  if(!l.g)l.g=l.sub&&prev&&prev.g?prev.g:'g'+(++gSeq)+Math.random().toString(36).slice(2,5);
+  l.sub=!!(prev&&prev.g===l.g);prev=l}}
+const grpLines=g=>draft.lines.map((l,i)=>[l,i]).filter(([l])=>l.lk!=='art'&&l.g===g);
+const grpFirst=g=>draft.lines.findIndex(l=>l.lk!=='art'&&l.g===g);
+const isMeas=l=>num(l.w)>0&&num(l.h)>0;
+function entOf(g){draft.ent=draft.ent||{};return draft.ent[g]||(draft.ent[g]={w:'',h:'',qty:'',use:'',svc:{},ref:null})}
+function grpSumTxt(g){let n=0,a=0,m=0;for(const [l] of grpLines(g)){if(!isMeas(l))continue;const c=lineCalc(l);n++;a+=c.bill;m+=c.amount}
+  return n?`<span>${n} ${n>1?tr('قياسات','mesures'):tr('قياس','mesure')} · ${M2(a)}</span><b>${DA(m)}</b>`:`<span>${tr('اكتب القياس واضغط +','Saisissez la mesure puis +')}</span>`}
+function groupHTML(g){const L=grpLines(g),[h,hi]=L[0],e=entOf(g),walk=draft.mode==='walk',sv=svcs().filter(x=>num(x.price)>0);let k=0;
+  const meas=L.filter(([l])=>isMeas(l));
+  return `<div class="gcard" data-g="${g}">
+  <div class="ghd"><select id="lt${hi}" data-lf="typeId" data-i="${hi}" aria-label="${tr('نوع الزجاج','Type de verre')}">${typeOptions(h.typeId)}</select>
+  <input id="lp${hi}" inputmode="decimal" data-lf="price" data-i="${hi}" value="${esc(h.price)}" aria-label="${tr('سعر م²','Prix m²')}" placeholder="${tr('سعر م²','Prix m²')}">
+  <button class="x" data-act="rm-grp" data-g="${g}" aria-label="${tr('حذف هذا النوع','Retirer ce type')}">×</button></div>
+  ${meas.length?`<div class="mlist">${meas.map(([l,i])=>{k++;const c=lineCalc(l),st=[];for(const x of sv){const v=(l.svc||{})[x.id];if(v)st.push(svcName(x)+(x.unit==='ml'?'':'×'+num(v)))}
+    return `<div class="mrow ${e.ref===l?'editing':''}" data-act="m-edit" data-i="${i}" role="button" tabindex="0"><span class="mn">${k}</span><span class="md"><bdi dir="ltr">${cf1(l.w)} × ${cf1(l.h)}</bdi>&nbsp; <bdi dir="ltr">×${esc(l.qty||1)}</bdi>${l.use?` <small>${esc(l.use)}</small>`:''}${st.length?` <small>${esc(st.join('، '))}</small>`:''}</span><span class="ma">${M2(c.bill)}</span><button class="mdel" data-act="m-del" data-i="${i}" aria-label="${tr('حذف القياس','Supprimer la mesure')}">${ic('trash')}</button></div>`}).join('')}</div>`:''}
+  <div class="entry ${e.ref?'editing':''}"><input data-ent="w" data-g="${g}" inputmode="decimal" value="${esc(e.w)}" placeholder="${tr('العرض','Larg.')}" aria-label="${tr('العرض (سم)','Largeur (cm)')}">
+  <input data-ent="h" data-g="${g}" inputmode="decimal" value="${esc(e.h)}" placeholder="${tr('الطول','Haut.')}" aria-label="${tr('الطول (سم)','Hauteur (cm)')}">
+  <input data-ent="qty" data-g="${g}" inputmode="numeric" value="${esc(e.qty)}" placeholder="${tr('العدد 1','Qté 1')}" aria-label="${tr('العدد','Quantité')}" enterkeyhint="done">
+  <button class="eplus" data-act="ent-add" data-g="${g}" aria-label="${tr('أضف القياس','Ajouter la mesure')}">${e.ref?ic('check'):ic('plus')}</button></div>
+  ${walk?`<input class="subuse" list="uses" data-ent="use" data-g="${g}" value="${esc(e.use||'')}" placeholder="${tr('الاستعمال (اختياري)','Usage (facultatif)')}">`:''}
+  ${sv.length?`<div class="svc"><span class="note">${tr('التشطيب','Façonnage')}:</span>${sv.map(x=>x.unit==='ml'?`<button type="button" class="svc-chip ${(e.svc||{})[x.id]?'on':''}" data-act="ent-svc" data-g="${g}" data-s="${esc(x.id)}">${esc(svcName(x))}</button>`:`<label class="svc-n">${esc(svcName(x))} <input inputmode="numeric" data-ent="svc" data-s="${esc(x.id)}" data-g="${g}" value="${esc((e.svc||{})[x.id]||'')}" placeholder="0"></label>`).join('')}</div>`:''}
+  <div class="gsum" id="gs-${g}">${grpSumTxt(g)}</div></div>`}
+function updGroupSums(){if(!draft||view.name!=='bon')return;const seen=new Set();for(const l of draft.lines){if(l.lk==='art'||!l.g||seen.has(l.g))continue;seen.add(l.g);const el=$('#gs-'+l.g);if(el)el.innerHTML=grpSumTxt(l.g)}}
+{const _u=updBon;updBon=function(){_u();try{updGroupSums()}catch(_){}}}
+function focusEnt(g,f){setTimeout(()=>{const i=document.querySelector(`[data-ent="${f||'w'}"][data-g="${g}"]`);if(i){i.focus();try{i.scrollIntoView({block:'nearest',behavior:'smooth'})}catch(_){}}},30)}
+function entAdd(g,quiet){const e=entOf(g),w=num(e.w),h=num(e.h);if(!(w>0&&h>0)){if(!quiet){toast(tr('اكتب العرض والطول.','Saisissez largeur et hauteur.'));focusEnt(g,w>0?'h':'w')}return false}
+  const q=String(e.qty).trim()===''?1:Math.max(1,Math.round(num(e.qty))),L=grpLines(g),[head]=L[0],vals={w:String(e.w).trim(),h:String(e.h).trim(),qty:q,use:String(e.use||'').trim(),svc:{...(e.svc||{})}};
+  if(e.ref&&draft.lines.includes(e.ref))Object.assign(e.ref,vals);
+  else{const empty=L.find(([l])=>!isMeas(l));if(empty)Object.assign(empty[0],vals);else{const last=L[L.length-1][1];draft.lines.splice(last+1,0,{typeId:head.typeId,price:head.price,manual:head.manual,g,sub:true,...vals})}}
+  draft.ent[g]={w:'',h:'',qty:'',use:e.use||'',svc:{...(e.svc||{})},ref:null};if(!quiet){linesRender();focusEnt(g)}return true}
+function commitPending(){if(!draft||!draft.ent)return;let ch=false;for(const g in draft.ent){const e=draft.ent[g];if(grpFirst(g)<0)continue;if(num(e.w)>0&&num(e.h)>0)ch=entAdd(g,true)||ch}if(ch)linesRender()}
+/* قبل الحفظ: القياس المكتوب وما تزادش يتزاد وحدو */
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act="save-bon"]');if(b&&view.name==='bon')commitPending()},true);
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]');if(!b||view.name!=='bon'||!draft)return;const a=b.dataset.act,g=b.dataset.g;
+  if(a==='ent-add'){entAdd(g);return}
+  if(a==='ent-svc'){const en=entOf(g);en.svc=en.svc||{};en.svc[b.dataset.s]=!en.svc[b.dataset.s];b.classList.toggle('on',!!en.svc[b.dataset.s]);return}
+  if(a==='m-del'){e.stopPropagation();const i=+b.dataset.i,l=draft.lines[i];if(!l)return;const L=grpLines(l.g);
+    for(const k in draft.ent||{})if(draft.ent[k].ref===l)draft.ent[k].ref=null;
+    if(L.length>1){if(i===L[0][1])draft.lines[i+1].sub=false;draft.lines.splice(i,1)}else Object.assign(l,{w:'',h:'',qty:1,svc:{}});linesRender();return}
+  if(a==='m-edit'){if(e.target.closest('.mdel'))return;const l=draft.lines[+b.dataset.i];if(!l)return;draft.ent=draft.ent||{};draft.ent[l.g]={w:String(l.w),h:String(l.h),qty:String(l.qty)==='1'?'':String(l.qty),use:l.use||'',svc:{...(l.svc||{})},ref:l};linesRender();focusEnt(l.g);return}
+  if(a==='rm-grp'){const L=grpLines(g);if(!L.length)return;draft.lines=draft.lines.filter(l=>l.lk==='art'||l.g!==g);if(draft.ent)delete draft.ent[g];if(!draft.lines.length){const nl=newLine();nl.price=priceOf('glass',nl.typeId,draft.mode,draft.clientId);draft.lines.push(nl)}linesRender();return}
+});
+document.addEventListener('input',e=>{const t=e.target;if(view.name!=='bon'||!draft||!t.dataset||!t.dataset.ent)return;const en=entOf(t.dataset.g);
+  if(t.dataset.ent==='svc'){en.svc=en.svc||{};en.svc[t.dataset.s]=t.value;return}en[t.dataset.ent]=t.value});
+document.addEventListener('keydown',e=>{const t=e.target;if(e.key!=='Enter'||view.name!=='bon'||!draft||!t.dataset||!t.dataset.ent)return;e.preventDefault();const g=t.dataset.g,f=t.dataset.ent;
+  const nx=f==='w'?'h':f==='h'?'qty':null;if(nx){const i=document.querySelector(`[data-ent="${nx}"][data-g="${g}"]`);if(i)i.focus();return}entAdd(g)});
+
 function backupFile(){const data={app:'daftar-zujaj',version:2,exportedAt:new Date().toISOString(),docs:LocalDB.dump()};return new File([JSON.stringify(data)],`tumayd-backup-${today()}.json`,{type:'application/json'})}
 function downloadFile(f){const u=URL.createObjectURL(f);const a=document.createElement('a');a.href=u;a.download=f.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}
 async function copyText(txt,fallbackSel){
@@ -4346,7 +4419,7 @@ document.addEventListener('click',async e=>{
   if(a==='new-adj'){adraft={typeId:activeTypes()[0].id,date:today(),real:'',note:''};return go('kadj')}
   if(a==='add-art'){if(!activeArts().length){if(isStaff())return toast(tr('لا توجد أي سلعة.','Aucun article.'));return quickArt(-1)}
     draft.lines.push(newArtLine());$('#lines').insertAdjacentHTML('beforeend',lineHTML(draft.lines.at(-1),draft.lines.length-1));document.querySelectorAll('.line-card .x').forEach(x=>x.disabled=draft.lines.length<2);updBon();$('#lq'+(draft.lines.length-1)).focus();return}
-  if(a==='add-line'){const nl=newLine();nl.price=priceOf('glass',nl.typeId,draft.mode,draft.clientId);draft.lines.push(nl);$('#lines').insertAdjacentHTML('beforeend',lineHTML(draft.lines.at(-1),draft.lines.length-1));document.querySelectorAll('.line-card .x').forEach(x=>x.disabled=draft.lines.length<2);updBon();$('#lw'+(draft.lines.length-1)).focus();return}
+  if(a==='add-line'){const nl=newLine();nl.price=priceOf('glass',nl.typeId,draft.mode,draft.clientId);draft.lines.push(nl);$('#lines').insertAdjacentHTML('beforeend',lineHTML(draft.lines.at(-1),draft.lines.length-1));document.querySelectorAll('.line-card .x').forEach(x=>x.disabled=draft.lines.length<2);updBon();focusEnt(draft.lines.at(-1).g);return}
   if(a==='rm-line'){const i=+b.dataset.i;if(draft.lines[i]&&!draft.lines[i].sub&&draft.lines[i+1]&&draft.lines[i+1].sub)draft.lines[i+1].sub=false;draft.lines.splice(i,1);linesRender();return}
   if(a==='paid-zero'){draft.paid='0';$('#bp').value='0';updBon();return}
   if(a==='paid-full'){draft.paid=String(bonTotal());$('#bp').value=draft.paid;updBon();return}
