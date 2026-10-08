@@ -655,6 +655,26 @@ input.subuse{padding:7px 10px;font-size:.85rem}
 .big2{font-size:1.15rem;color:var(--accent)}
 .qrbox{display:grid;place-items:center;min-height:40px}
 .qrbox svg{width:190px;height:190px;background:#fff;border-radius:10px}
+.syncdot{position:absolute;top:-4px;inset-inline-start:-4px;width:16px;height:16px;border-radius:50%;border:3px solid var(--bg);background:#9aa5a3;padding:0;cursor:pointer;z-index:2}
+.syncdot.ok{background:#22a35a}.syncdot.warn{background:#e08a1e}.syncdot.bad{background:var(--debt)}
+.ktab3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.ktab3 button{border:2px solid var(--line);background:var(--surface);border-radius:14px;padding:10px 4px;font:inherit;font-weight:700;font-size:.9rem;color:var(--muted);cursor:pointer}
+.ktab3 button.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.pick{display:grid;gap:6px}
+.pickin{display:flex;align-items:center;gap:8px;border:2px solid var(--accent);border-radius:12px;padding:2px 10px;background:var(--surface)}
+.pickin input{border:0;background:none;box-shadow:none;padding:9px 0;flex:1;min-width:0;font-size:1rem;outline:none}
+.pickl{display:grid;border:1px solid var(--line);border-radius:12px;overflow:hidden;max-height:260px;overflow-y:auto}
+.pki{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;border:0;border-bottom:1px solid var(--line);background:var(--surface);font:inherit;color:var(--ink);text-align:start;cursor:pointer}
+.pki:last-child{border-bottom:0}.pki small{color:var(--muted);font-size:.76rem;white-space:nowrap}
+.pki.on{background:var(--accent-soft)}.pki.new{color:var(--accent)}
+.pkm{padding:8px 12px}
+.picksel{background:var(--accent-soft);border-radius:12px;padding:9px 12px;font-size:.92rem}
+.pksheet .pkl{display:grid;border:1px solid var(--line);border-radius:12px;overflow-y:auto;max-height:52vh}
+.bigin{font-size:1.3rem!important;font-weight:700}
+.dvt{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+.dvh{display:flex;justify-content:space-between;padding:8px 12px;background:var(--sunk);font-weight:700;font-size:.86rem}
+.dvr{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line);font-size:.88rem}
+.dvtot{display:flex;justify-content:space-between;padding:12px;font-weight:700;font-size:1.15rem;color:var(--accent);border-top:2px solid var(--accent)}
 </style>
 </head>
 <body>
@@ -663,7 +683,7 @@ input.subuse{padding:7px 10px;font-size:.85rem}
   <aside id="side" aria-label="Menu"></aside>
   <header class="top"><div class="in">
     <div class="brand" id="brand"></div>
-    <div class="rowflex" style="gap:8px"><button class="syncchip" data-act="nav-cloud" id="syncchip" hidden></button><button class="iconbtn" data-act="help" id="helpbtn"></button><button class="iconbtn" data-act="nav-search" id="searchbtn"></button></div>
+    <div class="rowflex" style="gap:8px"><button class="iconbtn" data-act="help" id="helpbtn"></button><button class="iconbtn" data-act="nav-search" id="searchbtn"></button></div>
   </div></header>
   <main class="app" id="main"></main>
   <nav class="bottom"><div class="in" id="nav"></div></nav>
@@ -709,7 +729,7 @@ const num=v=>{const n=parseFloat(String(v??'').replace(/\s/g,'').replace(',','.'
 const loc=()=>isFr()?'fr-FR':'en-US';
 const grp=n=>{const r=Math.round(n);return(r<0?'-':'')+Math.abs(r).toLocaleString(loc()).replace(/ /g,' ')};
 const grpTxt=n=>Math.round(n).toLocaleString('en-US');
-const APP_VER=49; // نفس الرقم تاع VERSION في sw.js
+const APP_VER=50; // نفس الرقم تاع VERSION في sw.js
 const CUR=()=>tr('دج','DA');
 const DA=n=>`<bdi dir="ltr">${grp(n)}</bdi>&nbsp;${CUR()}`;
 const dec2=a=>(Math.round(a*100)/100).toLocaleString(loc(),{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -1497,7 +1517,7 @@ function moreHTML(){
     row('new-pay','cash',tr('فارسمو','Versement'),tr('حرفي دفع جزء من دينو','Un artisan paie')),
     row('nav-orders','cut',tr('الطلبيات','Commandes'),tr('قيد القص، واجدة، تسلّمها','À découper, prêtes, livrées')),
     row('nav-appts','cal',tr('المواعيد','Rendez-vous'),tr('تركيب، قياس، توصيل','Pose, métré, livraison')),
-    row('nav-calc','grid',tr('حاسبة الكونتوار','Calculette'),tr('شحال تجي القطعة؟','Prix rapide d’une pièce')),
+    row('nav-calc','grid',KT(),tr('سعر سريع للزبون: زجاج، سلعة، خدمة','Prix rapide : verre, articles, services')),
     row('nav-search','search',tr('بحث','Recherche'),tr('زبون، فاتورة، رقم هاتف…','Client, facture, téléphone…'))])}
   <div class="set-group">${row('nav-guide','book',tr('دليل الاستعمال','Guide d’utilisation'),tr('شرح كل حاجة خطوة بخطوة','Tout expliqué pas à pas'))}${row('nav-set','sliders',tr('الإعدادات','Réglages'),tr('الحساب، المحل، الأسعار، النسخة الاحتياطية','Compte, magasin, prix, sauvegarde'))}</div>
   <button class="btn line full" data-act="lock">${ic('lock')}${tr('قفل التطبيق والخروج','Verrouiller et quitter')}</button>
@@ -4792,13 +4812,13 @@ function bonStSeg(){return `<div class="stseg"><span class="note">${tr('الطل
 
 /* ---------- ③ الحاسبة ---------- */
 let cald=null;
-function calcInit(){const t=activeTypes()[0];cald={typeId:t?t.id:'',mode:'walk',w:'',h:'',qty:'',svc:{},rows:[]}}
-function calcPiece(){if(!cald)calcInit();const price=priceOf('glass',cald.typeId,cald.mode,'');const l={typeId:cald.typeId,price,w:cald.w,h:cald.h,qty:cald.qty||1,svc:cald.svc};return{l,c:lineCalc(l),price}}
+function calcInit49(){const t=activeTypes()[0];cald={typeId:t?t.id:'',mode:'walk',w:'',h:'',qty:'',svc:{},rows:[]}}
+function calcPiece49(){if(!cald)calcInit();const price=priceOf('glass',cald.typeId,cald.mode,'');const l={typeId:cald.typeId,price,w:cald.w,h:cald.h,qty:cald.qty||1,svc:cald.svc};return{l,c:lineCalc(l),price}}
 function calcSvcTxt(svc){const st=[];for(const x of svcs()){const v=(svc||{})[x.id];if(!v||!(num(x.price)>0))continue;st.push(x.unit==='ml'?svcName(x):svcName(x)+'×'+num(v))}return st.join('، ')}
-function calcRowsAll(){const r=[...cald.rows];const p=calcPiece();if(num(cald.w)>0&&num(cald.h)>0)r.push({...p.l,amount:p.c.amount,area:p.c.bill,cur:true});return r}
-function calcText(){const R=calcRowsAll();let tot=0;const L=R.map(r=>{tot+=r.amount;const ty=(types().find(t=>t.id===r.typeId)||{}).name||'';const sv=calcSvcTxt(r.svc);return `${ty} ${cf1(r.w)}×${cf1(r.h)} ${tr('سم','cm')}${num(r.qty)>1?' × '+num(r.qty):''}${sv?' + '+sv:''} = ${grpTxt(r.amount)} ${CUR()}`});
+function calcRowsAll49(){const r=[...cald.rows];const p=calcPiece();if(num(cald.w)>0&&num(cald.h)>0)r.push({...p.l,amount:p.c.amount,area:p.c.bill,cur:true});return r}
+function calcText49(){const R=calcRowsAll();let tot=0;const L=R.map(r=>{tot+=r.amount;const ty=(types().find(t=>t.id===r.typeId)||{}).name||'';const sv=calcSvcTxt(r.svc);return `${ty} ${cf1(r.w)}×${cf1(r.h)} ${tr('سم','cm')}${num(r.qty)>1?' × '+num(r.qty):''}${sv?' + '+sv:''} = ${grpTxt(r.amount)} ${CUR()}`});
   if(R.length>1)L.push(`${tr('المجموع','Total')}: ${grpTxt(tot)} ${CUR()}`);L.push(shopTail());return L.join('\n')}
-function calcHTML(){if(!cald)calcInit();const sv=svcs().filter(x=>num(x.price)>0),ts=activeTypes();
+function calcHTML49(){if(!cald)calcInit();const sv=svcs().filter(x=>num(x.price)>0),ts=activeTypes();
   return `<div class="stack">${backBtn('nav-home',tr('الرئيسية','Accueil'))}<h2>🧮 ${tr('شحال تجي؟','Combien ça fait ?')}</h2>
   <div class="calc card pad stack" style="gap:10px">
    <div class="seg"><button data-act="cal-m" data-v="walk" class="${cald.mode==='walk'?'on':''}">🛍️ ${tr('زبون عادي','Particulier')}</button><button data-act="cal-m" data-v="shop" class="${cald.mode==='shop'?'on':''}">🧰 ${tr('حرفي','Artisan')}</button></div>
@@ -4811,19 +4831,19 @@ function calcHTML(){if(!cald)calcInit();const sv=svcs().filter(x=>num(x.price)>0
   <div class="apb" style="justify-content:center"><a class="pb g" id="cal-wa" href="#" target="_blank" rel="noopener">💬 ${tr('بعثها واتساب','Envoyer WhatsApp')}</a><button class="pb" data-act="cal-copy">📋 ${tr('نسخ','Copier')}</button><button class="pb" data-act="cal-bon">🧾 ${tr('ديرها فاتورة','Facturer')}</button><button class="pb" data-act="cal-quote">📋 ${tr('عرض سعر','Devis')}</button><button class="pb" data-act="cal-clear">🧹</button></div>
   <div id="copyfall"></div>
   <p class="note">${tr('الحاسبة ما تحفظ والو. السعر من «الأسعار» (سعر الزبون العادي ولا الحرفي) + التشطيب + الحد الأدنى.','Rien n’est enregistré. Prix selon vos tarifs + façonnage + minimum.')}</p></div>`}
-function calcUpd(){if(view.name!=='calc'||!cald)return;const p=calcPiece(),el=$('#cres');
+function calcUpd49(){if(view.name!=='calc'||!cald)return;const p=calcPiece(),el=$('#cres');
   if(el)el.innerHTML=num(cald.w)>0&&num(cald.h)>0?`<small class="note">${M2(p.c.bill)} · ${grp(p.price)} ${tr('دج/م²','DA/m²')}${p.c.svc>0?' + '+tr('تشطيب','façonnage')+' '+grp(p.c.svc):''}</small><b>${DA(p.c.amount)}</b>`:`<small class="note">${grp(p.price)} ${tr('دج/م²','DA/m²')}</small><b class="note">${tr('اكتب القياس','Saisissez la mesure')}</b>`;
   const R=calcRowsAll(),tot=R.reduce((s,r)=>s+r.amount,0),cr=$('#crows');
   if(cr)cr.innerHTML=cald.rows.length?`<div class="tl">${cald.rows.map((r,i)=>{const ty=(types().find(t=>t.id===r.typeId)||{}).name||'';const sv=calcSvcTxt(r.svc);return `<div class="ev"><div class="evh"><span>${esc(ty)} <bdi dir="ltr">${cf1(r.w)}×${cf1(r.h)}${num(r.qty)>1?' ×'+num(r.qty):''}</bdi>${sv?' + '+esc(sv):''}</span><span class="cacts" style="align-items:center"><b>${DA(r.amount)}</b><button class="mini-btn" data-act="cal-rm" data-i="${i}" aria-label="${tr('نحّي','Retirer')}">×</button></span></div></div>`}).join('')}<div class="ev"><div class="evh"><b>${tr('المجموع','Total')}</b><b class="big2">${DA(tot)}</b></div></div></div>`:'';
   const wa=$('#cal-wa');if(wa)wa.href=R.length?waBare(calcText()):'#'}
-function calcToDraft(kind){const R=calcRowsAll();if(!R.length)return toast(tr('اكتب قياس واحد على الأقل.','Saisissez au moins une mesure.'));
+function calcToDraft49(kind){const R=calcRowsAll();if(!R.length)return toast(tr('اكتب قياس واحد على الأقل.','Saisissez au moins une mesure.'));
   const mode=cald.mode==='shop'?'shop':'walk';startBon('',kind==='quote'?'walk':mode,kind);if(!draft)return;
   draft.lines=groupLines(R.map(r=>({typeId:r.typeId,price:r.price,w:String(r.w),h:String(r.h),qty:String(r.qty||1),use:'',svc:{...(r.svc||{})},manual:true})));draft.ent={};draft.open='__none';render()}
 
 /* ---------- ④ المزامنة: العلامة فوق + الأجهزة + ربط جهاز جديد ---------- */
 const isMob=/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 const LINK_EMAIL=(()=>{try{const m=location.hash.match(/#link=([^&]+)/);if(m){const e=decodeURIComponent(m[1]);lsSet('gg-link',e);history.replaceState(null,'',location.pathname+location.search);return e}}catch(_){}return lsGet('gg-link','')||''})();
-function chipUpdate(){const el=$('#syncchip');if(!el)return;if(!unlocked){el.hidden=true;return}el.hidden=false;let cls='off',t=tr('المزامنة طافية','Synchro désactivée');
+function chipUpdate49(){const el=$('#syncchip');if(!el)return;if(!unlocked){el.hidden=true;return}el.hidden=false;let cls='off',t=tr('المزامنة طافية','Synchro désactivée');
   if(cloudOn()){if(Sync.state==='ok'&&!Sync.pending){cls='ok';t=tr('متزامن','Synchro')}else if(Sync.state==='ok'||Sync.state==='connecting'){cls='warn';t=Sync.pending?tr('يبعث…','Envoi…'):tr('يتصل…','Connexion…')}else if(Sync.state==='offline'){cls='warn';t=tr('بلا انترنت','Hors ligne')}else{cls='bad';t=tr('مشكل','Problème')}}
   el.className='syncchip '+cls;el.title=t;el.setAttribute('aria-label',tr('المزامنة','Synchro')+': '+t);el.innerHTML=`☁️<i></i><span>${t}</span>`}
 {const _su=syncUI;syncUI=function(){_su();try{chipUpdate()}catch(_){}}}
@@ -4851,7 +4871,7 @@ function homeTilesHTML(){const td=today(),nAp=Object.values(S.appts).filter(a=>a
     <button class="qa t1" data-act="nav-clients"><span class="ib emo-ib">👥</span>${tr('الزبائن','Clients')}<span class="qs">${tr('حرفيين وزبائن عاديين','Artisans et particuliers')}</span></button>
     <button class="qa t2" data-act="nav-orders"><span class="ib emo-ib">✂️</span>${tr('الطلبيات','Commandes')}<span class="qs">${nPrep||nReady?`${nPrep} ${tr('قيد القص','à découper')} · ${nReady} ${tr('واجدة','prêtes')}`:tr('ما كاين والو','Rien en cours')}</span></button>
     <button class="qa t3" data-act="nav-appts"><span class="ib emo-ib">📅</span>${tr('المواعيد','Rendez-vous')}<span class="qs">${nAp?`${nAp} ${tr('اليوم','aujourd’hui')}`:tr('تركيب، قياس، توصيل','Pose, métré, livraison')}</span></button>
-    <button class="qa t4" data-act="nav-calc"><span class="ib emo-ib">🧮</span>${tr('حاسبة','Calculette')}<span class="qs">${tr('شحال تجي؟','Combien ?')}</span></button>
+    <button class="qa t4" data-act="nav-calc"><span class="ib emo-ib">🧮</span>${KT()}<span class="qs">${tr('زجاج، سلعة، خدمة','Verre, articles, services')}</span></button>
     <button class="qa t5 wide" data-act="new-in"><span class="ib">${ic('inbox')}</span>${tr('إدخال سلعة','Entrée stock')}<span class="qs">${tr('زجاج أو سلع','Verre ou articles')}</span></button>
   </div>`}
 
@@ -4884,12 +4904,10 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]
   /* الحاسبة */
   if(a==='nav-calc'){if(!cald)calcInit();return go('calc')}
   if(a==='cal-m'){cald.mode=b.dataset.v;return render()}
-  if(a==='cal-t'){cald.typeId=b.dataset.v;document.querySelectorAll('[data-act=cal-t]').forEach(x=>x.classList.toggle('on',x.dataset.v===cald.typeId));return calcUpd()}
   if(a==='cal-s'){cald.svc[b.dataset.s]=!cald.svc[b.dataset.s];b.classList.toggle('on',!!cald.svc[b.dataset.s]);return calcUpd()}
-  if(a==='cal-add'){if(!(num(cald.w)>0&&num(cald.h)>0))return toast(tr('اكتب العرض والطول.','Saisissez largeur et hauteur.'));const p=calcPiece();cald.rows.push({...p.l,price:p.price,amount:p.c.amount,area:p.c.bill,svc:{...cald.svc}});cald.w='';cald.h='';cald.qty='';render();setTimeout(()=>{const i=$('#cw');if(i)i.focus()},30);return}
   if(a==='cal-rm'){cald.rows.splice(+b.dataset.i,1);return calcUpd()}
   if(a==='cal-clear'){const m=cald.mode,t=cald.typeId;calcInit();cald.mode=m;cald.typeId=t;return render()}
-  if(a==='cal-copy'){if(!calcRowsAll().length)return toast(tr('اكتب قياس.','Saisissez une mesure.'));return copyText(calcText(),'#copyfall')}
+  if(a==='cal-copy'){calcFlush();if(!cald.rows.length)return toast(tr('زيد حاجة للكشف أولاً.','Ajoutez d’abord une ligne.'));calcUpd();return copyText(calcText(),'#copyfall')}
   if(a==='cal-bon')return calcToDraft('bon');
   if(a==='cal-quote')return calcToDraft('quote');
   /* المزامنة */
@@ -4906,6 +4924,108 @@ document.addEventListener('keydown',e=>{if(view.name!=='calc'||e.key!=='Enter')r
 
 {const _r=render;render=function(){_r.apply(this,arguments);try{chipUpdate();if(view.name==='calc')calcUpd();if(view.name==='cloud')qrDraw()}catch(_){}}}
 {const _cp=custPageHTML;custPageHTML=function(D){return _cp(D).replace('<div class="kpi4">',apNextHTML(D)+'<div class="kpi4">')}}
+/* ====================== v50: «كشف تقديري» مرتب (زجاج / سلعة / خدمة) + البحث بالاسم + النقطة على الـ G ====================== */
+const KT=()=>tr('كشف تقديري','Estimation');
+function calcInit(){const t=activeTypes()[0];cald={mode:'walk',kind:'g',typeId:t?t.id:'',w:'',h:'',qty:'',svc:{},artId:'',aqty:'1',aprice:'',sv:'',svOther:false,svName:'',svPrice:'',svDesc:'',rows:[]}}
+function calcPiece(){if(!cald)calcInit();const price=priceOf('glass',cald.typeId,cald.mode,'');const l={typeId:cald.typeId,price,w:cald.w,h:cald.h,qty:cald.qty||1,svc:cald.svc};return{l,c:lineCalc(l),price}}
+const normQ=s=>String(s||'').toLowerCase().replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/\s+/g,' ').trim();
+const qHit=(name,q)=>{q=normQ(q);if(!q)return true;const n=normQ(name);return n.includes(q)||n.split(' ').some(w=>w.startsWith(q))};
+function svcList(){const ex=svcArts().map(([id,a])=>({id,name:a.name,price:num(a.price)})),names=new Set(ex.map(x=>normName(x.name)));return [...ex,...SVC_DEF.filter(([ar])=>!names.has(normName(ar))).map(([ar,fr])=>({id:'',name:isFr()?fr:ar,price:0}))]}
+/* ---- خانة البحث + القائمة ---- */
+function pickBox(kind,label,cur){return `<div class="pick"><div class="pickin">🔍<input id="pk-${kind}" autocomplete="off" placeholder="${label}" value=""></div><div class="pickl" id="pl-${kind}">${pickItems(kind,'')}</div>${cur?`<div class="picksel">${cur}</div>`:''}</div>`}
+function pickItems(kind,q){
+  if(kind==='g'){const L=activeTypes().filter(t=>qHit(t.name,q));return L.length?L.slice(0,q?12:6).map(t=>`<button type="button" class="pki ${cald.typeId===t.id?'on':''}" data-act="cal-pick" data-k="g" data-v="${esc(t.id)}"><b>${esc(t.name)}</b><small>${grp(priceOf('glass',t.id,cald.mode,''))} ${tr('دج/م²','DA/m²')}</small></button>`).join('')+(!q&&activeTypes().length>6?`<div class="note pkm">${tr('اكتب حرفين باش تلقى الباقي…','Tapez pour chercher…')}</div>`:''):`<div class="note pkm">${tr('ما لقيت حتى نوع.','Aucun type trouvé.')}</div>`}
+  const L=goodsArts().filter(([,a])=>qHit(a.name,q));
+  return L.length?L.slice(0,q?12:6).map(([id,a])=>{const e=S.ak[id];return `<button type="button" class="pki ${cald.artId===id?'on':''}" data-act="cal-pick" data-k="a" data-v="${id}"><b>${esc(a.name)}</b><small>${grp(priceOf('art',id,cald.mode,'','base'))} ${tr('دج','DA')} · ${esc(artUnitName(a,'base'))}${artTracked(a)&&e?' · '+tr('المخزون','stock')+' '+dec2s(e.bal).replace(/<[^>]+>/g,''):''}</small></button>`}).join('')+(!q&&goodsArts().length>6?`<div class="note pkm">${tr('اكتب حرفين باش تلقى الباقي…','Tapez pour chercher…')}</div>`:''):`<div class="note pkm">${tr('ما لقيت حتى سلعة.','Aucun article.')}</div>`}
+/* ---- الصفحة ---- */
+function calcHTML(){if(!cald)calcInit();const k=cald.kind;
+  const tab=(v,e,l)=>`<button data-act="cal-k" data-v="${v}" class="${k===v?'on':''}">${e} ${l}</button>`;
+  let panel='';
+  if(k==='g'){const ty=types().find(t=>t.id===cald.typeId),sv=svcs().filter(x=>num(x.price)>0);
+    panel=`${pickBox('g',tr('ابحث نوع الزجاج…','Chercher un verre…'),ty?`🪟 <b>${esc(ty.name)}</b> · ${grp(priceOf('glass',ty.id,cald.mode,''))} ${tr('دج/م²','DA/m²')}`:'')}
+     <div class="cdims"><input id="cw" inputmode="decimal" placeholder="${tr('العرض','Larg.')}" value="${esc(cald.w)}"><input id="ch" inputmode="decimal" placeholder="${tr('الطول','Haut.')}" value="${esc(cald.h)}"><input id="cq" inputmode="numeric" placeholder="${tr('العدد 1','Qté 1')}" value="${esc(cald.qty)}"></div>
+     ${sv.length?`<div class="svc"><span class="note">${tr('التشطيب','Façonnage')}:</span>${sv.map(x=>x.unit==='ml'?`<button type="button" class="svc-chip ${cald.svc[x.id]?'on':''}" data-act="cal-s" data-s="${esc(x.id)}">${esc(svcName(x))}</button>`:`<label class="svc-n">${esc(svcName(x))} <input inputmode="numeric" data-csvc="${esc(x.id)}" value="${esc(cald.svc[x.id]||'')}" placeholder="0"></label>`).join('')}</div>`:''}`}
+  else if(k==='a'){const a=S.arts[cald.artId];
+    panel=`${pickBox('a',tr('ابحث السلعة بالاسم…','Chercher un article…'),a?`📦 <b>${esc(a.name)}</b>`:'')}
+     ${a?`<div class="grid2"><div class="field"><label for="caq">${tr('الكمية','Quantité')} (${esc(artUnitName(a,'base'))})</label><input id="caq" inputmode="decimal" value="${esc(cald.aqty)}"></div><div class="field"><label for="cap">${tr('السعر','Prix')}</label><input id="cap" inputmode="decimal" dir="ltr" value="${esc(cald.aprice)}"></div></div>`:''}`}
+  else{const L=svcList();
+    panel=`<div class="chips" style="flex-wrap:wrap">${L.map((x,i)=>`<button data-act="cal-sv" data-v="${i}" class="${!cald.svOther&&cald.sv===String(i)?'on':''}">${esc(x.name)}</button>`).join('')}<button data-act="cal-sv" data-v="o" class="${cald.svOther?'on':''}">＋ ${tr('أخرى','Autre')}</button></div>
+     ${cald.svOther?`<div class="field"><label for="csn">${tr('اسم الخدمة','Nom du service')}</label><input id="csn" value="${esc(cald.svName)}" placeholder="${tr('مثلاً: تركيب واجهة','ex. Pose vitrine')}"></div>`:''}
+     <div class="field"><label for="csp">💰 ${tr('سعر الخدمة (دج)','Prix du service (DA)')}</label><input id="csp" class="bigin" inputmode="decimal" dir="ltr" value="${esc(cald.svPrice)}" placeholder="0"></div>
+     <div class="field"><label for="csd">${tr('تفاصيل (اختياري)','Détails (facultatif)')}</label><input id="csd" value="${esc(cald.svDesc)}" placeholder="${tr('مثلاً: 3 نوافذ · العلمة','ex. 3 fenêtres')}"></div>`}
+  return `<div class="stack">${backBtn('nav-home',tr('الرئيسية','Accueil'))}<h2>🧮 ${KT()}</h2>
+  <div class="seg"><button data-act="cal-m" data-v="walk" class="${cald.mode==='walk'?'on':''}">🛍️ ${tr('زبون عادي','Particulier')}</button><button data-act="cal-m" data-v="shop" class="${cald.mode==='shop'?'on':''}">🧰 ${tr('حرفي','Artisan')}</button></div>
+  <div class="ktab3">${tab('g','🪟',tr('زجاج','Verre'))}${tab('a','📦',tr('سلعة','Article'))}${tab('s','🛠️',tr('خدمة','Service'))}</div>
+  <div class="card pad stack" style="gap:10px">${panel}<div class="cres" id="cres"></div><button class="btn" data-act="cal-add">＋ ${tr('زيد للكشف','Ajouter')}</button></div>
+  <div id="crows"></div>
+  <div class="apb" style="justify-content:center"><a class="pb g" id="cal-wa" href="#" target="_blank" rel="noopener" data-act="cal-flush">💬 ${tr('واتساب','WhatsApp')}</a><button class="pb" data-act="cal-copy">📋 ${tr('نسخ','Copier')}</button><button class="pb" data-act="cal-bon">🧾 ${tr('فاتورة','Facture')}</button><button class="pb" data-act="cal-quote">📄 ${tr('حفظ كعرض سعر','Enregistrer en devis')}</button><button class="pb" data-act="cal-clear" aria-label="${tr('مسح','Effacer')}">🧹</button></div>
+  <div id="copyfall"></div>
+  <p class="note">${tr('الكشف التقديري ما يتحفظ ما دام ما ضغطتش «فاتورة» ولا «حفظ كعرض سعر».','Rien n’est enregistré tant que vous ne facturez pas ou n’enregistrez pas en devis.')}</p></div>`}
+function calcPending(){const k=cald.kind;
+  if(k==='g'){if(!(num(cald.w)>0&&num(cald.h)>0)||!cald.typeId)return null;const p=calcPiece();return{k:'g',...p.l,price:p.price,svc:{...cald.svc},amount:p.c.amount,area:p.c.bill}}
+  if(k==='a'){const a=S.arts[cald.artId];if(!a||!(num(cald.aqty)>0))return null;const pr=num(cald.aprice);return{k:'a',articleId:cald.artId,name:a.name,unit:artUnitName(a,'base'),qty:num(cald.aqty),price:pr,amount:Math.round(pr*num(cald.aqty))}}
+  const L=svcList(),x=cald.svOther?null:L[+cald.sv],name=cald.svOther?String(cald.svName||'').trim():(x&&x.name),pr=Math.round(num(cald.svPrice));if(!name||!(pr>0))return null;
+  return{k:'s',articleId:x&&x.id||'',name,price:pr,desc:String(cald.svDesc||'').trim(),qty:1,amount:pr}}
+function calcRowsAll(){return cald?cald.rows:[]}
+function rowLabel(r){if(r.k==='a')return `${r.name}${num(r.qty)!==1?' × '+num(r.qty):''}`;if(r.k==='s')return r.name+(r.desc?' — '+r.desc:'');const ty=(types().find(t=>t.id===r.typeId)||{}).name||'';const sv=calcSvcTxt(r.svc);return `${ty} ${cf1(r.w)}×${cf1(r.h)}${num(r.qty)>1?' × '+num(r.qty):''}${sv?' + '+sv:''}`}
+function calcText(){const R=cald.rows;let tot=0;const L=[`${KT()} · ${shopName()}`];
+  for(const [k,e,ar,fr] of [['g','🪟','الزجاج','Verre'],['a','📦','السلع','Articles'],['s','🛠️','الخدمات','Services']]){const rs=R.filter(r=>r.k===k);if(!rs.length)continue;L.push('',`${e} ${tr(ar,fr)}:`);for(const r of rs){tot+=r.amount;L.push(`• ${rowLabel(r)} = ${grpTxt(r.amount)} ${CUR()}`)}}
+  L.push('',`${tr('المجموع','Total')}: ${grpTxt(tot)} ${CUR()}`,shopTail());return L.join('\n')}
+function calcUpd(){if(view.name!=='calc'||!cald)return;const el=$('#cres'),p=calcPending(),k=cald.kind;
+  if(el){if(k==='g'){const pc=calcPiece();el.innerHTML=p?`<small class="note">${M2(pc.c.bill)} · ${grp(pc.price)} ${tr('دج/م²','DA/m²')}${pc.c.svc>0?' + '+tr('تشطيب','façonnage')+' '+grp(pc.c.svc):''}</small><b>${DA(p.amount)}</b>`:`<small class="note">${tr('اختار النوع واكتب القياس','Choisissez le verre et la mesure')}</small>`}
+    else el.innerHTML=p?`<small class="note">${k==='a'?`${dec2s(p.qty).replace(/<[^>]+>/g,'')} × ${grp(p.price)}`:esc(p.name)}</small><b>${DA(p.amount)}</b>`:`<small class="note">${k==='a'?tr('اختار السلعة','Choisissez l’article'):tr('اختار الخدمة واكتب سعرها','Choisissez le service et son prix')}</small>`}
+  const R=cald.rows,tot=R.reduce((s,r)=>s+r.amount,0),cr=$('#crows');
+  if(cr)cr.innerHTML=R.length?`<div class="dvt">${[['g','🪟','الزجاج','Verre'],['a','📦','السلع','Articles'],['s','🛠️','الخدمات','Services']].map(([k2,e,ar,fr])=>{const rs=R.map((r,i)=>[r,i]).filter(([r])=>r.k===k2);if(!rs.length)return'';
+      return `<div class="dvh"><span>${e} ${tr(ar,fr)}</span><span>${grp(rs.reduce((s,[r])=>s+r.amount,0))}</span></div>${rs.map(([r,i])=>`<div class="dvr"><span>${esc(rowLabel(r))}</span><span class="cacts" style="align-items:center"><b>${grp(r.amount)}</b><button class="mini-btn" data-act="cal-rm" data-i="${i}" aria-label="${tr('نحّي','Retirer')}">×</button></span></div>`).join('')}`}).join('')}<div class="dvtot"><span>${tr('المجموع','Total')}</span><span>${DA(tot)}</span></div></div>`:`<div class="empty" style="padding:14px"><p>${tr('زيد زجاج، سلعة ولا خدمة، ويبانو هنا بالمجموع.','Ajoutez verre, articles ou services : ils apparaissent ici.')}</p></div>`;
+  const wa=$('#cal-wa');if(wa)wa.href=R.length?waBare(calcText()):'#'}
+function calcFlush(){const p=calcPending();if(!p||p.k==='s'&&!p.articleId&&cald.svOther)return;cald.rows.push(p);if(p.k==='g'){cald.w='';cald.h='';cald.qty=''}else if(p.k==='a'){cald.artId='';cald.aqty='1';cald.aprice=''}else{cald.svPrice='';cald.svDesc='';cald.sv=''}const f=[['cw',''],['ch',''],['cq',''],['csp',''],['csd','']];for(const [i,v] of f){const x=$('#'+i);if(x)x.value=v}}
+async function svcArtFor(name,price){const f=svcArts().find(([,a])=>normName(a.name)===normName(name));if(f)return f[0];const ref=db.collection('articles').doc(),nref=Object.keys(S.arts).length+1;
+  await db.doc('articles/'+ref.id).set({name,cat:'svc',unit:'خدمة',pack:null,cost:0,price,priceW:0,packPrice:0,packPriceW:0,alert:0,ref:'A-'+String(nref).padStart(4,'0'),archived:false,createdAt:Date.now()});return ref.id}
+async function calcToDraft(kind){calcFlush();const R=cald.rows;if(!R.length)return toast(tr('زيد حاجة للكشف أولاً.','Ajoutez d’abord une ligne.'));
+  for(const r of R)if(r.k==='s'&&!r.articleId){try{r.articleId=await svcArtFor(r.name,r.price)}catch(_){}}
+  const mode=cald.mode==='shop'?'shop':'walk';startBon('',kind==='quote'?'walk':mode,kind);if(!draft)return;
+  draft.lines=groupLines(R.map(r=>r.k==='g'?{typeId:r.typeId,price:r.price,w:String(r.w),h:String(r.h),qty:String(r.qty||1),use:'',svc:{...(r.svc||{})},manual:true}
+    :{lk:'art',articleId:r.articleId,u:'base',qty:String(r.qty||1),price:r.price,manual:true,desc:r.k==='s'?r.desc:''}).filter(l=>l.lk!=='art'||l.articleId));
+  if(!draft.lines.some(l=>l.lk!=='art'))draft.lines.unshift(newLine());draft.ent={};draft.open='__none';render()}
+
+/* ---- البحث بالاسم في الفاتورة (نوع الزجاج والسلعة) ---- */
+function pickerModal(kind,i){const m=$('#modal');const isG=kind==='g';
+  const list=q=>{if(isG){const L=activeTypes().filter(t=>qHit(t.name,q));return L.map(t=>`<button type="button" class="pki" data-pv="${esc(t.id)}"><b>${esc(t.name)}</b><small>${grp(priceOf('glass',t.id,draft.mode,draft.clientId))} ${tr('دج/م²','DA/m²')}</small></button>`).join('')||`<p class="note">${tr('ما لقيت والو.','Aucun résultat.')}</p>`}
+    const L=goodsArts().filter(([,a])=>qHit(a.name,q));return (isStaff()?'':`<button type="button" class="pki new" data-pv="__new">＋ <b>${tr('سلعة جديدة…','Nouvel article…')}</b></button>`)+(L.map(([id,a])=>{const e=S.ak[id];return `<button type="button" class="pki" data-pv="${id}"><b>${esc(a.name)}</b><small>${grp(priceOf('art',id,draft.mode,draft.clientId,'base'))} ${tr('دج','DA')} · ${esc(artUnitName(a,'base'))}${artTracked(a)&&e?' · '+tr('المخزون','stock')+' '+dec2s(e.bal).replace(/<[^>]+>/g,''):''}</small></button>`}).join('')||`<p class="note">${tr('ما لقيت والو.','Aucun résultat.')}</p>`)};
+  m.innerHTML=`<div class="sheet pksheet" role="dialog" aria-modal="true"><h2>${isG?'🪟 '+tr('نوع الزجاج','Type de verre'):'📦 '+tr('السلعة','Article')}</h2><div class="pickin">🔍<input id="pm-q" autocomplete="off" placeholder="${isG?tr('اكتب الاسم… (شفاف، مرآة، 6مم…)','Nom… (clair, miroir…)'):tr('اكتب الاسم… (سيليكون، جوان…)','Nom… (silicone, joint…)')}"></div><div class="pkl" id="pm-l">${list('')}</div><div class="actions"><button class="btn line" data-m="0">${tr('إلغاء','Annuler')}</button></div></div>`;
+  m.hidden=false;setTimeout(()=>{const x=$('#pm-q');if(x)x.focus()},40);
+  const done=()=>{m.hidden=true;m.innerHTML='';m.onclick=null;m.oninput=null};
+  m.oninput=e=>{if(e.target.id==='pm-q')$('#pm-l').innerHTML=list(e.target.value)};
+  m.onclick=e=>{e.stopPropagation();const b=e.target.closest('[data-pv]');if(b){const v=b.dataset.pv;done();const sel=$('#lt'+i);if(!sel)return;
+      if(v==='__new'){return quickArt(i)}sel.value=v;sel.dispatchEvent(new Event('change',{bubbles:true}));return}
+    const c=e.target.closest('[data-m]');if(c||e.target===m)done()}}
+function pickIntercept(e){const t=e.target;if(!t||t.tagName!=='SELECT'||view.name!=='bon'||!draft)return;const lf=t.dataset.lf;if(lf!=='typeId'&&!(lf==='articleId'&&t.dataset.goods))return;
+  e.preventDefault();e.stopPropagation();pickerModal(lf==='typeId'?'g':'a',+t.dataset.i)}
+document.addEventListener('mousedown',pickIntercept,true);
+document.addEventListener('touchstart',pickIntercept,{capture:true,passive:false});
+document.addEventListener('keydown',e=>{const t=e.target;if(t&&t.tagName==='SELECT'&&view.name==='bon'&&(e.key==='Enter'||e.key===' ')&&(t.dataset.lf==='typeId'||t.dataset.goods)){e.preventDefault();pickerModal(t.dataset.lf==='typeId'?'g':'a',+t.dataset.i)}},true);
+
+/* ---- النقطة على الـ G بلاصت ☁️ ---- */
+function chipUpdate(){const br=$('#brand');if(!br)return;let d=$('#syncdot');if(!unlocked){if(d)d.remove();return}
+  if(!d){d=document.createElement('button');d.id='syncdot';d.dataset.act='nav-cloud';br.style.position='relative';br.appendChild(d)}
+  let cls='off',t=tr('المزامنة طافية','Synchro désactivée');
+  if(cloudOn()){if(Sync.state==='ok'&&!Sync.pending){cls='ok';t=tr('متزامن','Synchronisé')}else if(Sync.state==='ok'||Sync.state==='connecting'){cls='warn';t=Sync.pending?tr('يبعث…','Envoi…'):tr('يتصل…','Connexion…')}else if(Sync.state==='offline'){cls='warn';t=tr('بلا انترنت','Hors ligne')}else{cls='bad';t=tr('مشكل في المزامنة','Problème de synchro')}}
+  d.className='syncdot '+cls;d.title=t;d.setAttribute('aria-label',tr('المزامنة','Synchro')+': '+t)}
+
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act;if(!a.startsWith('cal-')||view.name!=='calc'||!cald)return;
+  if(a==='cal-k'){cald.kind=b.dataset.v;return render()}
+  if(a==='cal-pick'){if(b.dataset.k==='g'){cald.typeId=b.dataset.v;render();setTimeout(()=>{const i=$('#cw');if(i&&!cald.w)i.focus()},30)}else{cald.artId=b.dataset.v;cald.aprice=String(priceOf('art',cald.artId,cald.mode,'','base'));cald.aqty=cald.aqty||'1';render();setTimeout(()=>{const i=$('#caq');if(i){i.focus();i.select&&i.select()}},30)}return}
+  if(a==='cal-sv'){if(b.dataset.v==='o'){cald.svOther=true;cald.sv=''}else{cald.svOther=false;cald.sv=b.dataset.v;const x=svcList()[+b.dataset.v];if(x&&x.price>0&&!cald.svPrice)cald.svPrice=String(x.price)}render();setTimeout(()=>{const i=$(cald.svOther?'#csn':'#csp');if(i)i.focus()},30);return}
+  if(a==='cal-add'){const p=calcPending();if(!p)return toast(cald.kind==='g'?tr('اختار النوع واكتب العرض والطول.','Choisissez le verre et la mesure.'):cald.kind==='a'?tr('اختار السلعة والكمية.','Choisissez l’article et la quantité.'):tr('اختار الخدمة واكتب سعرها.','Choisissez le service et son prix.'));
+    if(p.k==='s'&&!p.articleId&&cald.svOther){try{p.articleId=await svcArtFor(p.name,p.price)}catch(_){}}
+    cald.rows.push(p);if(cald.kind==='g'){cald.w='';cald.h='';cald.qty=''}else if(cald.kind==='a'){cald.artId='';cald.aqty='1';cald.aprice=''}else{cald.svPrice='';cald.svDesc='';cald.svName='';cald.svOther=false;cald.sv=''}
+    render();toast('＋ '+tr('تزاد للكشف','Ajouté'));setTimeout(()=>{const i=$(cald.kind==='g'?'#cw':'#pk-a');if(i&&cald.kind!=='s')i.focus()},30);return}
+  if(a==='cal-flush'){calcFlush();const w=$('#cal-wa');if(w&&cald.rows.length)w.href=waBare(calcText());if(!cald.rows.length){e.preventDefault();toast(tr('زيد حاجة للكشف أولاً.','Ajoutez d’abord une ligne.'))}setTimeout(calcUpd,50);return}
+});
+document.addEventListener('input',e=>{const t=e.target;if(view.name!=='calc'||!cald)return;
+  if(t.id==='pk-g'||t.id==='pk-a'){const k=t.id.slice(3),l=$('#pl-'+k);if(l)l.innerHTML=pickItems(k,t.value);return}
+  const m={caq:'aqty',cap:'aprice',csn:'svName',csp:'svPrice',csd:'svDesc'}[t.id];if(m){cald[m]=t.value;calcUpd()}});
+
 function backupFile(){const data={app:'daftar-zujaj',version:2,exportedAt:new Date().toISOString(),docs:LocalDB.dump()};return new File([JSON.stringify(data)],`tumayd-backup-${today()}.json`,{type:'application/json'})}
 function downloadFile(f){const u=URL.createObjectURL(f);const a=document.createElement('a');a.href=u;a.download=f.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}
 async function copyText(txt,fallbackSel){
