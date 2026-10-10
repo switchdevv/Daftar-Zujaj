@@ -703,6 +703,25 @@ input.subuse{padding:7px 10px;font-size:.85rem}
 .pxe:last-child{border-bottom:0}.pxic{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;font-size:1.15rem;flex-shrink:0}.pxm{flex:1;display:grid}.pxm small{color:var(--muted);font-size:.76rem}
 .pxcrow{display:grid;grid-template-columns:3.2em 1fr auto;gap:6px;align-items:center}.pxcrow.off{opacity:.45}.pxemo{text-align:center;font-size:1.2rem}
 .blbox{background:#eef7f4;border:1px solid #bfe0d4;border-radius:14px;padding:10px 12px;display:grid;gap:8px;font-size:.88rem}
+.totals.walkt{border:2px solid var(--accent);border-top-width:2px}
+.totals.walkt .trow.big{font-size:1.15rem}
+.wpay .wplb{font-weight:700;font-size:.9rem;color:var(--muted)}
+.p3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.p3 button{border:2px solid var(--line);border-radius:14px;padding:9px 4px;background:var(--surface);font-weight:700;font-size:.86rem;color:var(--muted);line-height:1.35;display:grid;justify-items:center;gap:1px}
+.p3 button i{font-style:normal;font-size:1.25rem}.p3 button small{font-weight:500;font-size:.72rem}
+.p3 button.on.full{border-color:#22703e;color:#22703e;background:#e8f6ec}
+.p3 button.on.part{border-color:#c06a06;color:#c06a06;background:#fff3e0}
+.p3 button.on.credit{border-color:#b0392d;color:#b0392d;background:#fdecea}
+.wpay .wpin{font-size:1.35rem;font-weight:700;text-align:end;border:2px solid var(--accent)}
+.qch,.mth{display:flex;gap:6px;flex-wrap:wrap}
+.qch button{background:var(--sunk);border:0;border-radius:99px;padding:6px 12px;font-size:.82rem;font-weight:700;color:var(--ink)}
+.mth button{border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:5px 12px;font-size:.8rem;font-weight:600;color:var(--muted)}
+.mth button.on{background:var(--accent);border-color:transparent;color:#fff}
+.wrembox small{display:block;font-weight:500;font-size:.74rem;opacity:.85}
+.wrembox.ok{background:#e8f6ec;color:#22703e}.wrembox.pt{background:#fff3e0;color:#9a5300}.wrembox.cr{background:#fdecea;color:#b0392d}
+.btn.dim{opacity:.5}
+.stseg.ordr{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:6px 10px}
+.stseg.ordr b{font-size:.9rem;white-space:nowrap}.stseg.ordr .seg{flex:0 1 230px}
 </style>
 </head>
 <body>
@@ -757,7 +776,7 @@ const num=v=>{const n=parseFloat(String(v??'').replace(/\s/g,'').replace(',','.'
 const loc=()=>isFr()?'fr-FR':'en-US';
 const grp=n=>{const r=Math.round(n);return(r<0?'-':'')+Math.abs(r).toLocaleString(loc()).replace(/ /g,' ')};
 const grpTxt=n=>Math.round(n).toLocaleString('en-US');
-const APP_VER=52; // نفس الرقم تاع VERSION في sw.js
+const APP_VER=53; // نفس الرقم تاع VERSION في sw.js
 const CUR=()=>tr('دج','DA');
 const DA=n=>`<bdi dir="ltr">${grp(n)}</bdi>&nbsp;${CUR()}`;
 const dec2=a=>(Math.round(a*100)/100).toLocaleString(loc(),{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -2043,6 +2062,7 @@ function bonFormHTML(){
   <div class="field"><label for="wp">${tr('الهاتف','Téléphone')}</label><input id="wp" inputmode="tel" dir="ltr" value="${esc(draft.cphone)}" placeholder="${tr('اختياري','facultatif')}"></div></div>`
   :`<div class="field"><label for="bc">${tr('الحرفي','Client')}</label><select id="bc">${clientOptions(draft.clientId)}</select></div>`}
   <div id="bbal" class="note"></div>
+  ${q||draft.editId?'':bonStSeg()}
   <div class="stack" id="lines">${draft.lines.map(lineHTML).join('')}</div>
   <div class="adds3"><button class="btn ghost" data-act="add-line">＋ 🪟 ${tr('زجاج','Verre')}</button><button class="btn ghost" data-act="add-goods">＋ 📦 ${tr('سلعة','Article')}</button><button class="btn ghost" data-act="add-svc">＋ 🛠️ ${tr('خدمة','Service')}</button></div>
   <div class="opts tbar" role="toolbar">
@@ -2061,8 +2081,7 @@ function bonFormHTML(){
   ${optBox('disc',`<div class="field"><label for="bdisc">${tr('التخفيض (دج)','Remise (DA)')}</label><input id="bdisc" inputmode="decimal" dir="ltr" value="${esc(draft.disc||'')}" placeholder="0"></div>`)}
   ${q||walk?'':optBox('due',`<div class="field"><label for="bdu">${tr('موعد التسديد','Échéance')}</label><div class="grid2"><input id="bdu" type="date" value="${esc(draft.due||'')}" aria-label="${tr('التاريخ','Date')}"><input id="bdut" type="time" value="${esc(draft.dueT||'')}" aria-label="${tr('الساعة','Heure')}"></div><span class="note">${tr('كي يجي الموعد وما خلّصش، التطبيق يرنّ.','À l’échéance, l’application sonne si ce n’est pas payé.')}</span></div>`)}
   ${optBox('note',`<div class="field"><label for="bn">${tr('ملاحظة','Note')}</label><input id="bn" value="${esc(draft.note)}"></div>`)}
-  ${q||draft.editId?'':bonStSeg()}
-  <div class="totals"><div class="trow big"><span>${tr('المجموع','Total')}</span><span id="tt"></span></div>${q?`<span class="note">${tr('العرض ما يدخلش في المخزون ولا في الدين.','Le devis ne touche ni au stock ni au crédit.')}</span>`:''}${walk&&!q?walkPayBox():''}</div>
+  <div class="totals${walk&&!q?' walkt':''}"><div class="trow big"><span>${tr('المجموع','Total')}</span><span id="tt"></span></div>${q?`<span class="note">${tr('العرض ما يدخلش في المخزون ولا في الدين.','Le devis ne touche ni au stock ni au crédit.')}</span>`:''}${walk&&!q?walkPayBox():''}</div>
   <div class="actions"><button class="btn line" data-act="cancel-form">${tr('إلغاء','Annuler')}</button><button class="btn" data-act="save-bon">${tr('حفظ','Enregistrer')}</button></div>
   </div>`;
 }
@@ -3763,7 +3782,7 @@ function photoZoom(src){const m=$('#modal');m.innerHTML=`<div class="sheet" role
 let cldraft=null;
 function cashDayData(d){const isCash=m=>!m||m==='cash';let cin=0,cout=0;const nonc=[];
   for(const p of Object.values(S.pays))if(p.date===d){if(isCash(p.method))cin+=num(p.amount);else nonc.push({l:((S.clients[p.clientId]||{}).name||p.cname||'?')+' · '+payMName(p.method),a:num(p.amount)})}
-  for(const b of Object.values(S.bons))if(b.walkin&&b.date===d){const v=num(b.total);if(v>0)cin+=walkPaid0(b);else cout+=-v}for(const b of Object.values(S.bons))for(const w of b.wpays||[])if(w.date===d)cin+=num(w.amount);
+  for(const b of Object.values(S.bons))if(b.walkin&&b.date===d){const v=num(b.total);if(v>0){if(isCash(b.pmeth))cin+=walkPaid0(b);else if(walkPaid0(b)>0)nonc.push({l:custName(b)+' · '+payMName(b.pmeth),a:walkPaid0(b)})}else cout+=-v}for(const b of Object.values(S.bons))for(const w of b.wpays||[])if(w.date===d)cin+=num(w.amount);
   for(const e of Object.values(S.exps))if(e.date===d)cout+=num(e.amount);
   for(const x of Object.values(S.spays))if(x.date===d&&isCash(x.method))cout+=num(x.amount);
   for(const m of Object.values(S.stock))if(m.kind==='in'&&m.date===d)cout+=num(m.paid);
@@ -5276,6 +5295,67 @@ function blViewBox(id){const b=S.bons[id];if(!isBL(b)||isStaff())return'';
 document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act,id=b.dataset.id;if(a!=='bl-full'||isStaff())return;
   blFull=true;try{if(b.dataset.k==='print'){printHTML(blHTML(id,true,false),'a4')}else{const f=await bonFile(id,'bon');downloadFile(f);toast(tr('تحمّل: ','Téléchargé : ')+f.name)}}catch(_){toast(tr('تعذّر تحضير الملف.','Échec.'))}finally{blFull=false}},true);
 
+/* ---- v53: تنظيم الدفع تاع الزبون العادي (خلّص كامل / دفع جزء / كريدي) ---- */
+const WPM_METH=['cash','ccp','cheque'];
+function wpmOf(){if(!draft)return'full';if(!draft.wpm){const v=draft.wpaid;
+  if(v===undefined||v===null||String(v).trim()==='')draft.wpm=walkCredit()?'credit':'full';
+  else{const n=num(v),t=bonTotal();draft.wpm=t>0&&n<=0?'credit':n>=t-0.5?'full':'part'}}return draft.wpm}
+wpaidOf=function(total){if(!draft)return total;const m=wpmOf();if(m==='credit')return 0;if(m==='full')return total;
+  const v=draft.wpaid;if(v===undefined||v===null||String(v).trim()==='')return 0;return Math.min(total,Math.max(0,Math.round(num(v))))};
+function wpQuick(t){const o=[];const h=Math.round(t/2);if(h>0)o.push([h,tr('النص','Moitié')+': '+grp(h)]);for(const v of [5000,10000,20000,50000])if(v<t&&v!==h)o.push([v,grp(v)]);return o.slice(0,4)}
+function walkPayInner(){const m=wpmOf(),t=bonTotal(),meth=draft.wmeth||'cash';
+  const b=(k,ic,l,sub)=>`<button type="button" data-act="wpm" data-v="${k}" class="${m===k?'on '+k:''}"><i>${ic}</i>${l}${sub?`<small>${sub}</small>`:''}</button>`;
+  return `<div class="wplb">💵 ${tr('الدفع','Paiement')}</div>
+  <div class="p3">${b('full','✅',tr('خلّص كامل','Tout payé'))}${b('part','🔸',tr('دفع جزء','Acompte'))}${b('credit','📒',tr('كريدي','Crédit'),tr('ما دفع والو','rien payé'))}</div>
+  ${m==='part'?`<div class="field"><label for="wpaid">${tr('شحال دفع؟','Combien a-t-il payé ?')}</label><input id="wpaid" class="wpin" inputmode="decimal" dir="ltr" value="${esc(draft.wpaid&&num(draft.wpaid)>0&&num(draft.wpaid)<t?draft.wpaid:'')}" placeholder="0"></div>
+  <div class="qch" id="wqch">${wpQuick(t).map(([v,l])=>`<button type="button" data-act="wpq" data-v="${v}">${l}</button>`).join('')}</div>`:''}
+  ${m!=='credit'?`<div class="mth">${WPM_METH.map(k=>`<button type="button" data-act="wmeth" data-v="${k}" class="${meth===k?'on':''}">${esc(payMName(k))}</button>`).join('')}</div>`:''}
+  <div class="wrembox" id="wrembox"><span><span id="wremlb"></span><small id="wremsub"></small></span><b id="wrem"></b></div>
+  <div class="wcrw" id="wcrw" hidden>⚠️ ${tr('فيها كريدي: اكتب اسم الزبون وتيليفونو فوق، ولا اختار «خلّص كامل».','Crédit : saisissez le nom et le téléphone du client, ou choisissez « Tout payé ».')}</div>`}
+walkPayBox=function(){return `<div class="wpay" id="wpaybox">${walkPayInner()}</div>`};
+function wpRedraw(focus){const el=$('#wpaybox');if(!el)return;el.innerHTML=walkPayInner();updWrem();if(focus){const i=$('#wpaid');if(i)i.focus()}}
+updWrem=function(){const el=$('#wrem');if(!el||!draft||draft.mode!=='walk')return;const t=bonTotal(),p=wpaidOf(t),r=Math.max(0,t-p),m=wpmOf();
+  const box=$('#wrembox'),lb=$('#wremlb'),sb=$('#wremsub'),nm=String(draft.cname||'').trim();
+  const who=nm?tr('يتسجّل دين على ','Crédit au nom de ')+nm:tr('يتسجّل دين على الزبون','Crédit au client');
+  let cls='ok',L,S2,A;
+  if(r<=0.5){L='✅ '+tr('خالص','Payé');S2=tr('ما يبقى عليه والو','Rien à devoir');A=t}
+  else if(m==='credit'){cls='cr';L=tr('كامل المجموع دين','Tout à crédit');S2=who;A=r}
+  else{cls='pt';L=tr('الباقي عليه','Reste dû');S2=who;A=r}
+  if(box)box.className='wrembox '+cls;if(lb)lb.textContent=L;if(sb)sb.textContent=S2;el.innerHTML=DA(A);el.className='';
+  const w=$('#wcrw'),bad=r>0.5&&!walkCredit();if(w)w.hidden=!bad;
+  const sv=$('[data-act=save-bon]');if(sv)sv.classList.toggle('dim',bad);
+  const q=$('#wqch');if(q&&q.dataset.t!==String(t)){q.dataset.t=String(t);q.innerHTML=wpQuick(t).map(([v,l])=>`<button type="button" data-act="wpq" data-v="${v}">${l}</button>`).join('')}};
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b||view.name!=='bon'||!draft)return;const a=b.dataset.act;
+  if(a==='wpm'){e.stopPropagation();const v=b.dataset.v;draft.wpm=v;if(v==='part'){const t=bonTotal(),n=num(draft.wpaid);if(!(n>0&&n<t))draft.wpaid=''}wpRedraw(v==='part');return}
+  if(a==='wpq'){e.stopPropagation();draft.wpm='part';draft.wpaid=String(b.dataset.v);const i=$('#wpaid');if(i)i.value=draft.wpaid;updWrem();return}
+  if(a==='wmeth'){e.stopPropagation();draft.wmeth=b.dataset.v;document.querySelectorAll('[data-act=wmeth]').forEach(x=>x.classList.toggle('on',x===b));return}
+},true);
+bonStSeg=function(){return `<div class="stseg ordr"><b>✂️ ${tr('الطلبية','Commande')}</b><div class="seg"><button type="button" data-act="bon-st" data-v="prep" class="${draft.status==='prep'?'on':''}">${tr('قيد القص','À découper')}</button><button type="button" data-act="bon-st" data-v="done" class="${draft.status!=='prep'?'on':''}">${tr('داها ديراكت','Emportée')}</button></div></div>`};
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act=wp-bon]');if(!b)return;setTimeout(()=>{if(draft&&draft.fromWp&&draft.mode==='walk'&&walkCredit()&&draft.wpm==='full'){draft.wpm='credit';wpRedraw()}},0)});
+
+/* ---- v53: كي تدير Actualiser (تجبد الشاشة للتحت) يبقى في نفس الصفحة ---- */
+const KEEP_KEY='gg-keep';
+const KEEP_V={draft:[()=>draft,v=>draft=v],cdraft:[()=>cdraft,v=>cdraft=v],pdraft:[()=>pdraft,v=>pdraft=v],tdraft:[()=>tdraft,v=>tdraft=v],kdraft:[()=>kdraft,v=>kdraft=v],adraft:[()=>adraft,v=>adraft=v],
+  shopDraft:[()=>shopDraft,v=>shopDraft=v],odraft:[()=>odraft,v=>odraft=v],ldraft:[()=>ldraft,v=>ldraft=v],prdraft:[()=>prdraft,v=>prdraft=v],dndraft:[()=>dndraft,v=>dndraft=v],ndraft:[()=>ndraft,v=>ndraft=v],
+  wdraft:[()=>wdraft,v=>wdraft=v],rdraft:[()=>rdraft,v=>rdraft=v],sfdraft:[()=>sfdraft,v=>sfdraft=v],spdraft:[()=>spdraft,v=>spdraft=v],stdraft:[()=>stdraft,v=>stdraft=v],sdraft:[()=>sdraft,v=>sdraft=v],
+  edraft:[()=>edraft,v=>edraft=v],cldraft:[()=>cldraft,v=>cldraft=v],podraft:[()=>podraft,v=>podraft=v],wpd:[()=>wpd,v=>wpd=v],apd:[()=>apd,v=>apd=v],cald:[()=>cald,v=>cald=v],pxd:[()=>pxd,v=>pxd=v],
+  dbv:[()=>dbv,v=>dbv=v],dbf:[()=>dbf,v=>dbf=v],wflt:[()=>wflt,v=>wflt=v],ctabv:[()=>ctabv,v=>ctabv=v],cinvf:[()=>cinvf,v=>cinvf=v],apf:[()=>apf,v=>apf=v],ordf:[()=>ordf,v=>ordf=v],pxv:[()=>pxv,v=>pxv=v]};
+let keepPending=false;
+function keepSave(){try{if(!unlocked||!view||!view.name)return;const d={};for(const k in KEEP_V){try{const v=KEEP_V[k][0]();if(v!==undefined)d[k]=v}catch(_){}}
+  let s;try{s=JSON.stringify({ver:APP_VER,at:Date.now(),view,nav:navStack,y:window.scrollY||0,d})}catch(_){s=JSON.stringify({ver:APP_VER,at:Date.now(),view,nav:navStack,y:window.scrollY||0,d:{}})}
+  try{sessionStorage.setItem(KEEP_KEY,s)}catch(_){try{sessionStorage.setItem(KEEP_KEY,JSON.stringify({ver:APP_VER,at:Date.now(),view,nav:navStack,y:0,d:{}}))}catch(__){}}}catch(_){}}
+(()=>{try{const raw=sessionStorage.getItem(KEEP_KEY);if(!raw)return;const k=JSON.parse(raw);
+  if(!k||k.ver!==APP_VER||Date.now()-(k.at||0)>6*3600e3||!k.view||!k.view.name)return;
+  for(const n in (k.d||{}))if(KEEP_V[n]){try{KEEP_V[n][1](k.d[n])}catch(_){}}
+  view=k.view;navStack=Array.isArray(k.nav)?k.nav:[];optView=view.name;keepPending=k.y||0.001}catch(_){}})();
+{const _r=render;render=function(){if(!keepPending)return _r();
+  try{_r()}catch(e){keepPending=false;view={name:'home'};navStack=[];draft=null;return _r()}
+  if(!$('#shell').hidden){const y=keepPending,vn=view.name;keepPending=false;if(y>1)setTimeout(()=>{try{window.scrollTo(0,y)}catch(_){}},60);
+  if(FORM_VIEWS.has(vn))setTimeout(()=>{try{const ae=document.activeElement;if(view.name===vn&&!(ae&&/INPUT|TEXTAREA|SELECT/.test(ae.tagName))){const yy=window.scrollY;render();window.scrollTo(0,yy)}}catch(_){}},900)}}}
+window.addEventListener('pagehide',keepSave);window.addEventListener('beforeunload',keepSave);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')keepSave()});
+{const _g=go;go=function(n,a){const r=_g(n,a);keepSave();return r}}
+
 function backupFile(){const data={app:'daftar-zujaj',version:2,exportedAt:new Date().toISOString(),docs:LocalDB.dump()};return new File([JSON.stringify(data)],`tumayd-backup-${today()}.json`,{type:'application/json'})}
 function downloadFile(f){const u=URL.createObjectURL(f);const a=document.createElement('a');a.href=u;a.download=f.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}
 async function copyText(txt,fallbackSel){
@@ -5424,7 +5504,7 @@ document.addEventListener('click',async e=>{
   if(a==='set-status'){const bon=S.bons[id];if(!bon)return;await write(()=>db.doc('bons/'+id).update({status:b.dataset.v}),tr('تم تحديث الحالة: ','État : ')+stName(b.dataset.v));return}
   if(a==='edit-bon'){const bon=S.bons[id];if(!bon)return;
     if(Object.values(S.bons).some(x=>x.refOf===id))return toast(tr('لهذه الفاتورة مرتجع. احذف المرتجع أولاً لتعديلها.','Cette facture a un retour. Supprimez-le d’abord.'));
-    draft={editId:id,mode:bon.walkin?'walk':'shop',kind:'bon',clientId:bon.clientId||'',cname:bon.cname||'',cphone:bon.cphone||'',date:bon.date,note:bon.note||'',due:bon.due||'',dueT:bon.dueT||'',disc:bon.disc?String(bon.disc):'',status:bon.status||'done',paid:'',wpaid:bon.walkin&&bon.paid!==undefined&&bon.paid!==null&&bon.paid!==''&&(num(bon.paid)<num(bon.total)||(String(bon.cname||'').trim()&&String(bon.cphone||'').trim()))?String(num(bon.paid)):'',
+    draft={editId:id,mode:bon.walkin?'walk':'shop',kind:'bon',clientId:bon.clientId||'',cname:bon.cname||'',cphone:bon.cphone||'',date:bon.date,note:bon.note||'',due:bon.due||'',dueT:bon.dueT||'',disc:bon.disc?String(bon.disc):'',status:bon.status||'done',paid:'',wmeth:bon.pmeth||'cash',wpaid:bon.walkin&&bon.paid!==undefined&&bon.paid!==null&&bon.paid!==''&&(num(bon.paid)<num(bon.total)||(String(bon.cname||'').trim()&&String(bon.cphone||'').trim()))?String(num(bon.paid)):'',
       lines:groupLines((bon.lines||[]).map(toDraftLine))};return go('bon')}
   if(a==='new-ret'){rdraft={bonId:id,qty:{},restock:true,date:today(),note:''};return go('ret')}
   if(a==='save-ret'){const bon=S.bons[rdraft.bonId];if(!bon)return;const lines=[];
@@ -5672,13 +5752,13 @@ document.addEventListener('click',async e=>{
     if(q){const nq=Object.values(S.quotes).reduce((m,x)=>Math.max(m,num(x.num)),0)+1;const ref=db.collection('quotes').doc();
       if(await write(()=>ref.set({...who,...base,num:nq,status:'open'}),tr(`تم حفظ عرض السعر رقم ${nq}.`,`Devis n° ${nq} enregistré.`))){draft=null;go('quoteview',{id:ref.id})}return}
     if(draft.editId){const eid=draft.editId,old=S.bons[eid];if(!old)return;
-      const upd={...who,lines,sub,disc,total,date,note:base.note,status:draft.status||'done',editedAt:Date.now(),walkin:!!walk};if(walk)upd.paid=wpaidOf(total);else upd.due=draft.due||'';upd.dueT=draft.due?(draft.dueT||'09:00'):'';
+      const upd={...who,lines,sub,disc,total,date,note:base.note,status:draft.status||'done',editedAt:Date.now(),walkin:!!walk};if(walk){upd.paid=wpaidOf(total);upd.pmeth=upd.paid>0?(draft.wmeth||'cash'):''}else upd.due=draft.due||'';upd.dueT=draft.due?(draft.dueT||'09:00'):'';
       if(await write(()=>db.doc('bons/'+eid).set({...old,...upd}),tr('تم حفظ التعديل.','Modification enregistrée.'))){if(!walk)rememberPrices(draft.clientId,lines);draft=null;go('bonview',{id:eid})}return}
     base.status=lines.some(l=>l.lk!=='art')?(draft.status||'done'):'done';
     const nb=Object.values(S.bons).filter(x=>x.kind!=='return').reduce((m,x)=>Math.max(m,num(x.num)),0)+1;
     const ref=db.collection('bons').doc(),fq=draft.fromQuote,paid=Math.round(num(draft.paid));
     const ok=await write(async()=>{
-      if(walk)await ref.set({...who,...base,kind:'sale',num:nb,paid:wpaidOf(total)});
+      if(walk)await ref.set({...who,...base,kind:'sale',num:nb,paid:wpaidOf(total),pmeth:wpaidOf(total)>0?(draft.wmeth||'cash'):''});
       else{await ref.set({...who,...base,kind:'sale',num:nb,due:draft.due||'',dueT:draft.due?(draft.dueT||'09:00'):''});
         if(paid>0)await db.collection('payments').doc().set({clientId:draft.clientId,bonId:ref.id,amount:paid,method:'cash',date,note:tr('دفع عند البيع · فاتورة ','Payé à la vente · facture ')+nb,createdAt:Date.now()+1})}
       if(fq&&S.quotes[fq])await db.doc('quotes/'+fq).update({status:'done',bonId:ref.id})},tr(`تم حفظ الفاتورة رقم ${nb}.`,`Facture n° ${nb} enregistrée.`));
