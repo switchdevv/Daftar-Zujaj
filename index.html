@@ -722,6 +722,14 @@ input.subuse{padding:7px 10px;font-size:.85rem}
 .btn.dim{opacity:.5}
 .stseg.ordr{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:6px 10px}
 .stseg.ordr b{font-size:.9rem;white-space:nowrap}.stseg.ordr .seg{flex:0 1 230px}
+.fgbtn{background:#fff7e6;color:#8a5a00;border:2px solid #f0c24a}
+.fgcard{background:#fffbf0;border:2px solid #f0c24a;border-radius:var(--r);padding:14px;display:grid;gap:8px}
+.fgbig{font-size:1.6rem;font-weight:800;color:#8a5a00}
+.fglist{display:grid}.fgli{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border:0;border-bottom:1px dashed #ecd9a6;background:none;text-align:start;font:inherit;color:var(--ink);width:100%}
+.fgli small{display:block;color:var(--muted);font-size:.75rem}.fgli:last-child{border-bottom:0}
+.fgseg{display:grid;grid-template-columns:1fr 1fr;gap:6px}.fgseg button{border:2px solid var(--line);background:var(--surface);border-radius:12px;padding:9px 6px;font-weight:700;font-size:.85rem;color:var(--muted)}
+.fgseg button.on{border-color:var(--accent);color:var(--accent)}.fgseg button.on.fg{border-color:#c08a00;background:#fff7e6;color:#8a5a00}
+#ip-fg[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -776,7 +784,7 @@ const num=v=>{const n=parseFloat(String(v??'').replace(/\s/g,'').replace(',','.'
 const loc=()=>isFr()?'fr-FR':'en-US';
 const grp=n=>{const r=Math.round(n);return(r<0?'-':'')+Math.abs(r).toLocaleString(loc()).replace(/ /g,' ')};
 const grpTxt=n=>Math.round(n).toLocaleString('en-US');
-const APP_VER=53; // نفس الرقم تاع VERSION في sw.js
+const APP_VER=54; // نفس الرقم تاع VERSION في sw.js
 const CUR=()=>tr('دج','DA');
 const DA=n=>`<bdi dir="ltr">${grp(n)}</bdi>&nbsp;${CUR()}`;
 const dec2=a=>(Math.round(a*100)/100).toLocaleString(loc(),{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -1101,7 +1109,7 @@ function compute(){
   const st={};
   for(const id in S.clients)st[id]={sales:0,paid:0,bal:0,lastPay:null,oldestBon:null,lastAct:null};
   for(const id in S.bons){const b=S.bons[id],s=st[b.clientId];if(!s)continue;s.sales+=num(b.total);if(!s.oldestBon||b.date<s.oldestBon)s.oldestBon=b.date;if(!s.lastAct||b.date>s.lastAct)s.lastAct=b.date}
-  for(const id in S.pays){const p=S.pays[id],s=st[p.clientId];if(!s)continue;s.paid+=num(p.amount);if(!s.lastPay||p.date>s.lastPay)s.lastPay=p.date;if(!s.lastAct||p.date>s.lastAct)s.lastAct=p.date}
+  for(const id in S.pays){const p=S.pays[id],s=st[p.clientId];if(!s)continue;s.paid+=num(p.amount);if(isFg(p))continue;if(!s.lastPay||p.date>s.lastPay)s.lastPay=p.date;if(!s.lastAct||p.date>s.lastAct)s.lastAct=p.date}
   for(const id in st){const s=st[id];s.bal=s.sales-s.paid;const ref=s.lastPay||s.oldestBon;s.age=s.bal>0&&ref?daysSince(ref):0}
   S.stats=st;
   const rem={},byC={};for(const id in S.bons){const b=S.bons[id];if(b.walkin||!b.clientId)continue;(byC[b.clientId]=byC[b.clientId]||[]).push([id,b])}
@@ -1283,7 +1291,7 @@ function lockNow(){debtShown=false;adminOk=false;gateForcePw=false;endSession();
 
 /* ====================== views ====================== */
 const PAY_M=[['cash','نقداً','Espèces'],['cheque','شيك','Chèque'],['transfer','تحويل بنكي','Virement'],['ccp','CCP / بريدي موب','CCP / BaridiMob']];
-const payMName=k=>{const m=PAY_M.find(x=>x[0]===k);return m?tr(m[1],m[2]):''};
+const payMName=k=>{if(k==='forgive')return tr('🤝 تنازل','🤝 Remise accordée');const m=PAY_M.find(x=>x[0]===k);return m?tr(m[1],m[2]):''};
 const ST=[['prep','قيد التحضير','En préparation'],['ready','جاهزة','Prête'],['done','سُلّمت','Livrée']];
 const stName=k=>{const m=ST.find(x=>x[0]===(k||'done'));return tr(m[1],m[2])};
 const stChip=k=>`<span class="st-chip st-${k||'done'}">${stName(k)}</span>`;
@@ -1357,9 +1365,9 @@ function homeHTML(){
   let debt=0,debtors=0,late=0,lateAmt=0,sT=0,pT=0,sM=0,pM=0;
   for(const id in S.stats){const s=S.stats[id];if(s.bal>0){debt+=s.bal;debtors++;if(s.age>30){late++;lateAmt+=s.bal}}}
   for(const id in S.bons){const b=S.bons[id];if(b.kind==='opening')continue;const inM=b.date&&b.date.slice(0,7)===mo;if(b.date===td)sT+=num(b.total);if(inM)sM+=num(b.total);
-    if(b.walkin){const pa=walkPaid0(b);if(b.date===td)pT+=pa;if(inM)pM+=pa}for(const w of b.wpays||[]){if(w.date===td)pT+=num(w.amount);if(w.date&&w.date.slice(0,7)===mo)pM+=num(w.amount)}}
+    if(b.walkin){const pa=walkPaid0(b);if(b.date===td)pT+=pa;if(inM)pM+=pa}for(const w of cashW(b)){if(w.date===td)pT+=num(w.amount);if(w.date&&w.date.slice(0,7)===mo)pM+=num(w.amount)}}
   const orders=Object.entries(S.bons).filter(([,b])=>b.status==='prep'||b.status==='ready').sort((a,b)=>(a[1].createdAt||0)-(b[1].createdAt||0));
-  for(const id in S.pays){const p=S.pays[id];if(p.date===td)pT+=num(p.amount);if(p.date&&p.date.slice(0,7)===mo)pM+=num(p.amount)}
+  for(const id in S.pays){const p=S.pays[id];if(isFg(p))continue;if(p.date===td)pT+=num(p.amount);if(p.date&&p.date.slice(0,7)===mo)pM+=num(p.amount)}
   const toCall=Object.keys(S.stats).filter(id=>S.stats[id].bal>0&&S.stats[id].age>30).sort((a,b)=>S.stats[b].age-S.stats[a].age||S.stats[b].bal-S.stats[a].bal).slice(0,5);
   const lowStock=Object.keys(S.sk).map(id=>({id,e:S.sk[id],s:stockState(S.sk[id])})).filter(x=>x.s.tracked&&(x.s.cls==='low'||x.s.cls==='out'));
   const recent=[...Object.entries(S.bons).map(([id,b])=>({k:'bon',id,t:b.createdAt||0,d:b.date,c:b.clientId,a:num(b.total),b,walk:!!b.walkin})),...Object.entries(S.pays).map(([id,p])=>({k:'pay',id,t:p.createdAt||0,d:p.date,c:p.clientId,a:num(p.amount)}))].sort((x,y)=>y.t-x.t).slice(0,6);
@@ -1584,8 +1592,8 @@ function bonMargin(b){let m=0,u=0;if(!b||b.kind==='opening')return{m,u};
   m-=num(b.disc);return{m,u}}
 function dbData(f,t){const rows={};const R=k=>rows[k]||(rows[k]={id:k,buy:0,paid:0,sales:0,m:0,u:0});
   for(const b of Object.values(S.bons)){if(!b.date||b.date<f||b.date>t)continue;const k=b.walkin?'__walk':b.clientId;if(!k||(k!=='__walk'&&!S.clients[k]))continue;const r=R(k),amt=num(b.total);
-    r.buy+=amt;if(b.walkin)r.paid+=walkPaid0(b)+(b.wpays||[]).filter(w=>w.date>=f&&w.date<=t).reduce((a,w)=>a+num(w.amount),0);if(b.kind!=='opening'){r.sales+=amt;const x=bonMargin(b);r.m+=x.m;r.u+=x.u}}
-  for(const p of Object.values(S.pays)){if(!p.date||p.date<f||p.date>t||!S.clients[p.clientId])continue;R(p.clientId).paid+=num(p.amount)}
+    r.buy+=amt;if(b.walkin)r.paid+=walkPaid0(b)+cashW(b).filter(w=>w.date>=f&&w.date<=t).reduce((a,w)=>a+num(w.amount),0);if(b.kind!=='opening'){r.sales+=amt;const x=bonMargin(b);r.m+=x.m;r.u+=x.u}}
+  for(const p of cashPays()){if(!p.date||p.date<f||p.date>t||!S.clients[p.clientId])continue;R(p.clientId).paid+=num(p.amount)}
   if(f==='0000-01-01')for(const id in S.stats)if(S.clients[id]&&num(S.stats[id].bal)>0.5)R(id);
   for(const r of Object.values(rows)){r.debt=r.buy-r.paid;r.bal=r.id==='__walk'?0:num((S.stats[r.id]||{}).bal);r.name=r.id==='__walk'?tr('زبائن عاديون','Clients comptoir'):S.clients[r.id].name}
   return Object.values(rows)}
@@ -1622,10 +1630,11 @@ function debtsHTML(){
   }else{
     const ps=rows.filter(r=>r.sales||r.m).sort((a,b)=>b.m-a.m);
     const mP=ps.reduce((a,r)=>a+r.m,0),sP=ps.reduce((a,r)=>a+r.sales,0),uP=ps.reduce((a,r)=>a+r.u,0),eP=expSum(f==='0000-01-01'?'0000-01-01':f,t);
-    const maxM=Math.max(1,...ps.map(r=>Math.max(0,r.m))),net=mP-eP;
+    const maxM=Math.max(1,...ps.map(r=>Math.max(0,r.m))),fgP=fgSum(f==='0000-01-01'?'0000-01-01':f,t),net=mP-eP-fgP;
     body=`${per}
-    <div class="balbox"><div><div class="note">${tr('الربح الصافي (بعد المصاريف)','Bénéfice net (après dépenses)')}</div><div class="amt ${net<0?'neg':'pos'}" style="font-size:1.8rem">${DA(net)}</div></div>
-      <div class="rside"><span class="note">${tr('المبيعات','Ventes')} ${DA(sP)}</span><span class="note">${tr('ربح المبيعات','Marge')} ${DA(mP)} (<bdi dir="ltr">${pct(mP,sP)}%</bdi>)</span><span class="note">${tr('المصاريف','Dépenses')} −${DA(eP)}</span></div></div>
+    <div class="balbox"><div><div class="note">${tr('الربح الصافي (بعد المصاريف والتنازلات)','Bénéfice net (après dépenses et remises)')}</div><div class="amt ${net<0?'neg':'pos'}" style="font-size:1.8rem">${DA(net)}</div></div>
+      <div class="rside"><span class="note">${tr('المبيعات','Ventes')} ${DA(sP)}</span><span class="note">${tr('ربح المبيعات','Marge')} ${DA(mP)} (<bdi dir="ltr">${pct(mP,sP)}%</bdi>)</span><span class="note">${tr('المصاريف','Dépenses')} −${DA(eP)}</span>${fgP>0?`<span class="note">🤝 ${tr('التنازلات','Remises')} −${DA(fgP)}</span>`:''}</div></div>
+    ${fgCardHTML(f==='0000-01-01'?'0000-01-01':f,t)}
     ${uP?`<p class="note">${tr('مبيعات دون سعر شراء لم تُحتسب في الربح','Ventes sans prix d’achat non comptées')}: ${DA(uP)}</p>`:''}
     <h3>${tr('الربح مع كل زبون','Bénéfice par client')}</h3>
     ${ps.length?`<div class="card pad stack" style="gap:12px">${ps.map(r=>`<div style="display:grid;gap:5px"><div class="rowflex between"><b>${esc(r.name)}</b><span>${DA(r.m)} <span class="note">(<bdi dir="ltr">${pct(r.m,r.sales)}%</bdi>)</span></span></div><div class="note">${tr('مبيعات','Ventes')} ${DA(r.sales)}</div>${bar(r.m/maxM*100)}</div>`).join('')}</div>`
@@ -1638,8 +1647,8 @@ function chart7(){
   const days=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);days.push(dstr(d))}
   const s=days.map(d=>0),p=days.map(d=>0);
   for(const id in S.bons){const b=S.bons[id];if(b.kind==='opening')continue;const i=days.indexOf(b.date);if(i>=0)s[i]+=num(b.total)}
-  for(const id in S.pays){const x=S.pays[id];const i=days.indexOf(x.date);if(i>=0)p[i]+=num(x.amount)}
-  for(const id in S.bons){const b=S.bons[id];if(!b.walkin)continue;const i=days.indexOf(b.date);if(i>=0)p[i]+=walkPaid0(b);for(const w of b.wpays||[]){const j=days.indexOf(w.date);if(j>=0)p[j]+=num(w.amount)}}
+  for(const id in S.pays){const x=S.pays[id];if(isFg(x))continue;const i=days.indexOf(x.date);if(i>=0)p[i]+=num(x.amount)}
+  for(const id in S.bons){const b=S.bons[id];if(!b.walkin)continue;const i=days.indexOf(b.date);if(i>=0)p[i]+=walkPaid0(b);for(const w of cashW(b)){const j=days.indexOf(w.date);if(j>=0)p[j]+=num(w.amount)}}
   const max=Math.max(...s,...p);if(!max)return'';
   const W=320,H=130,top=10,bot=22,ch=H-top-bot,gw=W/7,bw=Math.min(14,gw/3);
   const y=v=>top+ch-(v/max)*ch;
@@ -1880,14 +1889,14 @@ function bonViewHTML(){
   ${b.due&&!b.walkin?`<div class="note">${tr('موعد التسديد المتفق عليه','Échéance convenue')}: <b>${fdate(b.due)}${b.dueT?` · <bdi dir="ltr">${esc(b.dueT)}</bdi>`:''}</b></div>`:''}
   ${b.kind==='opening'?'':docLinesTable(b.lines)}
   <div class="totals">${bonKg(b)>0?`<div class="trow"><span>${tr('الوزن التقريبي','Poids approximatif')}</span><b>${KG(bonKg(b))}</b></div>`:''}${num(b.disc)>0?`<div class="trow"><span>${tr('المجموع قبل التخفيض','Sous-total')}</span><span>${DA(b.sub)}</span></div><div class="trow"><span>${tr('التخفيض','Remise')}</span><span>−${DA(b.disc)}</span></div>`:''}<div class="trow big"><span>${tr('المجموع','Total')}</span><span>${DA(b.total)}</span></div>
-  ${b.kind!=='sale'?'':`<div class="trow"><span>${b.walkin?tr('المدفوع','Payé'):tr('دفع عند البيع','Payé à la vente')}</span><span>${DA(atSale)}</span></div><div class="trow"><span>${tr('الباقي من هذه الفاتورة','Reste sur cette facture')}</span><span class="amt ${b.total-atSale>0?'neg':''}">${DA(b.total-atSale)}</span></div>`}</div>
+  ${b.kind!=='sale'?'':`<div class="trow"><span>${b.walkin?tr('المدفوع','Payé'):tr('دفع عند البيع','Payé à la vente')}</span><span>${DA(atSale-(b.walkin?fgW(b):0))}</span></div>${b.walkin&&fgW(b)>0?`<div class="trow"><span>🤝 ${tr('تنازل','Remise accordée')}</span><span>${DA(fgW(b))}</span></div>`:''}<div class="trow"><span>${tr('الباقي من هذه الفاتورة','Reste sur cette facture')}</span><span class="amt ${b.total-atSale>0?'neg':''}">${DA(b.total-atSale)}</span></div>`}</div>
   ${b.kind==='opening'?'':`<div class="actions">${printBtns('bon',view.id)}</div><button class="btn ghost" data-act="bon-share" data-k="bon" data-id="${view.id}">${ic('chat')}${isBL(b)?tr('إرسال وصل التسليم PDF بالواتساب','Envoyer le bon PDF (WhatsApp)'):tr('إرسال الفاتورة PDF بالواتساب','Envoyer la facture PDF (WhatsApp)')}</button>${feat('tools')&&b.kind==='sale'&&(b.lines||[]).some(l=>l.lk!=='art')?`<button class="btn plain" data-act="cut-plan" data-k="bon" data-id="${view.id}">${ic('cut')}${tr('مخطط القص','Plan de découpe')}</button>`:''}`}
   ${b.kind==='sale'?`<div class="actions"><button class="btn line" data-act="new-ret" data-id="${view.id}">${ic('undo')}${tr('مرتجع','Retour')}</button></div>
   ${(!b.status||b.status==='done')?`<button class="btn plain" data-act="set-status" data-id="${view.id}" data-v="prep">${ic('cut')}${tr('تحويلها إلى طلبية قيد التحضير','Passer en commande à préparer')}</button>`:''}`:''}
   ${blViewBox(view.id)}
   ${b.kind==='sale'&&(b.walkin?(b.cname||b.cphone):b.clientId)?`<button class="btn ghost" data-act="ap-new" data-ck="${esc(b.walkin?'w:'+pkey(b.cname,b.cphone):'c:'+b.clientId)}" data-b="${view.id}">📅 ${tr('موعد تركيب / توصيل','RDV pose / livraison')}</button>`:''}
   ${bonPartsHTML(b)}
-  ${walkDebtHTML(view.id,b)}
+  ${walkDebtHTML(view.id,b)}${fgShopHTML(view.id,b)}
   ${bonPhotoHTML(view.id,b)}
   </div>`;
 }
@@ -2624,7 +2633,7 @@ function statTable(){
       rows:M.map(m=>[{h:`<bdi dir="ltr">${fdateTxt(m.date)}</bdi>`,v:fdateTxt(m.date)},{h:esc(m.name||''),v:m.name||''},{h:esc(m.supplier||''),v:m.supplier||''},{h:`${dec2s(m.qty)} ${esc(un(m))}`,v:num(m.qty)},money(num(m.unitCost)),money(num(m.cost)),money(num(m.paid))]),
       foot:[tr('المجموع','Total'),'','','','',money(M.reduce((s,m)=>s+num(m.cost),0)),money(M.reduce((s,m)=>s+num(m.paid),0))]}}
   if(T==='pay'){
-    const P=Object.values(S.pays).filter(x=>inR(x.date)).sort((a,b)=>a.date<b.date?1:-1);
+    const P=cashPays().filter(x=>inR(x.date)).sort((a,b)=>a.date<b.date?1:-1);
     if(sum){const g={};for(const x of P){const k=x.method||'cash';const e=g[k]=g[k]||{n:0,v:0};e.n++;e.v+=num(x.amount)}
       return{head:[tr('طريقة الدفع','Mode'),tr('عدد الدفعات','Nombre'),tr('المبلغ','Montant')],rows:Object.entries(g).map(([k,e])=>[{h:esc(payMName(k)),v:payMName(k)},int(e.n),money(e.v)]),foot:[tr('المجموع','Total'),int(P.length),money(P.reduce((s,x)=>s+num(x.amount),0))]}}
     return{head:[tr('التاريخ','Date'),tr('الحرفي','Client'),tr('الطريقة','Mode'),tr('ملاحظة','Note'),tr('المبلغ','Montant')],rows:P.map(x=>[{h:`<bdi dir="ltr">${fdateTxt(x.date)}</bdi>`,v:fdateTxt(x.date)},{h:`<button class="link" data-act="open-client" data-id="${x.clientId}">${esc((S.clients[x.clientId]||{}).name||x.cname||'?')}</button>`,v:(S.clients[x.clientId]||{}).name||'?'},{h:esc(payMName(x.method||'cash')),v:payMName(x.method||'cash')},{h:esc(x.note||''),v:x.note||''},money(num(x.amount))]),foot:[tr('المجموع','Total'),'','','',money(P.reduce((s,x)=>s+num(x.amount),0))]}}
@@ -2636,7 +2645,7 @@ function statTable(){
   if(T==='cli'){
     const g={};const ent=id=>g[id]=g[id]||{s:0,r:0,p:0,n:0};
     for(const b of Object.values(S.bons)){if(b.walkin||!b.clientId||!inR(b.date)||b.kind==='opening')continue;const e=ent(b.clientId);if(b.kind==='return')e.r+=-num(b.total);else{e.s+=num(b.total);e.n++}}
-    for(const x of Object.values(S.pays)){if(!inR(x.date))continue;ent(x.clientId).p+=num(x.amount)}
+    for(const x of cashPays()){if(!inR(x.date))continue;ent(x.clientId).p+=num(x.amount)}
     const ids=Object.keys(g).filter(id=>S.clients[id]).sort((a,b)=>g[b].s-g[a].s);const t=ids.reduce((s,id)=>({n:s.n+g[id].n,s:s.s+g[id].s,r:s.r+g[id].r,p:s.p+g[id].p,b:s.b+((S.stats[id]||{}).bal||0)}),{n:0,s:0,r:0,p:0,b:0});
     return{head:[tr('الحرفي','Client'),tr('فواتير','Factures'),tr('المبيعات','Ventes'),tr('المرتجعات','Retours'),tr('المدفوع','Payé'),tr('الدين الحالي','Solde actuel')],
       rows:ids.map(id=>[{h:`<button class="link" data-act="open-client" data-id="${id}">${esc(S.clients[id].name)}</button>`,v:S.clients[id].name},int(g[id].n),money(g[id].s),money(g[id].r),money(g[id].p),money((S.stats[id]||{}).bal||0)]),
@@ -2645,8 +2654,8 @@ function statTable(){
 }
 function statsTopHTML(){
   const td=today(),mo=td.slice(0,7);let sT=0,pT=0,sM=0,pM=0;
-  for(const b of Object.values(S.bons)){if(b.kind==='opening')continue;const inM=b.date&&b.date.slice(0,7)===mo;if(b.date===td)sT+=num(b.total);if(inM)sM+=num(b.total);if(b.walkin){const pa=walkPaid0(b);if(b.date===td)pT+=pa;if(inM)pM+=pa}for(const w of b.wpays||[]){if(w.date===td)pT+=num(w.amount);if(w.date&&w.date.slice(0,7)===mo)pM+=num(w.amount)}}
-  for(const p of Object.values(S.pays)){if(p.date===td)pT+=num(p.amount);if(p.date&&p.date.slice(0,7)===mo)pM+=num(p.amount)}
+  for(const b of Object.values(S.bons)){if(b.kind==='opening')continue;const inM=b.date&&b.date.slice(0,7)===mo;if(b.date===td)sT+=num(b.total);if(inM)sM+=num(b.total);if(b.walkin){const pa=walkPaid0(b);if(b.date===td)pT+=pa;if(inM)pM+=pa}for(const w of cashW(b)){if(w.date===td)pT+=num(w.amount);if(w.date&&w.date.slice(0,7)===mo)pM+=num(w.amount)}}
+  for(const p of cashPays()){if(p.date===td)pT+=num(p.amount);if(p.date&&p.date.slice(0,7)===mo)pM+=num(p.amount)}
   const f=stf.from||'0000-01-01',t=stf.to||'9999-12-31',by={};
   for(const b of Object.values(S.bons)){if(b.kind==='opening'||b.kind==='return'||!b.date||b.date<f||b.date>t)continue;
     for(const l of b.lines||[]){if(l.lk==='art')continue;const k=l.typeId||l.type;const x=by[k]||(by[k]={name:(types().find(y=>y.id===l.typeId)||{}).name||l.type||'?',a:0,v:0,q:0});x.a+=num(l.area);x.v+=num(l.amount);x.q+=num(l.qty)}}
@@ -2849,7 +2858,7 @@ function stmtRange(){const td=today();if(stdraft.p==='month')return[td.slice(0,7
 function stmtPrintHTML(){
   const id=stdraft.id,c=stCli(id)||{name:'?'},sh=S.shop||{};const [f,t]=stmtRange();const all=entries(id);
   let open=0;const rows=[];for(const x of all){if(x.date<f)open+=x.amt;else if(x.date<=t)rows.push(x)}
-  const det=stdraft.det!==false;let run=open,tb=0,tp=0;const body=rows.map(x=>{run+=x.amt;if(x.amt>0)tb+=x.amt;else tp+=-x.amt;const lbl=x.k==='bon'?(x.b.kind==='opening'?tr('دين قديم','Ancien crédit'):x.b.kind==='return'?tr('مرتجع','Retour')+' '+x.b.num:(isBL(x.b)?tr('وصل','Bon'):tr('فاتورة','Facture'))+' '+x.b.num):tr('دفع','Paiement')+(x.p.method?' · '+payMName(x.p.method):'');
+  const det=stdraft.det!==false;let run=open,tb=0,tp=0;const body=rows.map(x=>{run+=x.amt;if(x.amt>0)tb+=x.amt;else tp+=-x.amt;const lbl=x.k==='bon'?(x.b.kind==='opening'?tr('دين قديم','Ancien crédit'):x.b.kind==='return'?tr('مرتجع','Retour')+' '+x.b.num:(isBL(x.b)?tr('وصل','Bon'):tr('فاتورة','Facture'))+' '+x.b.num):(x.p.method==='forgive'?payMName('forgive'):tr('دفع','Paiement')+(x.p.method?' · '+payMName(x.p.method):''));
     const ls=det&&x.k==='bon'&&x.b.kind!=='opening'?(x.b.lines||[]):[];
     const sub=ls.length?`<tr class="sub"><td></td><td colspan="4">${ls.map(l=>l.lk==='art'?`${esc(l.type)} · <bdi dir="ltr">${esc(l.qty)}</bdi> ${esc(l.unit||'')} × <bdi dir="ltr">${grp(l.price)}</bdi> = <bdi dir="ltr">${grp(l.amount)}</bdi>`:`${esc(l.type)}${l.use?' ('+esc(l.use)+')':''} · <bdi dir="ltr">${esc(l.w)}×${esc(l.h)}</bdi> ${tr('سم','cm')} × <bdi dir="ltr">${esc(l.qty)}</bdi> = <bdi dir="ltr">${grp(l.amount)}</bdi>`).join('<br>')}${num(x.b.disc)>0?`<br>${tr('تخفيض','Remise')} −<bdi dir="ltr">${grp(x.b.disc)}</bdi>`:''}${x.b.note?`<br>${esc(x.b.note)}`:''}</td></tr>`:'';
     return `<tr class="${sub?'hd':''}"><td><bdi dir="ltr">${fdateTxt(x.date)}</bdi></td><td>${sub?'<b>'+esc(lbl)+'</b>':esc(lbl)}</td><td><bdi dir="ltr">${x.amt>0?grp(x.amt):''}</bdi></td><td><bdi dir="ltr">${x.amt<0?grp(-x.amt):''}</bdi></td><td><bdi dir="ltr">${grp(run)}</bdi></td></tr>${sub}`}).join('');
@@ -2867,7 +2876,7 @@ function stmtData(){
   const id=stdraft.id,c=stCli(id)||{name:'?'},[f,t]=stmtRange(),all=entries(id),det=stdraft.det!==false;
   let open=0;const rs=[];for(const x of all){if(x.date<f)open+=x.amt;else if(x.date<=t)rs.push(x)}
   let run=open,tb=0,tp=0;const rows=rs.map(x=>{run+=x.amt;if(x.amt>0)tb+=x.amt;else tp+=-x.amt;
-    const lbl=x.k==='bon'?(x.b.kind==='opening'?tr('دين قديم','Ancien crédit'):x.b.kind==='return'?tr('مرتجع','Retour')+' '+x.b.num:(isBL(x.b)?tr('وصل','Bon'):tr('فاتورة','Facture'))+' '+x.b.num):tr('دفع','Paiement')+(x.p.method?' · '+payMName(x.p.method):'');
+    const lbl=x.k==='bon'?(x.b.kind==='opening'?tr('دين قديم','Ancien crédit'):x.b.kind==='return'?tr('مرتجع','Retour')+' '+x.b.num:(isBL(x.b)?tr('وصل','Bon'):tr('فاتورة','Facture'))+' '+x.b.num):(x.p.method==='forgive'?payMName('forgive'):tr('دفع','Paiement')+(x.p.method?' · '+payMName(x.p.method):''));
     const sub=[];if(det&&x.k==='bon'&&x.b.kind!=='opening'){for(const l of x.b.lines||[])sub.push(l.lk==='art'?`${l.type} · \u2066${l.qty}\u2069 ${l.unit||''} × \u2066${grpTxt(l.price)}\u2069 = \u2066${grpTxt(l.amount)}\u2069`:`${l.type}${l.use?' ('+l.use+')':''} · \u2066${l.w}×${l.h}\u2069 ${tr('سم','cm')} × \u2066${l.qty}\u2069 = \u2066${grpTxt(l.amount)}\u2069`);
       if(num(x.b.disc)>0)sub.push(`${tr('تخفيض','Remise')} −${grpTxt(x.b.disc)}`);if(x.b.note)sub.push(String(x.b.note))}
     return{date:fdateTxt(x.date),lbl,deb:x.amt>0?grpTxt(x.amt):'',cred:x.amt<0?grpTxt(-x.amt):'',run:grpTxt(run),sub}});
@@ -3037,15 +3046,15 @@ const catName=k=>{const c=EXP_CATS.find(x=>x[0]===k)||EXP_CATS[5];return tr(c[1]
 const shiftDay=(d,n)=>{const x=new Date(d+'T12:00:00');x.setDate(x.getDate()+n);return dstr(x)};
 function cashHTML(){
   const d=cashDay||today(),mo=d.slice(0,7);
-  const ins=[...Object.values(S.pays).filter(p=>p.date===d).map(p=>({t:p.createdAt||0,label:(S.clients[p.clientId]||{}).name||p.cname||'?',sub:tr('دفع حرفي','Paiement atelier')+(p.method&&p.method!=='cash'?' · '+payMName(p.method):''),a:num(p.amount),act:'open-client',id:p.clientId})),
-    ...Object.entries(S.bons).filter(([,b])=>b.walkin&&b.date===d&&num(b.total)>0&&walkPaid0(b)>0).map(([id,b])=>({t:b.createdAt||0,label:custName(b),sub:tr('بيع نقداً · فاتورة ','Vente comptant · facture ')+b.num,a:walkPaid0(b),act:'open-bon',id})),...Object.entries(S.bons).flatMap(([id,b])=>(b.wpays||[]).filter(w=>w.date===d).map(w=>({t:w.t||0,label:custName(b),sub:tr('دفعة دين زبون عادي · فاتورة ','Versement client comptoir · facture ')+b.num,a:num(w.amount),act:'open-bon',id})))].sort((x,y)=>y.t-x.t);
+  const ins=[...cashPays().filter(p=>p.date===d).map(p=>({t:p.createdAt||0,label:(S.clients[p.clientId]||{}).name||p.cname||'?',sub:tr('دفع حرفي','Paiement atelier')+(p.method&&p.method!=='cash'?' · '+payMName(p.method):''),a:num(p.amount),act:'open-client',id:p.clientId})),
+    ...Object.entries(S.bons).filter(([,b])=>b.walkin&&b.date===d&&num(b.total)>0&&walkPaid0(b)>0).map(([id,b])=>({t:b.createdAt||0,label:custName(b),sub:tr('بيع نقداً · فاتورة ','Vente comptant · facture ')+b.num,a:walkPaid0(b),act:'open-bon',id})),...Object.entries(S.bons).flatMap(([id,b])=>cashW(b).filter(w=>w.date===d).map(w=>({t:w.t||0,label:custName(b),sub:tr('دفعة دين زبون عادي · فاتورة ','Versement client comptoir · facture ')+b.num,a:num(w.amount),act:'open-bon',id})))].sort((x,y)=>y.t-x.t);
   const outs=Object.entries(S.exps).filter(([,e])=>e.date===d).sort((a,b)=>(b[1].createdAt||0)-(a[1].createdAt||0));
   const outs2=[...Object.entries(S.bons).filter(([,b])=>b.walkin&&b.date===d&&num(b.total)<0).map(([id,b])=>({t:b.createdAt,label:tr('استرجاع لزبون','Remboursement client'),sub:custName(b),a:-num(b.total),act:'open-bon',id})),
     ...Object.values(S.spays).filter(x=>x.date===d).map(x=>({t:x.createdAt,label:tr('دفع لمورّد','Paiement fournisseur'),sub:(S.sups[x.supplierId]||{}).name||'',a:num(x.amount),act:'open-sup',id:x.supplierId})),
     ...Object.values(S.stock).filter(m=>m.kind==='in'&&m.date===d&&num(m.paid)>0).map(m=>({t:m.createdAt,label:tr('شراء سلعة','Achat de stock'),sub:(m.supplier||'')+' · '+m.type,a:num(m.paid),act:'open-sup',id:m.supplierId})),
     ...Object.values(S.amv).filter(m=>m.kind==='in'&&m.date===d&&num(m.paid)>0).map(m=>({t:m.createdAt,label:tr('شراء سلعة','Achat de stock'),sub:(m.supplier||'')+' · '+(m.name||''),a:num(m.paid),act:'open-sup',id:m.supplierId}))];
   const tin=ins.reduce((s,x)=>s+x.a,0),tout=outs.reduce((s,[,e])=>s+num(e.amount),0)+outs2.reduce((s,x)=>s+x.a,0);
-  let min=0,mout=0;const inM=x=>x&&x.slice(0,7)===mo;for(const p of Object.values(S.pays))if(inM(p.date))min+=num(p.amount);for(const b of Object.values(S.bons))if(b.walkin&&inM(b.date)){if(num(b.total)>0)min+=walkPaid0(b);else mout+=-num(b.total)}for(const b of Object.values(S.bons))for(const w of b.wpays||[])if(inM(w.date))min+=num(w.amount);
+  let min=0,mout=0;const inM=x=>x&&x.slice(0,7)===mo;for(const p of cashPays())if(inM(p.date))min+=num(p.amount);for(const b of Object.values(S.bons))if(b.walkin&&inM(b.date)){if(num(b.total)>0)min+=walkPaid0(b);else mout+=-num(b.total)}for(const b of Object.values(S.bons))for(const w of cashW(b))if(inM(w.date))min+=num(w.amount);
   for(const e of Object.values(S.exps))if(inM(e.date))mout+=num(e.amount);for(const x of Object.values(S.spays))if(inM(x.date))mout+=num(x.amount);for(const m of Object.values(S.stock))if(m.kind==='in'&&inM(m.date))mout+=num(m.paid);for(const m of Object.values(S.amv))if(m.kind==='in'&&inM(m.date))mout+=num(m.paid);
   return `<div class="stack">${backBtn('nav-more',tr('المزيد','Plus'))}
   <div class="rowflex between"><h2>${tr('الصندوق','Caisse')}</h2><button class="btn ghost" data-act="new-exp">${ic('plus')}${tr('مصروف','Dépense')}</button></div>
@@ -3104,13 +3113,13 @@ function costAt(typeId,date){let best=null;for(const m of Object.values(S.stock)
 function reportsHTML(){
   const mo=repMonth||today().slice(0,7);
   let shopS=0,walkS=0,coll=0,exps=0,margin=0,unknown=0;const byType={};
-  for(const b of Object.values(S.bons)){if(b.kind==='opening'||!b.date||b.date.slice(0,7)!==mo)continue;if(b.walkin){walkS+=num(b.total);coll+=walkPaid0(b)+(b.wpays||[]).filter(w=>w.date&&w.date.slice(0,7)===mo).reduce((a,w)=>a+num(w.amount),0)}else shopS+=num(b.total);
+  for(const b of Object.values(S.bons)){if(b.kind==='opening'||!b.date||b.date.slice(0,7)!==mo)continue;if(b.walkin){walkS+=num(b.total);coll+=walkPaid0(b)+cashW(b).filter(w=>w.date&&w.date.slice(0,7)===mo).reduce((a,w)=>a+num(w.amount),0)}else shopS+=num(b.total);
     if(b.kind==='return'){for(const l of b.lines||[]){if(l.lk==='art'){const c=artCostAt(l.articleId,b.date);margin+=num(l.amount)+(b.restock&&c!==null?num(l.baseQty||l.qty)*c:0);continue}const c=costAt(l.typeId,b.date);margin+=num(l.amount)+(b.restock&&c!==null?num(l.area)*c:0)}continue}
     margin-=num(b.disc);
     for(const l of b.lines||[]){const k=l.type||'?';byType[k]=byType[k]||{a:0,v:0};byType[k].a+=num(l.area);byType[k].v+=num(l.amount);
       if(l.lk==='art'){if(l.cat==='svc'){margin+=num(l.amount);continue}const c=artCostAt(l.articleId,b.date);if(c===null)unknown+=num(l.amount);else margin+=num(l.amount)-num(l.baseQty||l.qty)*c;continue}
       const c=costAt(l.typeId,b.date);if(c===null)unknown+=num(l.amount);else margin+=num(l.amount)-num(l.area)*c}}
-  for(const p of Object.values(S.pays))if(p.date&&p.date.slice(0,7)===mo)coll+=num(p.amount);
+  for(const p of cashPays())if(p.date&&p.date.slice(0,7)===mo)coll+=num(p.amount);
   for(const e of Object.values(S.exps))if(e.date&&e.date.slice(0,7)===mo)exps+=num(e.amount);
   margin=Math.round(margin);
   const ag=[0,0,0];for(const id in S.stats){const s=S.stats[id];if(s.bal<=0)continue;ag[s.age>60?2:s.age>30?1:0]+=s.bal}const agT=ag[0]+ag[1]+ag[2];
@@ -3686,7 +3695,7 @@ function collList(){const out=[];
 function collectHTML(){
   if(!loaded())return `<div class="empty"><p>${tr('جاري التحميل…','Chargement…')}</p></div>`;
   const td=today(),goal=num(prefs.goal),done=collDone(),paidT={};let got=0;
-  for(const p of Object.values(S.pays))if(p.date===td){got+=num(p.amount);paidT[p.clientId]=(paidT[p.clientId]||0)+num(p.amount)}
+  for(const p of cashPays())if(p.date===td){got+=num(p.amount);paidT[p.clientId]=(paidT[p.clientId]||0)+num(p.amount)}
   const all=collList(),pri=all.filter(x=>x.pr<3),list=collAll?all:pri,isDone=x=>!!done[x.id]||paidT[x.id]>0;
   const todo=list.filter(x=>!isDone(x)),fin=list.filter(isDone),pct=goal>0?Math.min(100,got/goal*100):0;
   const chip=x=>x.why==='due'?`<span class="chip bad">${tr('حلّ الموعد','Échéance')} ${fdate(x.due)}</span>`:x.why==='cap'?`<span class="chip bad">${tr('تجاوز السقف','Plafond dépassé')}</span>`:x.why==='late'?`<span class="chip warn">${x.s.lastPay?tr(`آخر دفع منذ ${x.s.age} يوم`,`payé il y a ${x.s.age} j`):tr(`دون دفع منذ ${x.s.age} يوم`,`rien payé depuis ${x.s.age} j`)}</span>`:ageChip(x.s);
@@ -3781,8 +3790,8 @@ function photoZoom(src){const m=$('#modal');m.innerHTML=`<div class="sheet" role
 /* ---- سكرة النهار ---- */
 let cldraft=null;
 function cashDayData(d){const isCash=m=>!m||m==='cash';let cin=0,cout=0;const nonc=[];
-  for(const p of Object.values(S.pays))if(p.date===d){if(isCash(p.method))cin+=num(p.amount);else nonc.push({l:((S.clients[p.clientId]||{}).name||p.cname||'?')+' · '+payMName(p.method),a:num(p.amount)})}
-  for(const b of Object.values(S.bons))if(b.walkin&&b.date===d){const v=num(b.total);if(v>0){if(isCash(b.pmeth))cin+=walkPaid0(b);else if(walkPaid0(b)>0)nonc.push({l:custName(b)+' · '+payMName(b.pmeth),a:walkPaid0(b)})}else cout+=-v}for(const b of Object.values(S.bons))for(const w of b.wpays||[])if(w.date===d)cin+=num(w.amount);
+  for(const p of cashPays())if(p.date===d){if(isCash(p.method))cin+=num(p.amount);else nonc.push({l:((S.clients[p.clientId]||{}).name||p.cname||'?')+' · '+payMName(p.method),a:num(p.amount)})}
+  for(const b of Object.values(S.bons))if(b.walkin&&b.date===d){const v=num(b.total);if(v>0){if(isCash(b.pmeth))cin+=walkPaid0(b);else if(walkPaid0(b)>0)nonc.push({l:custName(b)+' · '+payMName(b.pmeth),a:walkPaid0(b)})}else cout+=-v}for(const b of Object.values(S.bons))for(const w of cashW(b))if(w.date===d)cin+=num(w.amount);
   for(const e of Object.values(S.exps))if(e.date===d)cout+=num(e.amount);
   for(const x of Object.values(S.spays))if(x.date===d&&isCash(x.method))cout+=num(x.amount);
   for(const m of Object.values(S.stock))if(m.kind==='in'&&m.date===d)cout+=num(m.paid);
@@ -4029,8 +4038,8 @@ function walkWaText(id){const b=S.bons[id];if(!b)return'';return [tr(`السلا
 function noteWaText(id){const n=(S.notes||{})[id]||{};return [tr(`السلام عليكم ${n.name||''}،`,`Bonjour ${n.name||''},`),tr(`نذكّركم بلطف بالمبلغ المتبقي لدى ${shopName()}: ${iso(grpTxt(n.amount))} ${CUR()}.`,`Petit rappel : il reste ${grpTxt(n.amount)} ${CUR()} chez ${shopName()}.`),tr('نشكركم.','Merci.')].join('\n')}
 function walkDebtHTML(id,b){const r=walkRem(b);if(!b.walkin||b.kind!=='sale'||(!(r>0)&&!(b.wpays||[]).length))return'';const w=waText(b.cphone,walkWaText(id));
   return `<div class="card pad stack" style="gap:8px;${r>0?'border-color:var(--debt)':''}"><div class="rowflex between"><b>${tr('دين الزبون','Reste dû par le client')}</b><b class="amt ${r>0?'neg':'pos'}">${DA(r)}</b></div>
-  <div class="note">${tr('دفع عند البيع','Payé à la vente')} ${DA(walkPaid0(b))}${(b.wpays||[]).map((x,i)=>` · ${fdate(x.date)} ${DA(x.amount)}${isStaff()?'':` <button class="link" data-act="del-wpay" data-id="${id}" data-i="${i}" style="color:var(--debt);padding:0 4px">×</button>`}`).join('')}</div>
-  ${r>0?`<div class="rowflex" style="gap:8px"><input id="wpa" inputmode="decimal" dir="ltr" placeholder="${esc(Math.round(r))}" style="flex:1;min-width:0"><button class="btn" data-act="w-pay" data-id="${id}" style="width:auto">${ic('cash')}${tr('تسجيل دفعة','Encaisser')}</button></div>
+  <div class="note">${tr('دفع عند البيع','Payé à la vente')} ${DA(walkPaid0(b))}${(b.wpays||[]).map((x,i)=>` · ${fdate(x.date)} ${isFg(x)?'🤝 '+tr('تنازل','Remise')+' ':''}${DA(x.amount)}${isStaff()?'':` <button class="link" data-act="del-wpay" data-id="${id}" data-i="${i}" style="color:var(--debt);padding:0 4px">×</button>`}`).join('')}</div>
+  ${r>0?`<div class="rowflex" style="gap:8px"><input id="wpa" inputmode="decimal" dir="ltr" placeholder="${esc(Math.round(r))}" style="flex:1;min-width:0"><button class="btn" data-act="w-pay" data-id="${id}" style="width:auto">${ic('cash')}${tr('تسجيل دفعة','Encaisser')}</button></div>${isStaff()?'':`<button class="btn fgbtn" data-act="fg-bon" data-id="${id}">🤝 ${tr('التنازل عن الباقي','Abandonner le reste')} (${DA(r)})</button>`}
   <div class="rowflex" style="gap:8px">${b.cphone?`<a class="btn line" href="${telHref(b.cphone)}" style="width:auto">${ic('phone')}${tr('اتصال','Appeler')}</a>`:''}${w?`<a class="btn line" href="${w}" target="_blank" rel="noopener" style="width:auto">${ic('chat')}${tr('تذكير','Rappel')}</a>`:''}</div>`:`<span class="chip ok">${tr('سدّد كل شيء','Tout réglé')}</span>`}</div>`}
 
 /* تصنيف طريقة الدفع */
@@ -4038,7 +4047,7 @@ const BEH={good:['يدفع بانتظام','Paie bien','ok'],mid:['متوسط','
 function payBeh(cid){const c=S.clients[cid]||{},s=S.stats[cid];if(!s)return null;if(BEH[c.beh])return c.beh;if(s.bal<=0.5)return 'good';
   const from=shiftDay(today(),-120);let bought=0,paid=0,n=0;
   for(const b of Object.values(S.bons))if(b.clientId===cid&&b.kind!=='opening'&&b.date>=from)bought+=num(b.total);
-  for(const p of Object.values(S.pays))if(p.clientId===cid&&p.date>=from){paid+=num(p.amount);n++}
+  for(const p of cashPays())if(p.clientId===cid&&p.date>=from){paid+=num(p.amount);n++}
   if((S.dueMap&&S.dueMap[cid])||s.age>60||(s.age>30&&paid<bought*0.3))return 'bad';
   if(num(c.limit)>0&&s.bal>num(c.limit))return 'mid';
   if(n>=1&&s.age<=30&&(n>=2||paid>=bought*0.6))return 'good';return 'mid'}
@@ -4219,7 +4228,7 @@ async function bonPages(id,kind){
   const area=lines.reduce((s,l)=>s+num(l.billArea||l.area),0),kg=bonKg(b);
   const tl=[];if(area>0)tl.push([tr('المساحة الكلية','Surface totale'),(Math.round(area*100)/100).toFixed(2)+' '+tr('م²','m²')]);if(kg>0)tl.push([tr('الوزن التقريبي','Poids approx.'),Math.round(kg)+' '+tr('كغ','kg')]);
   if(num(b.disc)>0){tl.push([tr('المجموع قبل التخفيض','Sous-total'),grpTxt(b.sub)+' '+CUR()]);tl.push([tr('التخفيض','Remise'),'−'+grpTxt(b.disc)+' '+CUR()])}
-  const tl2=[];if(!q&&b.kind==='sale'){tl2.push([tr('المدفوع','Payé'),grpTxt(atSale)+' '+CUR()]);tl2.push([tr('الباقي من هذه الفاتورة','Reste sur cette facture'),grpTxt(Math.max(0,num(b.total)-atSale))+' '+CUR()]);if(st)tl2.push([tr('رصيد الحساب الكلي','Solde total du compte'),grpTxt(st.bal)+' '+CUR()])}
+  const tl2=[];if(!q&&b.kind==='sale'){{const fg=b.walkin?fgW(b):0;tl2.push([tr('المدفوع','Payé'),grpTxt(atSale-fg)+' '+CUR()]);if(fg>0)tl2.push([tr('تنازل','Remise accordée'),grpTxt(fg)+' '+CUR()])}tl2.push([tr('الباقي من هذه الفاتورة','Reste sur cette facture'),grpTxt(Math.max(0,num(b.total)-atSale))+' '+CUR()]);if(st)tl2.push([tr('رصيد الحساب الكلي','Solde total du compte'),grpTxt(st.bal)+' '+CUR()])}
   const words=wrap((q?tr('أُوقف هذا العرض على مبلغ','Arrêté le présent devis à la somme de'):tr('أُوقفت هذه الفاتورة على مبلغ','Arrêtée la présente facture à la somme de'))+': '+amountWords(b.total),W-2*M,{s:20});
   if(y+(tl.length+tl2.length)*36+90+words.length*30+90>bottom)page(false);
   const bx=W-M-560;y+=34;for(const [l,v] of tl){T(l,bx,y,{s:20,c:'#333'});T(v,W-M,y,{s:20,a:'end'});y+=36}
@@ -4638,7 +4647,7 @@ function cHeadHTML(D){const walk=D.kind==='walk',k=esc(D.id),m=D.meta;
    <button class="${ipOpen===D.id?'on':''}" data-act="ip-open" data-id="${k}"><span>💵</span>${tr('فارسمو','Versement')}</button>
    <button data-act="cq-new" data-k="${D.kind}" data-id="${k}"><span>📋</span>${tr('عرض سعر','Devis')}</button>
    <button data-act="stmt" data-id="${walk?'w:'+k:k}"><span>📄</span>${tr('كشف حساب','Relevé')}</button></div></div>`}
-function cKpiHTML(D){const ag=agingOf(D.items);let lp=null;for(const x of D.pays){if(!lp||x.date>lp.date||(x.date===lp.date&&x.t>lp.t))lp=x}
+function cKpiHTML(D){const ag=agingOf(D.items);let lp=null;for(const x of D.pays){if(x.m==='forgive')continue;if(!lp||x.date>lp.date||(x.date===lp.date&&x.t>lp.t))lp=x}
   return `<div class="kpi4">
   <div class="red ${D.kind==='shop'?'tapcard':''}" ${D.kind==='shop'?`role="button" tabindex="0" data-act="pm-debt" data-id="${esc(D.id)}"`:''}><small>${tr('الباقي عليه','Reste dû')}</small><b>${DA(D.owe)}</b></div>
   <div class="${ag.over>0.5?'org':''}"><small>${tr('متأخر +30 يوم','En retard +30 j')}</small><b>${DA(ag.over)}</b></div>
@@ -5355,6 +5364,61 @@ function keepSave(){try{if(!unlocked||!view||!view.name)return;const d={};for(co
 window.addEventListener('pagehide',keepSave);window.addEventListener('beforeunload',keepSave);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')keepSave()});
 {const _g=go;go=function(n,a){const r=_g(n,a);keepSave();return r}}
+
+/* ---- v54: 🤝 التنازل عن الباقي (الدين يسقط ويتسجّل في خانة التنازلات) ---- */
+function isFg(x){return !!x&&x.method==='forgive'}
+function cashPays(){return Object.values(S.pays).filter(p=>!isFg(p))}
+function cashW(b){return (b&&b.wpays||[]).filter(w=>!isFg(w))}
+function fgW(b){return (b&&b.wpays||[]).filter(isFg).reduce((a,w)=>a+num(w.amount),0)}
+let fgNote='';
+document.addEventListener('input',e=>{if(e.target&&e.target.id==='fg-note')fgNote=e.target.value});
+async function fgAsk(name,amt){fgNote='';return ask({title:`🤝 ${tr('التنازل عن','Abandonner')} ${DA(amt)} ${tr('لصالح','pour')} ${esc(name||tr('الزبون','le client'))}؟`,
+  body:`${tr('ستصبح الفاتورة مسدَّدة ولن يبقى على الزبون أي دين. يُسجَّل المبلغ في خانة «التنازلات» لمعرفة مجموع ما تنازلت عنه كل شهر.','La facture sera soldée et le client ne devra plus rien. Le montant est enregistré dans « Remises accordées ».')}
+  <input id="fg-note" style="margin-top:10px;width:100%" placeholder="${tr('ملاحظة (اختياري): مثلًا «جبر الكسر»','Note (facultatif)')}">`,
+  ok:'🤝 '+tr('تأكيد التنازل','Confirmer'),danger:false,icon:'check'})}
+/* قائمة التنازلات في فترة */
+function fgList(f,t){const L=[],inR=d=>d&&d>=f&&d<=t;
+  for(const [id,p] of Object.entries(S.pays))if(isFg(p)&&inR(p.date)){const fb=p.fgBon&&S.bons[p.fgBon];L.push({date:p.date,t:p.createdAt||0,amt:num(p.amount),who:(S.clients[p.clientId]||{}).name||'?',ref:fb?tr('فاتورة ','Facture ')+fb.num:'',act:'open-client',id:p.clientId})}
+  for(const [id,b] of Object.entries(S.bons))for(const w of b.wpays||[])if(isFg(w)&&inR(w.date))L.push({date:w.date,t:w.t||0,amt:num(w.amount),who:custName(b),ref:(isBL(b)?tr('وصل ','Bon '):tr('فاتورة ','Facture '))+b.num,act:'open-bon',id});
+  for(const [id,n] of Object.entries(S.notes||{}))for(const w of n.pays||[])if(isFg(w)&&inR(w.date))L.push({date:w.date,t:w.t||0,amt:num(w.amount),who:n.name||'?',ref:tr('دين قديم','Ancien crédit'),act:'',id});
+  return L.sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:b.t-a.t)}
+function fgSum(f,t){return fgList(f,t).reduce((a,x)=>a+x.amt,0)}
+function fgCardHTML(f,t){const L=fgList(f,t),s=L.reduce((a,x)=>a+x.amt,0);
+  let prev='';if(dbv.p==='month'){const d=new Date();d.setDate(1);d.setMonth(d.getMonth()-1);const m=dstr(d).slice(0,7);prev=`<div class="note">${tr('الشهر الماضي','Mois dernier')}: ${DA(fgSum(m+'-01',m+'-31'))}</div>`}
+  if(!L.length&&!prev)return `<div class="fgcard"><div class="rowflex between"><b>🤝 ${tr('التنازلات','Remises accordées')}</b><b>${DA(0)}</b></div><div class="note">${tr('لم تتنازل عن أي مبلغ في هذه الفترة.','Aucune remise sur cette période.')}</div></div>`;
+  return `<div class="fgcard"><div class="rowflex between"><b>🤝 ${tr('التنازلات','Remises accordées')}</b><span class="note">${L.length} ${tr('مرة','fois')}</span></div>
+  <div class="fgbig">${DA(s)}</div>${prev}
+  ${L.length?`<div class="fglist">${L.slice(0,30).map(x=>`<${x.act?`button data-act="${x.act}" data-id="${esc(x.id)}"`:'div'} class="fgli"><span>${esc(x.who)}${x.ref?' · '+esc(x.ref):''}<small>${fdate(x.date)}</small></span><b>${grp(x.amt)}</b></${x.act?'button':'div'}>`).join('')}</div>`:''}</div>`}
+/* زر التنازل في فاتورة الحرفي */
+function fgShopHTML(id,b){if(!b||b.walkin||b.kind!=='sale'||isStaff())return'';const r=Math.round(num((S.bonRem||{})[id]||0));if(!(r>0))return'';
+  return `<button class="btn fgbtn" data-act="fg-shop" data-id="${id}">🤝 ${tr('التنازل عن الباقي','Abandonner le reste')} (${DA(r)})</button>`}
+/* التنازل في «فارسمو» */
+function ipFgHTML(bal){const after=Math.max(0,bal-Math.round(num(ipd.amount))),show=!isStaff()&&num(ipd.amount)>0&&after>0.5;
+  return `<div id="ip-fg" ${show?'':'hidden'}><div class="note" style="margin-bottom:6px">${tr('ماذا تريد أن تفعل بالمتبقي','Que faire du reste')} (<b id="ip-fga">${DA(after)}</b>)؟</div>
+  <div class="fgseg"><button type="button" data-act="ip-fg" data-v="0" class="${ipd.fg?'':'on'}">📒 ${tr('يبقى دَينًا','Reste dû')}</button><button type="button" data-act="ip-fg" data-v="1" class="${ipd.fg?'on fg':''}">🤝 ${tr('التنازل عنه','L’abandonner')}</button></div></div>`}
+{const _ip=ipSheetHTML;ipSheetHTML=function(k,id,bal){const h=_ip(k,id,bal);const i=h.lastIndexOf('<button class="btn full" data-act="ip-save"');return i<0?h:h.slice(0,i)+ipFgHTML(bal)+h.slice(i)}}
+function ipFgUpd(){const box=$('#ip-fg');if(!box)return;const sv=$('[data-act=ip-save]');if(!sv)return;const k=sv.dataset.k,id=sv.dataset.id;
+  const bal=k==='shop'?num((S.stats[id]||{}).bal):((personOf(id)||{}).owe||0);const after=Math.max(0,bal-Math.round(num(ipd.amount)));
+  const show=!isStaff()&&num(ipd.amount)>0&&after>0.5;box.hidden=!show;const a=$('#ip-fga');if(a)a.innerHTML=DA(after);if(!show)ipd.fg=false}
+document.addEventListener('input',e=>{if(e.target&&e.target.id==='ip-a')setTimeout(ipFgUpd,0)});
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act,id=b.dataset.id;
+  if(a==='ip-full')setTimeout(ipFgUpd,30);
+  if(a==='ip-fg'){e.stopPropagation();ipd.fg=b.dataset.v==='1';document.querySelectorAll('[data-act=ip-fg]').forEach(x=>{const on=x.dataset.v===(ipd.fg?'1':'0');x.classList.toggle('on',on);x.classList.toggle('fg',on&&ipd.fg)});return}
+  if(a==='ip-save'&&ipd.fg&&!isStaff()){const amt=Math.round(num(ipd.amount));if(!(amt>0))return;
+    if(b.dataset.k==='shop'){const cid=id,bal=num((S.stats[cid]||{}).bal),after=Math.round(bal-amt);if(!(after>0))return;e.stopPropagation();
+      const r1=db.collection('payments').doc(),r2=db.collection('payments').doc(),now=Date.now();
+      if(await write(async()=>{await r1.set({clientId:cid,amount:amt,method:ipd.method||'cash',date:today(),note:'',createdAt:now});await r2.set({clientId:cid,amount:after,method:'forgive',date:today(),note:'',createdAt:now+1})},tr('تم حفظ الفارسمو والتنازل عن الباقي.','Versement et remise enregistrés.'))){sound('paid');try{justPaid={id:r1.id,cid,t:now}}catch(_){}ipOpen=null;ipd={amount:'',method:'cash'};render()}return}
+    const p=personOf(id);if(!p||amt>p.owe+0.5)return;e.stopPropagation();
+    const items=wpOweItems(p),t0=Date.now();let left=amt,i=0;const plan=[];
+    for(const it of items){const rem=Math.round(it.rem),x=Math.min(left,rem);left-=x;const add=[];if(x>0)add.push({amount:x,date:today(),t:t0+(i++),g:t0,method:ipd.method||'cash',by:curName()});if(rem-x>0)add.push({amount:rem-x,date:today(),t:t0+(i++),g:t0+1,method:'forgive',by:curName()});if(add.length)plan.push([it,add])}
+    if(await write(async()=>{for(const [it,add] of plan){if(it.k==='bon'){const bb=S.bons[it.id];await db.doc('bons/'+it.id).update({wpays:[...(bb.wpays||[]),...add]})}
+        else{const n=S.notes[it.id],np=[...(n.pays||[]),...add];await db.doc('notes/'+it.id).update({pays:np,done:true,doneAt:Date.now(),updatedAt:Date.now()})}}},tr('تم حفظ الفارسمو والتنازل عن الباقي.','Versement et remise enregistrés.'))){sound('paid');ipOpen=null;ipd={amount:'',method:'cash'};render()}return}
+  if(a==='fg-bon'){if(isStaff())return;const bb=S.bons[id];if(!bb)return;const r=Math.round(walkRem(bb));if(!(r>0))return;if(!await fgAsk(custName(bb),r))return;
+    await write(()=>db.doc('bons/'+id).update({wpays:[...(bb.wpays||[]),{amount:r,date:today(),t:Date.now(),method:'forgive',by:curName(),note:fgNote||''}]}),tr('تم التنازل عن الباقي. الفاتورة مسدَّدة.','Remise enregistrée. Facture soldée.'));return}
+  if(a==='fg-shop'){if(isStaff())return;const bb=S.bons[id];if(!bb)return;const r=Math.round(num((S.bonRem||{})[id]||0));if(!(r>0))return;if(!await fgAsk((S.clients[bb.clientId]||{}).name,r))return;
+    const ref=db.collection('payments').doc();await write(()=>ref.set({clientId:bb.clientId,amount:r,method:'forgive',date:today(),note:fgNote||'',createdAt:Date.now(),fgBon:id}),tr('تم التنازل عن الباقي. الفاتورة مسدَّدة.','Remise enregistrée. Facture soldée.'));return}
+},true);
+['fg-bon','fg-shop','ip-fg'].forEach(x=>STAFF_BLOCK.add(x));
 
 function backupFile(){const data={app:'daftar-zujaj',version:2,exportedAt:new Date().toISOString(),docs:LocalDB.dump()};return new File([JSON.stringify(data)],`tumayd-backup-${today()}.json`,{type:'application/json'})}
 function downloadFile(f){const u=URL.createObjectURL(f);const a=document.createElement('a');a.href=u;a.download=f.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}
