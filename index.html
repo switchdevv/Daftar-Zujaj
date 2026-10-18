@@ -740,7 +740,20 @@ input.subuse{padding:7px 10px;font-size:.85rem}
 .purhd{background:#1d2b2a;color:#fff;border-radius:16px;padding:12px 14px;display:grid;gap:3px}.purhd small{opacity:.8}
 .pur4{display:grid;grid-template-columns:1fr 1fr;gap:8px}.pur4 .btn{width:100%}
 .purlnk{all:unset;cursor:pointer;font-weight:700;color:var(--accent)}
-.buwas{color:#22703e;font-size:.78rem}.busheet .pki.on{background:var(--accent-soft)}.busheet .pki.new{color:var(--accent)}
+.buwas{color:#22703e;font-size:.78rem}
+.qmain.q4{grid-template-columns:repeat(2,minmax(0,1fr))}
+.pxq2 button{background:linear-gradient(135deg,#8b5cf6,#6d28d9);padding:8px 0 6px}
+#modal .busheet{position:fixed;inset:0;max-width:none;width:100%;height:100%;max-height:none;border-radius:0;overflow-y:auto;align-content:start;padding:calc(10px + env(safe-area-inset-top,0px)) 16px calc(24px + env(safe-area-inset-bottom,0px));z-index:60}
+#modal .busheet .pkl{max-height:42vh}
+.fsbar{position:sticky;top:calc(-10px - env(safe-area-inset-top,0px));z-index:2;background:var(--surface);display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0 10px;border-bottom:1px solid var(--line);margin-bottom:2px}
+.fsbar h2{margin:0;font-size:1.1rem;flex:1;text-align:center}
+.fsx{width:42px;height:42px;border-radius:12px;border:0;background:var(--sunk);font-size:1.1rem;color:var(--muted)}
+.fsok{width:50px;height:50px;border-radius:50%;border:0;background:linear-gradient(135deg,#1fa37a,#17635e);color:#fff;font-size:1.5rem;font-weight:800;box-shadow:0 4px 12px rgba(23,99,94,.35)}
+.busec{display:flex;justify-content:space-between;align-items:center;border-radius:12px;padding:9px 12px;font-weight:800}.busec.g{background:var(--accent-soft);color:var(--accent)}.busec.m{background:#fff3e0;color:#9a5300}
+.bugrp{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.bugh{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 12px;background:var(--sunk);border-bottom:1px solid var(--line)}.bugh small{display:block;color:var(--muted);font-size:.75rem;font-weight:500}
+.burow{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px dashed var(--line);font-size:.85rem}.burow:last-child{border-bottom:0}.burow .bus{flex:1;min-width:0}
+.ied,.idl{width:34px;height:34px;border-radius:10px;border:0;font-size:.95rem;flex:none}.ied{background:linear-gradient(135deg,#ffb547,#f08a24);color:#fff}.idl{background:#fdecea;color:#b0392d}.busheet .pki.on{background:var(--accent-soft)}.busheet .pki.new{color:var(--accent)}
 .bunewbox{border:2px dashed var(--accent);border-radius:14px;padding:10px;display:grid;gap:8px;background:var(--accent-soft)}
 .g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .uch{display:flex;gap:6px;flex-wrap:wrap}.uch button{border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:6px 12px;font:inherit;font-size:.82rem;font-weight:700;color:var(--muted)}.uch button.on{background:var(--accent);color:var(--accent-ink);border-color:transparent}
@@ -804,7 +817,7 @@ const num=v=>{const n=parseFloat(String(v??'').replace(/\s/g,'').replace(',','.'
 const loc=()=>isFr()?'fr-FR':'en-US';
 const grp=n=>{const r=Math.round(n);return(r<0?'-':'')+Math.abs(r).toLocaleString(loc()).replace(/ /g,' ')};
 const grpTxt=n=>Math.round(n).toLocaleString('en-US');
-const APP_VER=56; // نفس الرقم تاع VERSION في sw.js
+const APP_VER=57; // نفس الرقم تاع VERSION في sw.js
 const CUR=()=>tr('دج','DA');
 const DA=n=>`<bdi dir="ltr">${grp(n)}</bdi>&nbsp;${CUR()}`;
 const dec2=a=>(Math.round(a*100)/100).toLocaleString(loc(),{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -1401,7 +1414,7 @@ function homeHTML(){
   ${pexHomeHTML()}${homeTilesHTML()}
   <button class="btn line full" data-act="nav-more">${ic('grid')}${tr('كل الأدوات','Tous les outils')}</button>
   ${noClients?`<div class="empty"><p>${tr('لا يوجد أي حرفي بعد. أضف الحرفيين واحداً تلو الآخر، أو استورد الديون من الكراس دفعة واحدة.','Aucun client pour l’instant. Ajoutez-les un par un, ou importez les crédits du cahier en une fois.')}</p><div class="rowflex"><button class="btn" data-act="add-client">${ic('userplus')}${tr('إضافة حرفي','Ajouter un client')}</button><button class="btn ghost" data-act="nav-import">${ic('scan')}${tr('استيراد من الكراس','Importer du cahier')}</button></div></div>`:''}
-  ${orders.length?`<div class="sec"><h3>${tr('طلبيات قيد التحضير','Commandes en cours')}</h3><button class="link" data-act="nav-orders" data-v="prep">${tr('الكل','Tout voir')}</button></div><div class="list">${orders.slice(0,6).map(([id,b])=>`<button class="row" data-act="open-bon" data-id="${id}"><span class="rleft"><span class="av">${ic('cut')}</span><span class="rmain"><span class="rname">${esc(custName(b))}</span><span class="rsub">${tr('فاتورة','Facture')} <bdi dir="ltr">${b.num}</bdi> · ${fdt(b.date,b.createdAt)}</span></span></span>${stChip(b.status)}</button>`).join('')}</div>`:''}
+  ${false&&orders.length?`<div class="sec"><h3>${tr('طلبيات قيد التحضير','Commandes en cours')}</h3><button class="link" data-act="nav-orders" data-v="prep">${tr('الكل','Tout voir')}</button></div><div class="list">${orders.slice(0,6).map(([id,b])=>`<button class="row" data-act="open-bon" data-id="${id}"><span class="rleft"><span class="av">${ic('cut')}</span><span class="rmain"><span class="rname">${esc(custName(b))}</span><span class="rsub">${tr('فاتورة','Facture')} <bdi dir="ltr">${b.num}</bdi> · ${fdt(b.date,b.createdAt)}</span></span></span>${stChip(b.status)}</button>`).join('')}</div>`:''}
   ${(()=>{const ids=Object.keys(S.dueMap||{}).sort((a,b)=>S.dueMap[a]<S.dueMap[b]?-1:1).slice(0,5);if(!ids.length)return'';
     return `<div class="sec"><h3>${tr('مواعيد تسديد حلّ أجلها','Échéances arrivées')}</h3></div><div class="list">${ids.map(id=>{const c=S.clients[id],s=S.stats[id];return `<button class="row" data-act="open-client" data-id="${id}"><span class="rleft"><span class="av bad">${ic('clock')}</span><span class="rmain"><span class="rname">${esc(c.name)}</span><span class="rsub">${tr('الموعد المحدد','Échéance')}: ${fdate(S.dueMap[id])}</span></span></span><span class="amt neg">${DA(s.bal)}</span></button>`}).join('')}</div>`})()}
   ${promiseHomeHTML()}
@@ -5471,9 +5484,9 @@ function buyHTML(){const d=bud;if(!d)return `<div class="stack">${backBtn('nav-h
   return `<div class="stack">${backBtn('cancel-form',tr('رجوع','Retour'))}
   <h2>🧾 ${tr('فاتورة شراء','Facture d’achat')}</h2>
   ${supSelectHTML('bu',d.supplierId,d.newSup)}
-  <div class="grid2"><div class="field"><label for="bu-d">${tr('التاريخ','Date')}</label><input id="bu-d" type="date" value="${esc(d.date)}"></div>
-  <div class="field"><label for="bu-r">${tr('رقم فاتورة المورّد','N° facture fournisseur')}</label><input id="bu-r" value="${esc(d.ref||'')}" placeholder="${tr('اختياري','facultatif')}"></div></div>
-  <div class="bulist">${d.lines.length?d.lines.map(buLineHTML).join(''):`<p class="note" style="margin:0;text-align:center">${tr('زيد واش شريت: زجاج ولا مواد.','Ajoutez ce que vous avez acheté.')}</p>`}</div>
+  <div class="grid1"><div class="field"><label for="bu-d">${tr('التاريخ','Date')}</label><input id="bu-d" type="date" value="${esc(d.date)}"></div>
+  </div>
+  <div class="bulist">${d.lines.length?buGroupsHTML():`<p class="note" style="margin:0;text-align:center">${tr('زيد واش شريت: زجاج ولا مواد.','Ajoutez ce que vous avez acheté.')}</p>`}</div>
   <div class="buadd"><button type="button" data-act="bu-add" data-k="g">＋ 🪟 ${tr('زجاج','Verre')}</button><button type="button" data-act="bu-add" data-k="m">＋ 🧴 ${tr('مواد ولوازم','Fournitures')}</button></div>
   <div class="totals"><div class="trow big"><span>${tr('المجموع','Total')}</span><span id="bu-t">${DA(buTotal())}</span></div><div id="bu-pay" class="stack" style="gap:8px">${buPayHTML()}</div></div>
   <div class="actions"><button class="btn line" data-act="cancel-form">${tr('إلغاء','Annuler')}</button><button class="btn" data-act="bu-save">${tr('حفظ الفاتورة','Enregistrer')}</button></div></div>`}
@@ -5495,23 +5508,23 @@ function buLineSheet(k,i,preArt){const m=$('#modal');const src=i>=0&&bud.lines[i
     const list=activeArts().filter(([,a])=>a.cat!=='svc'&&(!qq||qHit(a.name,qq))).sort((x,y)=>(x[1].cat==='mat'?0:1)-(y[1].cat==='mat'?0:1)).slice(0,qq?10:12);const exact=activeArts().some(([,a])=>normName(a.name)===normName(qq));
     return list.map(([id,a])=>{const e=S.ak[id];return `<button type="button" class="pki ${!L.isNew&&L.articleId===id?'on':''}" data-ba="${esc(id)}"><b>${esc(a.name)}</b><small>${a.cat==='mat'?'🧴 ':''}${e?dec2s(Math.max(0,e.bal))+' '+esc(unitTr(a.unit)):esc(unitTr(a.unit))}</small></button>`}).join('')+(isStaff()?'':`<button type="button" class="pki new ${L.isNew?'on':''}" data-ba="__new">＋ <b>${tr('مادة جديدة','Nouvelle fourniture')}${qq&&!exact?' «'+esc(qq)+'»':''}</b></button>`)};
   const info=()=>{if(L.k==='g'){const a=buArea(L),amt=buAmt(L),c=num(L.cost),p=num(L.price),pw=num(L.priceW)||p;let h=`<div class="rowflex between"><span>${tr('المساحة','Surface')} ${M2(a)}</span><b>${DA(amt)}</b></div>`;
-      if(c>0&&p>0)h+=`<div class="bumg">${tr('ربحك في المتر','Votre marge au m²')}: ${tr('حرفي','atelier')} ${p-c>=0?'+':''}${grp(p-c)} (<bdi dir="ltr">${Math.round((p-c)/p*100)}%</bdi>) · ${tr('زبون','client')} ${pw-c>=0?'+':''}${grp(pw-c)} (<bdi dir="ltr">${Math.round((pw-c)/pw*100)}%</bdi>)</div>`;
+      if(false)h+=`<div class="bumg">${tr('ربحك في المتر','Votre marge au m²')}: ${tr('حرفي','atelier')} ${p-c>=0?'+':''}${grp(p-c)} (<bdi dir="ltr">${Math.round((p-c)/p*100)}%</bdi>) · ${tr('زبون','client')} ${pw-c>=0?'+':''}${grp(pw-c)} (<bdi dir="ltr">${Math.round((pw-c)/pw*100)}%</bdi>)</div>`;
       const lm=!L.isNew&&L.typeId&&lastIn('g',L.typeId,'');if(lm&&c>0&&Math.abs(num(lm.costM2)-c)>0.5)h+=`<div class="note">${tr('المرة اللي فاتت شريتو بـ','Dernier achat à')} ${grp(lm.costM2)} (${c>num(lm.costM2)?'+':''}${grp(c-num(lm.costM2))} ${c>num(lm.costM2)?'⬆️':'⬇️'})</div>`;return h}
     const u=L.nu||((S.arts[L.articleId]||{}).unit||'');let h=`<div class="rowflex between"><span>${tr('التكلفة','Coût')}</span><b>${DA(buAmt(L))}</b></div>`;
     const lm=!L.isNew&&L.articleId&&lastIn('m',L.articleId,'');if(lm&&num(L.uc)>0&&Math.abs(num(lm.unitCost)-num(L.uc))>0.01)h+=`<div class="note">${tr('المرة اللي فاتت','Dernier achat')}: ${grp(lm.unitCost)} / ${esc(unitTr(u))}</div>`;return h};
   const body=()=>{const g=L.k==='g',sel=g?(L.isNew||L.typeId):(L.isNew||L.articleId),u=g?'':(L.nu||((S.arts[L.articleId]||{}).unit||'')),isMat=!g&&(L.isNew||(S.arts[L.articleId]||{}).cat==='mat');
-    return `<h2 id="bl-t">${g?'🪟 '+tr('صنف زجاج','Verre'):'🧴 '+tr('مواد ولوازم','Fournitures')}</h2>
+    return `<div class="fsbar"><button type="button" class="fsx" data-m="0" aria-label="${tr('إلغاء','Annuler')}">✕</button><h2 id="bl-t">${g?'🪟 '+tr('صنف زجاج','Verre'):'🧴 '+tr('مواد ولوازم','Fournitures')}</h2><button type="button" class="fsok" data-m="1" aria-label="${tr('حفظ','OK')}">✓</button></div>
     <input id="bl-q" value="${esc(q)}" placeholder="🔍 ${g?tr('ابحث عن النوع…','Chercher le type…'):tr('ابحث: ماستيك، سيليكون…','Chercher : mastic, silicone…')}" autocomplete="off">
     <div class="pkl" id="bl-res">${res()}</div>
     ${L.isNew?`<div class="bunewbox">${g?`<b>🆕 ${tr('نوع جديد','Nouveau type')}</b><div class="grid2"><div class="field"><label for="bl-nn">${tr('الاسم','Nom')}</label><input id="bl-nn" value="${esc(L.nn)}" placeholder="Fumé 6"></div><div class="field"><label for="bl-mm">${tr('السمك (ملم)','Épaisseur (mm)')}</label><input id="bl-mm" inputmode="decimal" dir="ltr" value="${esc(L.mm)}" placeholder="4"></div></div>`
       :`<b>🆕 ${tr('مادة جديدة','Nouvelle fourniture')}</b><div class="field"><label for="bl-nn">${tr('الاسم','Nom')}</label><input id="bl-nn" value="${esc(L.nn)}" placeholder="${tr('ماستيك','Mastic')}"></div><div class="field"><label>${tr('الوحدة','Unité')}</label><div class="uch">${MAT_UNITS.map(x=>`<button type="button" data-bu="${esc(x)}" class="${L.nu===x?'on':''}">${esc(unitTr(x))}</button>`).join('')}</div></div>`}</div>`:''}
-    ${!g&&!L.isNew&&L.articleId?buUnitRow(L):''}${sel?(g?`<div class="g3"><div class="field"><label for="bl-n">${tr('الألواح','Plaques')}</label><input id="bl-n" inputmode="decimal" dir="ltr" value="${esc(L.sheets)}" placeholder="10"></div><div class="field"><label for="bl-w">${tr('العرض (سم)','Largeur')}</label><input id="bl-w" inputmode="decimal" dir="ltr" value="${esc(L.sw)}"></div><div class="field"><label for="bl-h">${tr('الطول (سم)','Hauteur')}</label><input id="bl-h" inputmode="decimal" dir="ltr" value="${esc(L.sh)}"></div></div>
+    ${!g&&!L.isNew&&L.articleId?buUnitRow(L):''}${sel?(g?`<div class="g3"><div class="field"><label for="bl-n">${tr('الألواح','Plaques')}</label><input id="bl-n" inputmode="decimal" dir="ltr" value="${esc(L.sheets)}"></div><div class="field"><label for="bl-w">${tr('العرض (سم)','Largeur')}</label><input id="bl-w" inputmode="decimal" dir="ltr" value="${esc(L.sw)}"></div><div class="field"><label for="bl-h">${tr('الطول (سم)','Hauteur')}</label><input id="bl-h" inputmode="decimal" dir="ltr" value="${esc(L.sh)}"></div></div>
       <b style="font-size:.9rem">💰 ${tr('الأسعار (للمتر²)','Prix (m²)')}</b>
       <div class="g3"><div class="field"><label for="bl-c">${tr('الشراء','Achat')}</label><input id="bl-c" inputmode="decimal" dir="ltr" value="${esc(L.cost)}"></div><div class="field"><label for="bl-p">${tr('بيع للحرفي','Prix atelier')}</label><input id="bl-p" inputmode="decimal" dir="ltr" value="${esc(L.price)}"></div><div class="field"><label for="bl-pw">${tr('بيع للزبون','Prix client')}</label><input id="bl-pw" inputmode="decimal" dir="ltr" value="${esc(L.priceW)}" placeholder="${esc(L.price||'')}"></div></div>`
       :`<div class="grid2"><div class="field"><label for="bl-qty">${tr('الكمية','Quantité')}${u?' ('+esc(unitTr(u))+')':''}</label><input id="bl-qty" inputmode="decimal" dir="ltr" value="${esc(L.qty)}"></div><div class="field"><label for="bl-uc">${tr('سعر الشراء','Prix d’achat')}${u?' / '+esc(unitTr(u)):''}</label><input id="bl-uc" inputmode="decimal" dir="ltr" value="${esc(L.uc)}"></div></div>
       ${isMat?`<div class="butag">🔒 ${tr('سعر الشراء فقط · ما تتباعش وحدها، تدخل في تكلفة الخدمة','Prix d’achat seulement · utilisée dans les services')}</div>`:''}`)+`<div id="bl-info" class="stack" style="gap:6px">${info()}</div>`:''}
     <p class="err" id="bl-e"></p>
-    <div class="actions"><button class="btn line" data-m="0">${tr('إلغاء','Annuler')}</button><button class="btn" data-m="1">${src?tr('حفظ التعديل','Enregistrer'):tr('زيد للفاتورة','Ajouter')}</button></div>`};
+    `};
   const draw=focus=>{m.innerHTML=`<div class="sheet busheet" role="dialog" aria-modal="true" aria-labelledby="bl-t">${body()}</div>`;m.hidden=false;if(focus)setTimeout(()=>{const x=$(focus);if(x){x.focus();if(x.select&&focus!=='#bl-q')x.select()}},30)};
   draw(src?null:(L.k==='m'&&L.articleId?'#bl-qty':'#bl-q'));
   const done=()=>{m.hidden=true;m.innerHTML='';m.onclick=null;m.oninput=null};
@@ -5693,6 +5706,28 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]
   if(a==='pur-edit'){e.stopPropagation();if(isStaff())return;return purEdit(id)}},true);
 {const _bl=buLineHTML;buLineHTML=function(l,i){let h=_bl(l,i);const cur=l.k==='g'?num(l.sheets):num(l.qty);if(l.was!==undefined&&Math.abs(cur-l.was)>0.0001)h=h.replace('</span></button>',` <b class="buwas">(${tr('كانت','avant')} ${dec2(l.was)})</b></span></button>`);return h}}
 {const _b=buyHTML;buyHTML=function(){let h=_b();if(bud&&bud.editGk)h=h.replace('<h2>🧾 '+tr('فاتورة شراء','Facture d’achat')+'</h2>','<h2>✏️ '+tr('تعديل فاتورة شراء','Modifier l’achat')+(bud.ref?' '+esc(bud.ref):'')+'</h2>').replace('>'+tr('حفظ الفاتورة','Enregistrer')+'<','>'+tr('حفظ التعديل','Enregistrer')+'<');return h}}
+
+/* ---- v57: الرئيسية أخف · نافذة الصنف بالشاشة كاملة · فاتورة الشراء مجمّعة كيما فاتورة الزبون ---- */
+pexHomeHTML=function(){return''};
+apHomeHTML=function(){return''};
+homeTilesHTML=function(){return `<div class="qmain q4">
+    <button class="qa t1" data-act="nav-clients"><span class="ib emo-ib">👥</span>${tr('الزبائن','Clients')}<span class="qs">${tr('حرفيين وزبائن عاديين','Artisans et particuliers')}</span></button>
+    <button class="qa t2" data-act="new-pay"><span class="ib emo-ib">💵</span>${tr('فارسمو','Versement')}<span class="qs">${tr('حرفي دفع جزء من دينو','Un artisan paie')}</span></button>
+    <button class="qa t4" data-act="nav-calc"><span class="ib emo-ib">🧮</span>${KT()}<span class="qs">${tr('زجاج، سلعة، خدمة','Verre, articles, services')}</span></button>
+    <button class="qa t5" data-act="new-in"><span class="ib emo-ib">📥</span>${tr('إدخال سلعة','Entrée stock')}<span class="qs">${tr('فاتورة شراء','Facture d’achat')}</span></button>
+  </div>`};
+function buGKey(l){return l.k==='g'?(l.isNew?'n:'+normName(l.nn):'t:'+l.typeId):'m'}
+function buRowHTML(l,i){const sub=l.k==='g'?`<bdi dir="ltr">${num(l.sheets)}</bdi> ${tr('لوح','plaques')} · <bdi dir="ltr">${num(l.sw)}×${num(l.sh)}</bdi> · ${grp(l.cost)}/${tr('م²','m²')}`:`${esc(buName(l))}${l.isNew?` <span class="bunew">${tr('جديد','nouveau')}</span>`:''} · ${dec2s(l.qty)} ${esc(unitTr(buUnit(l)))} × ${grp(l.uc)}`;
+  const cur=l.k==='g'?num(l.sheets):num(l.qty),was=l.was!==undefined&&Math.abs(cur-l.was)>0.0001?` <b class="buwas">(${tr('كانت','avant')} ${String(Math.round(l.was*1000)/1000)})</b>`:'';
+  return `<div class="burow"><span class="bus">${sub}${was}</span><b>${grp(buAmt(l))}</b><button type="button" class="ied" data-act="bu-edit" data-i="${i}" aria-label="${tr('تعديل','Modifier')}">✏️</button><button type="button" class="idl" data-act="bu-rm" data-i="${i}" aria-label="${tr('حذف','Supprimer')}">🗑</button></div>`}
+function buGroupsHTML(){const L=bud.lines.map((l,i)=>[l,i]),G=L.filter(([l])=>l.k==='g'),M=L.filter(([l])=>l.k==='m');let h='';
+  if(G.length){const groups=[],idx={};for(const [l,i] of G){const k=buGKey(l);if(!(k in idx)){idx[k]=groups.length;groups.push({l,items:[]})}groups[idx[k]].items.push([l,i])}
+    h+=`<div class="busec g"><span>🪟 ${tr('الزجاج','Verre')}</span><b>${grp(G.reduce((s,[l])=>s+buAmt(l),0))}</b></div>`;
+    for(const g of groups){const a=g.items.reduce((s,[l])=>s+buArea(l),0),amt=g.items.reduce((s,[l])=>s+buAmt(l),0);
+      h+=`<div class="bugrp"><div class="bugh"><div><b>${esc(buName(g.l))}${g.l.isNew?` <span class="bunew">${tr('جديد','nouveau')}</span>`:''}</b><small>${g.items.length} ${g.items.length>1?tr('أصناف','lignes'):tr('صنف','ligne')} · ${M2(a)}</small></div><b>${grp(amt)}</b></div>${g.items.map(([l,i])=>buRowHTML(l,i)).join('')}</div>`}}
+  if(M.length){h+=`<div class="busec m"><span>🧴 ${tr('المواد ولوازم','Fournitures')}</span><b>${grp(M.reduce((s,[l])=>s+buAmt(l),0))}</b></div><div class="bugrp">${M.map(([l,i])=>buRowHTML(l,i)).join('')}</div>`}
+  return h}
+{const _p=pexHTML;pexHTML=function(){const h=_p();if(isStaff())return h;const q=`<div class="pxq pxq2">${pxCats().slice(0,5).map(c=>`<button data-act="px-add" data-v="${esc(c.id)}"><span>${esc(c.e)}</span><small>${esc(c.n)}</small></button>`).join('')}<button data-act="px-add"><span>➕</span><small>${tr('أخرى','Autre')}</small></button></div>`;const k=h.indexOf('<div class="ctabs2">');return k<0?h:h.slice(0,k)+q+h.slice(k)}}
 
 function backupFile(){const data={app:'daftar-zujaj',version:2,exportedAt:new Date().toISOString(),docs:LocalDB.dump()};return new File([JSON.stringify(data)],`tumayd-backup-${today()}.json`,{type:'application/json'})}
 function downloadFile(f){const u=URL.createObjectURL(f);const a=document.createElement('a');a.href=u;a.download=f.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}
