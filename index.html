@@ -736,7 +736,11 @@ input.subuse{padding:7px 10px;font-size:.85rem}
 .bunew{background:var(--accent-soft);color:var(--accent);border-radius:6px;padding:1px 6px;font-size:.7rem;font-weight:800}
 .pchips{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.pchips button{border:2px solid var(--line);background:var(--surface);border-radius:12px;padding:8px 4px;font:inherit;font-size:.82rem;font-weight:700;color:var(--muted)}
 .pchips button.on.full{border-color:#22703e;background:#e8f6ec;color:#22703e}.pchips button.on.part{border-color:#c06a06;background:#fff3e0;color:#9a5300}.pchips button.on.debt{border-color:#b0392d;background:#fdecea;color:#b0392d}
-.busheet{display:grid;gap:10px;max-height:92vh;overflow-y:auto}.busheet .pkl{max-height:30vh}.busheet .pki.on{background:var(--accent-soft)}.busheet .pki.new{color:var(--accent)}
+.busheet{display:grid;gap:10px;max-height:92vh;overflow-y:auto}.busheet .pkl{display:grid;border:1px solid var(--line);border-radius:12px;overflow-y:auto;max-height:34vh}
+.purhd{background:#1d2b2a;color:#fff;border-radius:16px;padding:12px 14px;display:grid;gap:3px}.purhd small{opacity:.8}
+.pur4{display:grid;grid-template-columns:1fr 1fr;gap:8px}.pur4 .btn{width:100%}
+.purlnk{all:unset;cursor:pointer;font-weight:700;color:var(--accent)}
+.buwas{color:#22703e;font-size:.78rem}.busheet .pki.on{background:var(--accent-soft)}.busheet .pki.new{color:var(--accent)}
 .bunewbox{border:2px dashed var(--accent);border-radius:14px;padding:10px;display:grid;gap:8px;background:var(--accent-soft)}
 .g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .uch{display:flex;gap:6px;flex-wrap:wrap}.uch button{border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:6px 12px;font:inherit;font-size:.82rem;font-weight:700;color:var(--muted)}.uch button.on{background:var(--accent);color:var(--accent-ink);border-color:transparent}
@@ -800,7 +804,7 @@ const num=v=>{const n=parseFloat(String(v??'').replace(/\s/g,'').replace(',','.'
 const loc=()=>isFr()?'fr-FR':'en-US';
 const grp=n=>{const r=Math.round(n);return(r<0?'-':'')+Math.abs(r).toLocaleString(loc()).replace(/ /g,' ')};
 const grpTxt=n=>Math.round(n).toLocaleString('en-US');
-const APP_VER=55; // نفس الرقم تاع VERSION في sw.js
+const APP_VER=56; // نفس الرقم تاع VERSION في sw.js
 const CUR=()=>tr('دج','DA');
 const DA=n=>`<bdi dir="ltr">${grp(n)}</bdi>&nbsp;${CUR()}`;
 const dec2=a=>(Math.round(a*100)/100).toLocaleString(loc(),{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -1904,7 +1908,7 @@ function bonViewHTML(){
     ${b.status==='ready'&&(waText(b.walkin?b.cphone:(S.clients[b.clientId]||{}).phone,'x'))?`<a class="btn ghost" target="_blank" rel="noopener" href="${waText(b.walkin?b.cphone:(S.clients[b.clientId]||{}).phone,tr(`السلام عليكم، طلبيتكم (فاتورة رقم ${b.num}) جاهزة للاستلام لدى ${shopName()}. شكراً.`,`Bonjour, votre commande (facture n° ${b.num}) est prête chez ${shopName()}. Merci.`))}">${ic('chat')}${tr('إبلاغ الزبون عبر واتساب','Prévenir par WhatsApp')}</a>`:''}</div>`:''}
   ${b.due&&!b.walkin?`<div class="note">${tr('موعد التسديد المتفق عليه','Échéance convenue')}: <b>${fdate(b.due)}${b.dueT?` · <bdi dir="ltr">${esc(b.dueT)}</bdi>`:''}</b></div>`:''}
   ${b.kind==='opening'?'':docLinesTable(b.lines)}
-  <div class="totals">${bonKg(b)>0?`<div class="trow"><span>${tr('الوزن التقريبي','Poids approximatif')}</span><b>${KG(bonKg(b))}</b></div>`:''}${num(b.disc)>0?`<div class="trow"><span>${tr('المجموع قبل التخفيض','Sous-total')}</span><span>${DA(b.sub)}</span></div><div class="trow"><span>${tr('التخفيض','Remise')}</span><span>−${DA(b.disc)}</span></div>`:''}<div class="trow big"><span>${tr('المجموع','Total')}</span><span>${DA(b.total)}</span></div>
+  <div class="totals">${num(b.disc)>0?`<div class="trow"><span>${tr('المجموع قبل التخفيض','Sous-total')}</span><span>${DA(b.sub)}</span></div><div class="trow"><span>${tr('التخفيض','Remise')}</span><span>−${DA(b.disc)}</span></div>`:''}<div class="trow big"><span>${tr('المجموع','Total')}</span><span>${DA(b.total)}</span></div>
   ${b.kind!=='sale'?'':`<div class="trow"><span>${b.walkin?tr('المدفوع','Payé'):tr('دفع عند البيع','Payé à la vente')}</span><span>${DA(atSale-(b.walkin?fgW(b):0))}</span></div>${b.walkin&&fgW(b)>0?`<div class="trow"><span>🤝 ${tr('تنازل','Remise accordée')}</span><span>${DA(fgW(b))}</span></div>`:''}<div class="trow"><span>${tr('الباقي من هذه الفاتورة','Reste sur cette facture')}</span><span class="amt ${b.total-atSale>0?'neg':''}">${DA(b.total-atSale)}</span></div>`}</div>
   ${b.kind==='opening'?'':`<div class="actions">${printBtns('bon',view.id)}</div><button class="btn ghost" data-act="bon-share" data-k="bon" data-id="${view.id}">${ic('chat')}${isBL(b)?tr('إرسال وصل التسليم PDF بالواتساب','Envoyer le bon PDF (WhatsApp)'):tr('إرسال الفاتورة PDF بالواتساب','Envoyer la facture PDF (WhatsApp)')}</button>${feat('tools')&&b.kind==='sale'&&(b.lines||[]).some(l=>l.lk!=='art')?`<button class="btn plain" data-act="cut-plan" data-k="bon" data-id="${view.id}">${ic('cut')}${tr('مخطط القص','Plan de découpe')}</button>`:''}`}
   ${b.kind==='sale'?`<div class="actions"><button class="btn line" data-act="new-ret" data-id="${view.id}">${ic('undo')}${tr('مرتجع','Retour')}</button></div>
@@ -1953,7 +1957,7 @@ function receiptHTML(id,kind){
   <table><thead><tr><th>${tr('النوع','Type')}</th><th>${tr('الاستعمال','Usage')}</th><th>${tr('المقاس سم','Dim. cm')}</th><th>${tr('العدد','Qté')}</th><th>${tr('السعر','Prix')}</th>${hasSvc?`<th>${tr('التشطيب','Façonnage')}</th>`:''}<th>${tr('المبلغ','Montant')}</th></tr></thead><tbody>
   ${(b.lines||[]).map(l=>l.lk==='art'?`<tr><td>${esc(l.type)}</td><td></td><td>—</td><td><bdi dir="ltr">${esc(l.qty)}</bdi> ${esc(l.unit||'')}</td><td><bdi dir="ltr">${grp(l.price)}</bdi></td>${hasSvc?'<td></td>':''}<td><bdi dir="ltr">${grp(l.amount)}</bdi></td></tr>`:`<tr><td>${esc(l.type)}</td><td>${esc(l.use||'')}</td><td><bdi dir="ltr">${esc(l.w)}×${esc(l.h)}</bdi></td><td>${esc(l.qty)}</td><td><bdi dir="ltr">${grp(l.price)}</bdi></td>${hasSvc?`<td>${esc(l.svcText||'')}${num(l.svcAmt)?` <bdi dir="ltr">${grp(l.svcAmt)}</bdi>`:''}</td>`:''}<td><bdi dir="ltr">${grp(l.amount)}</bdi></td></tr>`).join('')}
   </tbody></table>
-  <div class="tot">${bonKg(b)>0?`<div><span>${tr('الوزن التقريبي','Poids approx.')}</span><span>${KG(bonKg(b))}</span></div>`:''}${num(b.disc)>0?`<div><span>${tr('المجموع قبل التخفيض','Sous-total')}</span><span>${DA(b.sub)}</span></div><div><span>${tr('التخفيض','Remise')}</span><span>−${DA(b.disc)}</span></div>`:''}<div class="g"><span>${tr('المجموع','Total')}</span><span>${DA(b.total)}</span></div>
+  <div class="tot">${num(b.disc)>0?`<div><span>${tr('المجموع قبل التخفيض','Sous-total')}</span><span>${DA(b.sub)}</span></div><div><span>${tr('التخفيض','Remise')}</span><span>−${DA(b.disc)}</span></div>`:''}<div class="g"><span>${tr('المجموع','Total')}</span><span>${DA(b.total)}</span></div>
   ${q?'':`<div><span>${tr('المدفوع','Payé')}</span><span>${DA(atSale)}</span></div><div><span>${tr('الباقي','Reste')}</span><span>${DA(num(b.total)-atSale)}</span></div>`}
   ${st?`<div><span>${tr('رصيد الحساب الكلي','Solde total du compte')}</span><span>${DA(st.bal)}</span></div>`:''}</div>
   <p class="words">${q?tr('أُوقف هذا العرض على مبلغ','Arrêté le présent devis à la somme de'):tr('أُوقفت هذه الفاتورة على مبلغ','Arrêtée la présente facture à la somme de')}: <b>${esc(amountWords(b.total))}</b></p>
@@ -1979,7 +1983,7 @@ function ticketHTML(id,kind){
   <div class="tk-sep"></div>
   ${(b.lines||[]).map(l=>`<div class="tk-l"><div>${esc(l.type)}${l.use?' · '+esc(l.use):''}</div>${row(l.lk==='art'?`<bdi dir="ltr">${esc(l.qty)}</bdi> ${esc(l.unit||'')} × <bdi dir="ltr">${grp(l.price)}</bdi>`:`<bdi dir="ltr">${esc(l.w)}×${esc(l.h)} ×${esc(l.qty)}</bdi>`,`<bdi dir="ltr">${grp(l.amount)}</bdi>`)}</div>`).join('')}
   <div class="tk-sep"></div>
-  ${bonKg(b)>0?row(tr('الوزن التقريبي','Poids approx.'),KG(bonKg(b))):''}
+  
   ${num(b.disc)>0?row(tr('التخفيض','Remise'),'−'+DA(b.disc)):''}
   ${row(`<b>${tr('المجموع','Total')}</b>`,`<b>${DA(b.total)}</b>`,'big')}
   ${q?'':row(tr('المدفوع','Payé'),DA(atSale))+row(tr('الباقي','Reste'),DA(num(b.total)-atSale))}
@@ -4210,7 +4214,7 @@ async function bonPages(id,kind){
   const L=(x1,y1,x2,y2,c,w)=>{x.strokeStyle=c||'#ccc';x.lineWidth=w||1.5;x.beginPath();x.moveTo(X(x1),y1);x.lineTo(X(x2),y2);x.stroke()};
   const R=(x1,y1,w,h,c)=>{x.fillStyle=c;const a=X(x1),bb=X(x1+w);x.fillRect(Math.min(a,bb),y1,Math.abs(bb-a),h)};
   const lines=b.lines||[],hasUse=lines.some(l=>String(l.use||'').trim()),hasSvc=lines.some(l=>num(l.svcAmt)>0);
-  const defs=[['n','#',44],['type',tr('النوع','Type'),hasUse?220:330],...(hasUse?[['use',tr('الاستعمال','Usage'),150]]:[]),['dim',tr('المقاس (سم)','Dim. (cm)'),165],['qty',tr('العدد','Qté'),82],['area',tr('م²','m²'),105],['price',tr('السعر','Prix'),140],['amt',tr('المبلغ','Montant'),0]];
+  const defs=[['n','#',44],['type',tr('النوع','Type'),hasUse?220:330],...(hasUse?[['use',tr('الاستعمال','Usage'),150]]:[]),['dim',tr('المقاس (سم)','Dim. (cm)'),165],['qty',tr('العدد','Qté'),82],['price',tr('السعر','Prix'),140],['amt',tr('المبلغ','Montant'),0]];
   let cx=M;const C={};for(const [k,l,w] of defs){const ww=w||(W-M-cx);C[k]=[cx,cx+ww,l];cx+=ww}
   const head=()=>{R(M,y,W-2*M,48,'#eef5f3');L(M,y+48,W-M,y+48,'#bbb',2);for(const k in C)T(C[k][2],C[k][0]+8,y+32,{s:19,w:700,c:'#333'});y+=60};
   const title=q?tr('عرض سعر رقم','Devis n°'):b.kind==='return'?tr('مرتجع رقم','Avoir n°'):tr('فاتورة رقم','Facture n°');
@@ -4235,14 +4239,14 @@ async function bonPages(id,kind){
     T(i+1,C.n[0]+8,b0,{s:19,c:'#666',ltr:true});typeL.forEach((t,j)=>T(t,C.type[0]+8,b0+j*28,{s:21,w:600}));if(hasUse&&!art)useL.forEach((t,j)=>T(t,C.use[0]+8,b0+j*28,{s:20,c:'#333'}));
     if(!art)T(`${cf1(l.w)} × ${cf1(l.h)}`,C.dim[0]+8,b0,{s:21,ltr:true});
     T(art?`${dec2s(l.qty).replace(/<[^>]+>/g,'')} ${l.unit||''}`:String(l.qty),C.qty[0]+8,b0,{s:21,ltr:!art});
-    if(!art)T((Math.round(num(l.billArea||l.area)*100)/100).toFixed(2),C.area[0]+8,b0,{s:20,ltr:true,c:'#333'});
+    
     T(grpTxt(l.price),C.price[0]+8,b0,{s:21,ltr:true});T(grpTxt(l.amount),C.amt[0]+8,b0,{s:21,w:700,ltr:true});
     let yy=b0+(rowsN-1)*28;for(const s of sv){yy+=25;T(s,C.type[0]+8,yy,{s:17,c:'#555'})}
     y=yy+14;L(M,y,W-M,y,'#e2e2e2');y+=8});
   /* المجاميع */
   const atSale=q?0:b.walkin?walkPaidAll(b):Object.values(S.pays).filter(p=>p.bonId===id).reduce((s,p)=>s+num(p.amount),0),st=!q&&!b.walkin&&S.stats[b.clientId];
   const area=lines.reduce((s,l)=>s+num(l.billArea||l.area),0),kg=bonKg(b);
-  const tl=[];if(area>0)tl.push([tr('المساحة الكلية','Surface totale'),(Math.round(area*100)/100).toFixed(2)+' '+tr('م²','m²')]);if(kg>0)tl.push([tr('الوزن التقريبي','Poids approx.'),Math.round(kg)+' '+tr('كغ','kg')]);
+  const tl=[];
   if(num(b.disc)>0){tl.push([tr('المجموع قبل التخفيض','Sous-total'),grpTxt(b.sub)+' '+CUR()]);tl.push([tr('التخفيض','Remise'),'−'+grpTxt(b.disc)+' '+CUR()])}
   const tl2=[];if(!q&&b.kind==='sale'){{const fg=b.walkin?fgW(b):0;tl2.push([tr('المدفوع','Payé'),grpTxt(atSale-fg)+' '+CUR()]);if(fg>0)tl2.push([tr('تنازل','Remise accordée'),grpTxt(fg)+' '+CUR()])}tl2.push([tr('الباقي من هذه الفاتورة','Reste sur cette facture'),grpTxt(Math.max(0,num(b.total)-atSale))+' '+CUR()]);if(st)tl2.push([tr('رصيد الحساب الكلي','Solde total du compte'),grpTxt(st.bal)+' '+CUR()])}
   const words=wrap((q?tr('أُوقف هذا العرض على مبلغ','Arrêté le présent devis à la somme de'):tr('أُوقفت هذه الفاتورة على مبلغ','Arrêtée la présente facture à la somme de'))+': '+amountWords(b.total),W-2*M,{s:20});
@@ -5441,7 +5445,7 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]
 ART_CATS.push(['mat','مواد الاستعمال (للخدمات)','Consommables (services)']);
 if(!UNITS.some(u=>u[0]==='لتر'))UNITS.splice(UNITS.length-1,0,['لتر','litre']);
 FORM_VIEWS.add('buy');
-const MAT_UNITS=['كلغ','أنبوب','قطعة','لتر','متر','رولو','علبة','كرتونة'];
+const MAT_UNITS=['كلغ','دلو','أنبوب','قطعة','لتر','متر','رولو','علبة','كرتونة'];
 goodsArts=function(){return activeArts().filter(([,a])=>a.cat!=='svc'&&a.cat!=='mat')};
 {const _ao=artOptions;artOptions=function(sel){const h=_ao(sel);if((S.arts[sel]||{}).cat==='mat')return h;const lab=esc(artCatName('mat')).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');return h.replace(new RegExp('<optgroup label="'+lab+'">.*?</optgroup>'),'')}}
 const r0=n=>Math.round(num(n)*100)/100;
@@ -5454,7 +5458,7 @@ const buArea=l=>num(l.sheets)*num(l.sw)*num(l.sh)/10000;
 const buAmt=l=>l.k==='g'?Math.round(buArea(l)*num(l.cost)):Math.round(num(l.qty)*num(l.uc));
 const buTotal=()=>bud?bud.lines.reduce((s,l)=>s+buAmt(l),0):0;
 function buName(l){if(l.k==='g')return l.isNew?l.nn:((types().find(t=>t.id===l.typeId)||{}).name||'?');return l.isNew?l.nn:((S.arts[l.articleId]||{}).name||'?')}
-function buUnit(l){return l.isNew?l.nu:((S.arts[l.articleId]||{}).unit||'')}
+function buUnit(l){return l.nu||((S.arts[l.articleId]||{}).unit||'')}
 function buLineHTML(l,i){const nw=l.isNew?` <span class="bunew">${tr('جديد','nouveau')}</span>`:'';
   const sub=l.k==='g'?`<bdi dir="ltr">${num(l.sheets)}</bdi> ${tr('لوح','plaques')} · <bdi dir="ltr">${num(l.sw)}×${num(l.sh)}</bdi> · ${M2(buArea(l))} × ${grp(l.cost)}`:`${dec2s(l.qty)} ${esc(unitTr(buUnit(l)))} × ${grp(l.uc)}`;
   return `<div class="buln"><button type="button" class="bulnb" data-act="bu-edit" data-i="${i}"><span class="t"><span>${l.k==='g'?'🪟':'🧴'} ${esc(buName(l))}${nw}</span><b>${grp(buAmt(l))}</b></span><span class="s">${sub}</span></button><button type="button" class="x" data-act="bu-rm" data-i="${i}" aria-label="${tr('إزالة','Retirer')}">×</button></div>`}
@@ -5483,7 +5487,7 @@ function buLineSheet(k,i,preArt){const m=$('#modal');const src=i>=0&&bud.lines[i
   const L=src?{...src}:k==='g'?{k:'g',typeId:'',isNew:false,nn:'',mm:'',sheets:'',sw:String(SHEET0.w),sh:String(SHEET0.h),cost:'',price:'',priceW:''}:{k:'m',articleId:'',isNew:false,nn:'',nu:'كلغ',qty:'',uc:''};
   let q=src?buName(src):'';
   const pickType=id=>{const t=types().find(x=>x.id===id);if(!t)return;L.typeId=id;L.isNew=false;q=t.name;const lm=lastIn('g',id,bud.supplierId);if(lm){L.sw=String(num(lm.sw)||L.sw);L.sh=String(num(lm.sh)||L.sh);L.cost=String(num(lm.costM2)||'')}L.price=String(num(t.price)||'');L.priceW=String(num(t.priceW)||'');L.mm=String(num(t.mm)||guessMM(t.name)||'')};
-  const pickArt=id=>{const a=S.arts[id];if(!a)return;L.articleId=id;L.isNew=false;q=a.name;const lm=lastIn('m',id,bud.supplierId);const c=lm?num(lm.unitCost):num(a.cost);L.uc=c>0?String(r0(c)):''};
+  const pickArt=id=>{const a=S.arts[id];if(!a)return;L.articleId=id;L.isNew=false;L.nu=a.unit||'';q=a.name;const lm=lastIn('m',id,bud.supplierId);const c=lm?num(lm.unitCost):num(a.cost);L.uc=c>0?String(r0(c)):''};
   if(!src&&preArt&&S.arts[preArt])pickArt(preArt);
   const res=()=>{const qq=String(q||'').trim();
     if(L.k==='g'){const list=types().filter(t=>!t.archived&&(!qq||qHit(t.name,qq))).slice(0,qq?10:12);const exact=types().some(t=>normName(t.name)===normName(qq));
@@ -5493,15 +5497,15 @@ function buLineSheet(k,i,preArt){const m=$('#modal');const src=i>=0&&bud.lines[i
   const info=()=>{if(L.k==='g'){const a=buArea(L),amt=buAmt(L),c=num(L.cost),p=num(L.price),pw=num(L.priceW)||p;let h=`<div class="rowflex between"><span>${tr('المساحة','Surface')} ${M2(a)}</span><b>${DA(amt)}</b></div>`;
       if(c>0&&p>0)h+=`<div class="bumg">${tr('ربحك في المتر','Votre marge au m²')}: ${tr('حرفي','atelier')} ${p-c>=0?'+':''}${grp(p-c)} (<bdi dir="ltr">${Math.round((p-c)/p*100)}%</bdi>) · ${tr('زبون','client')} ${pw-c>=0?'+':''}${grp(pw-c)} (<bdi dir="ltr">${Math.round((pw-c)/pw*100)}%</bdi>)</div>`;
       const lm=!L.isNew&&L.typeId&&lastIn('g',L.typeId,'');if(lm&&c>0&&Math.abs(num(lm.costM2)-c)>0.5)h+=`<div class="note">${tr('المرة اللي فاتت شريتو بـ','Dernier achat à')} ${grp(lm.costM2)} (${c>num(lm.costM2)?'+':''}${grp(c-num(lm.costM2))} ${c>num(lm.costM2)?'⬆️':'⬇️'})</div>`;return h}
-    const u=L.isNew?L.nu:((S.arts[L.articleId]||{}).unit||'');let h=`<div class="rowflex between"><span>${tr('التكلفة','Coût')}</span><b>${DA(buAmt(L))}</b></div>`;
+    const u=L.nu||((S.arts[L.articleId]||{}).unit||'');let h=`<div class="rowflex between"><span>${tr('التكلفة','Coût')}</span><b>${DA(buAmt(L))}</b></div>`;
     const lm=!L.isNew&&L.articleId&&lastIn('m',L.articleId,'');if(lm&&num(L.uc)>0&&Math.abs(num(lm.unitCost)-num(L.uc))>0.01)h+=`<div class="note">${tr('المرة اللي فاتت','Dernier achat')}: ${grp(lm.unitCost)} / ${esc(unitTr(u))}</div>`;return h};
-  const body=()=>{const g=L.k==='g',sel=g?(L.isNew||L.typeId):(L.isNew||L.articleId),u=g?'':(L.isNew?L.nu:((S.arts[L.articleId]||{}).unit||'')),isMat=!g&&(L.isNew||(S.arts[L.articleId]||{}).cat==='mat');
+  const body=()=>{const g=L.k==='g',sel=g?(L.isNew||L.typeId):(L.isNew||L.articleId),u=g?'':(L.nu||((S.arts[L.articleId]||{}).unit||'')),isMat=!g&&(L.isNew||(S.arts[L.articleId]||{}).cat==='mat');
     return `<h2 id="bl-t">${g?'🪟 '+tr('صنف زجاج','Verre'):'🧴 '+tr('مواد ولوازم','Fournitures')}</h2>
     <input id="bl-q" value="${esc(q)}" placeholder="🔍 ${g?tr('ابحث عن النوع…','Chercher le type…'):tr('ابحث: ماستيك، سيليكون…','Chercher : mastic, silicone…')}" autocomplete="off">
     <div class="pkl" id="bl-res">${res()}</div>
     ${L.isNew?`<div class="bunewbox">${g?`<b>🆕 ${tr('نوع جديد','Nouveau type')}</b><div class="grid2"><div class="field"><label for="bl-nn">${tr('الاسم','Nom')}</label><input id="bl-nn" value="${esc(L.nn)}" placeholder="Fumé 6"></div><div class="field"><label for="bl-mm">${tr('السمك (ملم)','Épaisseur (mm)')}</label><input id="bl-mm" inputmode="decimal" dir="ltr" value="${esc(L.mm)}" placeholder="4"></div></div>`
       :`<b>🆕 ${tr('مادة جديدة','Nouvelle fourniture')}</b><div class="field"><label for="bl-nn">${tr('الاسم','Nom')}</label><input id="bl-nn" value="${esc(L.nn)}" placeholder="${tr('ماستيك','Mastic')}"></div><div class="field"><label>${tr('الوحدة','Unité')}</label><div class="uch">${MAT_UNITS.map(x=>`<button type="button" data-bu="${esc(x)}" class="${L.nu===x?'on':''}">${esc(unitTr(x))}</button>`).join('')}</div></div>`}</div>`:''}
-    ${sel?(g?`<div class="g3"><div class="field"><label for="bl-n">${tr('الألواح','Plaques')}</label><input id="bl-n" inputmode="decimal" dir="ltr" value="${esc(L.sheets)}" placeholder="10"></div><div class="field"><label for="bl-w">${tr('العرض (سم)','Largeur')}</label><input id="bl-w" inputmode="decimal" dir="ltr" value="${esc(L.sw)}"></div><div class="field"><label for="bl-h">${tr('الطول (سم)','Hauteur')}</label><input id="bl-h" inputmode="decimal" dir="ltr" value="${esc(L.sh)}"></div></div>
+    ${!g&&!L.isNew&&L.articleId?buUnitRow(L):''}${sel?(g?`<div class="g3"><div class="field"><label for="bl-n">${tr('الألواح','Plaques')}</label><input id="bl-n" inputmode="decimal" dir="ltr" value="${esc(L.sheets)}" placeholder="10"></div><div class="field"><label for="bl-w">${tr('العرض (سم)','Largeur')}</label><input id="bl-w" inputmode="decimal" dir="ltr" value="${esc(L.sw)}"></div><div class="field"><label for="bl-h">${tr('الطول (سم)','Hauteur')}</label><input id="bl-h" inputmode="decimal" dir="ltr" value="${esc(L.sh)}"></div></div>
       <b style="font-size:.9rem">💰 ${tr('الأسعار (للمتر²)','Prix (m²)')}</b>
       <div class="g3"><div class="field"><label for="bl-c">${tr('الشراء','Achat')}</label><input id="bl-c" inputmode="decimal" dir="ltr" value="${esc(L.cost)}"></div><div class="field"><label for="bl-p">${tr('بيع للحرفي','Prix atelier')}</label><input id="bl-p" inputmode="decimal" dir="ltr" value="${esc(L.price)}"></div><div class="field"><label for="bl-pw">${tr('بيع للزبون','Prix client')}</label><input id="bl-pw" inputmode="decimal" dir="ltr" value="${esc(L.priceW)}" placeholder="${esc(L.price||'')}"></div></div>`
       :`<div class="grid2"><div class="field"><label for="bl-qty">${tr('الكمية','Quantité')}${u?' ('+esc(unitTr(u))+')':''}</label><input id="bl-qty" inputmode="decimal" dir="ltr" value="${esc(L.qty)}"></div><div class="field"><label for="bl-uc">${tr('سعر الشراء','Prix d’achat')}${u?' / '+esc(unitTr(u)):''}</label><input id="bl-uc" inputmode="decimal" dir="ltr" value="${esc(L.uc)}"></div></div>
@@ -5533,13 +5537,14 @@ document.addEventListener('change',e=>{if(view.name!=='buy'||!bud)return;const t
 async function buSave(){const d=bud;if(!d)return;if(!d.lines.length)return toast(tr('زيد صنف واحد على الأقل.','Ajoutez au moins une ligne.'));
   if(d.supplierId==='__new'&&!String(d.newSup||'').trim())return toast(tr('اكتب اسم المورّد.','Saisissez le nom du fournisseur.'));
   const tot=buTotal();let left=d.supplierId?(d.pm==='full'?tot:d.pm==='debt'?0:Math.min(tot,Math.max(0,Math.round(num(d.paid))))):0;
-  const pid='p'+Date.now().toString(36),pref=String(d.ref||'').trim(),date=d.date||today(),now=Date.now();
+  const pid=d.editGk&&!String(d.editGk).startsWith('x')?d.editGk:'p'+Date.now().toString(36),pref=String(d.ref||'').trim(),date=d.date||today(),now=Date.now();
   let tlist=types().map(t=>({...t})),tch=false;let k=0;const newT={},newA={};
   for(const l of d.lines){if(l.k!=='g')continue;const mmN=num(l.mm)>0&&num(l.mm)<=50?Math.round(num(l.mm)*10)/10:0,p=num(l.price),pw=num(l.priceW);
     if(l.isNew){const key=normName(l.nn);if(!newT[key]){const id='t'+(now+(k++)).toString(36);newT[key]=id;tlist.push({id,name:l.nn,price:p,priceW:pw>0?pw:0,mm:mmN,img:''});tch=true}}
     else{const t=tlist.find(x=>x.id===l.typeId);if(!t)continue;if(p>0&&p!==num(t.price)){t.price=p;tch=true}if(pw>0&&pw!==num(t.priceW)){t.priceW=pw;tch=true}if(mmN>0&&mmN!==num(t.mm)){t.mm=mmN;tch=true}}}
   const ok=await write(async()=>{let sid=d.supplierId||'',sname='';
     if(sid==='__new'){const r=db.collection('suppliers').doc();sname=String(d.newSup).trim();await r.set({name:sname,phone:'',opening:0,createdAt:now});sid=r.id}else if(sid)sname=(S.sups[sid]||{}).name||'';
+    if(d.editDocs)for(const p of d.editDocs)await db.doc(p).delete();
     if(tch)await saveSettings({types:tlist});
     let nref=Object.keys(S.arts).length;
     for(const l of d.lines){if(l.k!=='m'||!l.isNew)continue;const key=normName(l.nn);if(newA[key])continue;const ref=db.collection('articles').doc();nref++;
@@ -5549,9 +5554,9 @@ async function buSave(){const d=bud;if(!d)return;if(!d.lines.length)return toast
         await db.collection('stock').doc().set({kind:'in',typeId:tid,type:t.name,date,sheets:num(l.sheets),sw:num(l.sw),sh:num(l.sh),area:Math.round(buArea(l)*10000)/10000,costM2:num(l.cost),mm:mmN,cost:amt,supplierId:sid,supplier:sname,paid:pd,pid,pref,createdAt:now+j})}
       else{const aid=l.isNew?newA[normName(l.nn)]:l.articleId,a=S.arts[aid]||{name:l.nn},uc=r0(l.uc);
         await db.collection('amoves').doc().set({kind:'in',articleId:aid,name:a.name||l.nn,qty:Math.round(num(l.qty)*1000)/1000,unitCost:uc,cost:amt,supplierId:sid,supplier:sname,paid:pd,date,pid,pref,createdAt:now+j});
-        if(!l.isNew&&uc>0&&Math.abs(uc-num(a.cost))>0.001)await db.doc('articles/'+aid).update({cost:uc})}}
+        {const up={};if(!l.isNew&&uc>0&&Math.abs(uc-num(a.cost))>0.001)up.cost=uc;if(!l.isNew&&l.nu&&a.unit&&l.nu!==a.unit)up.unit=l.nu;if(Object.keys(up).length)await db.doc('articles/'+aid).update(up)}}}
     d._sid=sid},tr('تم حفظ فاتورة الشراء.','Achat enregistré.'));
-  if(ok){const sid=d._sid;bud=null;if(sid)go('sup',{id:sid});else{stkTab='glass';go('stock')}}}
+  if(ok){bud=null;go('purview',{id:pid})}}
 document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act;
   if((a==='new-in'||a==='new-ain')&&!poQueue){if(isStaff()&&STAFF_BLOCK.has(a))return;e.stopPropagation();const id=b.dataset.id;buOpen(a==='new-in'?'g':'m',b.dataset.sup||'',a==='new-ain'&&id&&S.arts[id]?id:'');return}
   if(view.name!=='buy'||!bud)return;
@@ -5574,7 +5579,7 @@ let supPur={};
     e.push({k:'pur',gk,g,date:g.date,t:g.t,amt:g.amt});if(g.paid>0)e.push({k:'pay',date:g.date,t:g.t+1,amt:-g.paid,label:tr('دفع عند الشراء','Payé à l’achat')})}
   for(const [pid,p] of Object.entries(S.spays))if(p.supplierId===id)e.push({k:'spay',id:pid,date:p.date,t:p.createdAt||0,amt:-num(p.amount),label:tr('دفع','Paiement')+(p.method?' · '+payMName(p.method):'')+(p.note?' · '+esc(p.note):'')});
   e.sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:a.t-b.t);let run=0;for(const r of e){run+=r.amt;r.run=run}e.reverse();
-  const row=r=>{if(r.k==='pur'){const g=r.g,multi=g.items.length>1||g.pid;return `<div class="le pur"><span class="what">${multi?`🧾 ${tr('فاتورة شراء','Achat')}${g.ref?' '+esc(g.ref):''} · ${g.items.length} ${g.items.length>1?tr('أصناف','articles'):tr('صنف','article')}`:`${tr('شراء','Achat')} ${esc(g.items[0].name)}`}</span><span class="a" style="color:var(--debt)">+${DA(r.amt)}</span><span class="d">${fdate(r.date)}</span><span class="run">${tr('الرصيد','Solde')} ${DA(r.run)}</span>
+  const row=r=>{if(r.k==='pur'){const g=r.g,multi=g.items.length>1||g.pid;return `<div class="le pur"><button type="button" class="what purlnk" data-act="open-pur" data-id="${esc(r.gk)}">${multi?`🧾 ${tr('فاتورة شراء','Achat')}${g.ref?' '+esc(g.ref):''} · ${g.items.length} ${g.items.length>1?tr('أصناف','articles'):tr('صنف','article')}`:`${tr('شراء','Achat')} ${esc(g.items[0].name)}`} ›</button><span class="a" style="color:var(--debt)">+${DA(r.amt)}</span><span class="d">${fdate(r.date)}</span><span class="run">${tr('الرصيد','Solde')} ${DA(r.run)}</span>
       <span class="puri">${g.items.map(it=>`<span><span>${esc(it.name)} · ${it.det}</span><b>${grp(it.a)}</b></span>`).join('')}</span>${isStaff()?'':`<button class="btn danger del" data-act="del-pur" data-id="${esc(r.gk)}">${tr('حذف','Supprimer')}</button>`}</div>`}
     return `<div class="le"><span class="what">${r.label}</span><span class="a" style="color:${r.amt<0?'var(--ok)':'var(--debt)'}">${r.amt<0?'−'+DA(-r.amt):'+'+DA(r.amt)}</span><span class="d">${fdate(r.date)}</span><span class="run">${tr('الرصيد','Solde')} ${DA(r.run)}</span>${r.k==='spay'?`<button class="btn danger del" data-act="del-spay" data-id="${r.id}">${tr('حذف','Supprimer')}</button>`:''}</div>`};
   const P=Object.values(pr).sort((a,b)=>String(a.name).localeCompare(b.name,prefs.lang));
@@ -5601,7 +5606,7 @@ function matPick(i){const m=$('#modal'),l=draft&&draft.lines[i];if(!l)return;let
   const list=()=>{const qq=String(q).trim();const L=activeArts().filter(([,a])=>a.cat!=='svc'&&(!qq||qHit(a.name,qq))).sort((x,y)=>(x[1].cat==='mat'?0:1)-(y[1].cat==='mat'?0:1)).slice(0,12);
     return L.length?L.map(([id,a])=>{const e=S.ak[id];return `<button type="button" class="pki ${sel===id?'on':''}" data-mp="${esc(id)}"><b>${esc(a.name)}</b><small>${e?dec2s(Math.max(0,e.bal))+' '+esc(unitTr(a.unit)):''}</small></button>`}).join(''):`<p class="note">${tr('ما كاين حتى مادة. زيدها من «إدخال سلعة» ← مواد ولوازم.','Aucune fourniture. Ajoutez-la via « Entrée de stock ».')}</p>`};
   const ucOf=id=>{const c=artCostAt(id,today());return c===null?0:c};
-  const draw=()=>{const a=sel&&S.arts[sel];m.innerHTML=`<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mp-t"><h2 id="mp-t">🧴 ${tr('مادة مستعملة','Fourniture utilisée')}</h2>
+  const draw=()=>{const a=sel&&S.arts[sel];m.innerHTML=`<div class="sheet busheet" role="dialog" aria-modal="true" aria-labelledby="mp-t"><h2 id="mp-t">🧴 ${tr('مادة مستعملة','Fourniture utilisée')}</h2>
     <input id="mp-q" value="${esc(q)}" placeholder="🔍 ${tr('ماستيك، سيليكون…','mastic, silicone…')}" autocomplete="off"><div class="pkl" id="mp-l">${list()}</div>
     ${a?`<div class="field"><label for="mp-n">${tr('شحال استعملت؟','Quantité utilisée')} (${esc(unitTr(a.unit))})</label><input id="mp-n" inputmode="decimal" dir="ltr" placeholder="0.5"></div>${isStaff()?'':`<div class="note" id="mp-c">${tr('سعر الشراء','Prix d’achat')}: ${grp(ucOf(sel))} / ${esc(unitTr(a.unit))}</div>`}`:''}
     <p class="err" id="mp-e"></p><div class="actions"><button class="btn line" data-m="0">${tr('إلغاء','Annuler')}</button><button class="btn" data-m="1">${tr('زيد','Ajouter')}</button></div></div>`;m.hidden=false;setTimeout(()=>{const x=$(a?'#mp-n':'#mp-q');if(x)x.focus()},30)};
@@ -5616,6 +5621,78 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
   if(a==='sm-rm'){e.stopPropagation();const l=draft.lines[+b.dataset.i];if(l&&l.mats){l.mats.splice(+b.dataset.j,1);linesRender()}return}},true);
 {const _c=compute;compute=function(){_c();const ak=S.ak||{},mo=today().slice(0,7);for(const id in S.bons){const b=S.bons[id];if(b.kind!=='sale')continue;for(const l of b.lines||[])for(const m of l.mats||[]){const e=ak[m.id]||(ak[m.id]={inQ:0,adjQ:0,outQ:0,monthOut:0,bal:0,last:null});const q=num(m.qty);e.outQ+=q;if(b.date&&b.date.slice(0,7)===mo)e.monthOut+=q}}
   for(const id in ak){const e=ak[id];e.bal=e.inQ+e.adjQ-e.outQ}S.ak=ak}}
+
+/* ---- v56: فاتورة الشراء (عرض · PDF · طباعة · تعديل) + وحدة «دلو» ---- */
+if(!UNITS.some(u=>u[0]==='دلو'))UNITS.splice(UNITS.length-1,0,['دلو','seau']);
+FORM_VIEWS.add('buy');
+function buUnitRow(L){const a=S.arts[L.articleId];if(!a)return'';const cur=L.nu||a.unit||'';const us=[...new Set([a.unit,...MAT_UNITS].filter(Boolean))];const e=S.ak[L.articleId],bal=e?e.bal:0;
+  return `<div class="field"><label>${tr('الوحدة','Unité')}</label><div class="uch">${us.map(x=>`<button type="button" data-bu="${esc(x)}" class="${cur===x?'on':''}">${esc(unitTr(x))}</button>`).join('')}</div>
+  ${cur!==a.unit&&bal>0.0001?`<div class="butag" style="margin-top:6px">⚠️ ${tr(`بدّلت الوحدة: الكمية اللي في المخزون (${dec2(bal)}) تولّي بالـ${unitTr(cur)}. صحّحها من «تعديل الجرد» إلا لازم.`,`Unité changée : le stock (${dec2(bal)}) sera compté en ${unitTr(cur)}.`)}</div>`:''}</div>`}
+/* ---------- مجموعة فاتورة شراء ---------- */
+function purGroup(gk){gk=String(gk||'');const it=[];
+  if(gk.startsWith('x')){const mid=gk.slice(1);if(S.stock[mid]&&S.stock[mid].kind==='in')it.push(['stock',mid,S.stock[mid]]);else if(S.amv[mid]&&S.amv[mid].kind==='in')it.push(['amoves',mid,S.amv[mid]])}
+  else{for(const [mid,m] of Object.entries(S.stock))if(m.kind==='in'&&m.pid===gk)it.push(['stock',mid,m]);for(const [mid,m] of Object.entries(S.amv))if(m.kind==='in'&&m.pid===gk)it.push(['amoves',mid,m])}
+  if(!it.length)return null;it.sort((a,b)=>(a[2].createdAt||0)-(b[2].createdAt||0));const f=it[0][2];
+  return{gk,sid:f.supplierId||'',sname:(S.sups[f.supplierId]||{}).name||f.supplier||'',date:f.date||'',ref:f.pref||'',items:it,docs:it.map(x=>x[0]+'/'+x[1]),
+    total:it.reduce((s,x)=>s+num(x[2].cost),0),paid:it.reduce((s,x)=>s+num(x[2].paid),0)}}
+function purRow(x){const [col,,m]=x;if(col==='stock')return{name:m.type||'?',qty:`${num(m.sheets)} ${tr('لوح','plaques')}`,dim:`${num(m.sw)}×${num(m.sh)}`,price:`${grpTxt(m.costM2)}/${tr('م²','m²')}`,amt:num(m.cost)};
+  const a=S.arts[m.articleId]||{};return{name:m.name||a.name||'?',qty:`${String(Math.round(num(m.qty)*1000)/1000)} ${unitTr(a.unit)}`,dim:'—',price:grpTxt(m.unitCost),amt:num(m.cost)}}
+function purTitle(g){return tr('فاتورة شراء','Facture d’achat')+(g.ref?' '+g.ref:'')}
+function purviewHTML(){const g=purGroup(view.id);
+  if(!g)return `<div class="stack">${backBtn('nav-sups',tr('الموردون','Fournisseurs'))}<div class="empty"><p>${tr('تم حذف فاتورة الشراء هذه.','Achat supprimé.')}</p></div></div>`;
+  supPur[g.gk]=g.docs;const R=g.items.map(purRow),rem=g.total-g.paid;
+  return `<div class="stack">${g.sid&&S.sups[g.sid]?backBtn('open-sup',esc(g.sname),g.sid):backBtn('nav-stk',tr('المخزون','Stock'))}
+  <div class="purhd"><b>🧾 ${esc(purTitle(g))}</b><small>${g.sname?esc(g.sname)+' · ':''}${fdate(g.date)}</small></div>
+  <div class="card" style="padding:0;overflow-x:auto"><table class="tbl doc"><thead><tr><th>${tr('الصنف','Article')}</th><th class="n">${tr('الكمية','Qté')}</th><th>${tr('المقاس (سم)','Dim. (cm)')}</th><th class="n">${tr('السعر','Prix')}</th><th class="n">${tr('المبلغ','Montant')}</th></tr></thead><tbody>
+  ${R.map(r=>`<tr><td>${esc(r.name)}</td><td class="n">${esc(r.qty)}</td><td><bdi dir="ltr">${esc(r.dim)}</bdi></td><td class="n"><bdi dir="ltr">${esc(r.price)}</bdi></td><td class="n b"><bdi dir="ltr">${grp(r.amt)}</bdi></td></tr>`).join('')}</tbody></table></div>
+  <div class="totals"><div class="trow big"><span>${tr('المجموع','Total')}</span><span>${DA(g.total)}</span></div>
+  ${g.sid?`<div class="trow"><span>${tr('دفعنا عند الشراء','Payé à l’achat')}</span><span>${DA(g.paid)}</span></div><div class="trow"><span>${tr('الباقي من هذه الفاتورة','Reste sur cet achat')}</span><b class="amt ${rem>0.5?'neg':''}">${DA(rem)}</b></div>`:''}</div>
+  <div class="pur4"><button class="btn" data-act="pur-pdf" data-id="${esc(g.gk)}">⬇️ ${tr('تحميل PDF','Télécharger PDF')}</button><button class="btn ghost" data-act="pur-print" data-id="${esc(g.gk)}">🖨️ ${tr('طباعة','Imprimer')}</button>
+  ${isStaff()?'':`<button class="btn ghost" data-act="pur-edit" data-id="${esc(g.gk)}">✏️ ${tr('تعديل','Modifier')}</button><button class="btn danger" data-act="del-pur" data-id="${esc(g.gk)}">🗑️ ${tr('حذف','Supprimer')}</button>`}</div></div>`}
+{const _r=render33;render33=function(v){if(v==='purview')return purviewHTML();return _r(v)}}
+function purPrintHTML(g){const R=g.items.map(purRow),rem=g.total-g.paid;
+  return `<div class="rc" dir="${isFr()?'ltr':'rtl'}">${rcHead(true)}
+  <div class="rc-meta"><div><b>${esc(purTitle(g))}</b><div>${tr('التاريخ','Date')}: ${fdate(g.date)}</div></div><div>${g.sname?`<div>${tr('المورّد','Fournisseur')}: <b>${esc(g.sname)}</b></div>`:''}</div></div>
+  <table><thead><tr><th>${tr('الصنف','Article')}</th><th>${tr('الكمية','Qté')}</th><th>${tr('المقاس سم','Dim. cm')}</th><th>${tr('السعر','Prix')}</th><th>${tr('المبلغ','Montant')}</th></tr></thead><tbody>
+  ${R.map(r=>`<tr><td>${esc(r.name)}</td><td>${esc(r.qty)}</td><td><bdi dir="ltr">${esc(r.dim)}</bdi></td><td><bdi dir="ltr">${esc(r.price)}</bdi></td><td><bdi dir="ltr">${grp(r.amt)}</bdi></td></tr>`).join('')}</tbody></table>
+  <div class="tot"><div class="big"><span>${tr('المجموع','Total')}</span><span>${DA(g.total)}</span></div>${g.sid?`<div><span>${tr('المدفوع','Payé')}</span><span>${DA(g.paid)}</span></div><div><span>${tr('الباقي','Reste')}</span><span>${DA(rem)}</span></div>`:''}</div></div>`}
+async function purPages(g){const sh=S.shop||{},RTL=!isFr(),W=1240,H=1754,M=72,FONT=getComputedStyle(document.body).fontFamily||'sans-serif';
+  try{await document.fonts.load(`400 24px ${FONT}`);await document.fonts.load(`700 24px ${FONT}`)}catch(_){}
+  const logo=await loadImg(sh.logo||('data:image/svg+xml;charset=utf-8,'+encodeURIComponent(MARK.replace('<svg ','<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" '))));
+  const pages=[];let cv,x,y;const X=v=>RTL?W-v:v,A=a=>a==='start'?(RTL?'right':'left'):a==='end'?(RTL?'left':'right'):a;
+  const T=(s,px,py,o={})=>{x.font=`${o.w||400} ${o.s||22}px ${FONT}`;x.fillStyle=o.c||'#111';x.textAlign=A(o.a||'start');x.direction=o.ltr?'ltr':(RTL?'rtl':'ltr');x.textBaseline='alphabetic';x.fillText(String(s),X(px),py)};
+  const L=(x1,y1,x2,y2,c,w)=>{x.strokeStyle=c||'#ccc';x.lineWidth=w||1.5;x.beginPath();x.moveTo(X(x1),y1);x.lineTo(X(x2),y2);x.stroke()};
+  const Rc=(x1,y1,w,h,c)=>{x.fillStyle=c;const a=X(x1),b=X(x1+w);x.fillRect(Math.min(a,b),y1,Math.abs(b-a),h)};
+  const defs=[['n','#',50],['name',tr('الصنف','Article'),330],['qty',tr('الكمية','Qté'),170],['dim',tr('المقاس (سم)','Dim. (cm)'),190],['price',tr('السعر','Prix'),180],['amt',tr('المبلغ','Montant'),0]];
+  let cx=M;const C={};for(const [k,l,w] of defs){const ww=w||(W-M-cx);C[k]=[cx,cx+ww,l];cx+=ww}
+  const head=()=>{Rc(M,y,W-2*M,48,'#eef5f3');L(M,y+48,W-M,y+48,'#bbb',2);for(const k in C)T(C[k][2],C[k][0]+8,y+32,{s:19,w:700,c:'#333'});y+=60};
+  const page=first=>{cv=document.createElement('canvas');cv.width=W;cv.height=H;x=cv.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,W,H);pages.push(cv);y=M;
+    if(first){if(logo){const s=Math.min(150/logo.width,100/logo.height,1.5),lw=logo.width*s,lh=logo.height*s;x.drawImage(logo,RTL?M:W-M-lw,y,lw,lh)}
+      T(shopName(),M,y+34,{s:34,w:700});let yy=y+34;for(const l of [sh.activity,sh.address,sh.phone?(tr('الهاتف','Tél')+': '+sh.phone):''].filter(Boolean)){yy+=30;T(l,M,yy,{s:19,c:'#555'})}
+      y=Math.max(yy,y+(logo?100:0))+26;L(M,y,W-M,y,'#17635e',3);y+=46;T(purTitle(g),M,y,{s:32,w:700});T(fdateTxt(g.date),W-M,y,{s:20,c:'#444',a:'end'});
+      if(g.sname){y+=40;T(tr('المورّد','Fournisseur')+': '+g.sname,M,y,{s:24,w:700})}y+=34}
+    else{T(purTitle(g)+' ('+tr('تابع','suite')+')',M,y+26,{s:21,w:700,c:'#333'});y+=48}head()};
+  page(true);const bottom=H-M-50;
+  g.items.map(purRow).forEach((r,i)=>{if(y+56>bottom)page(false);const b0=y+28;if(i%2)Rc(M,y,W-2*M,50,'#f8fbfa');
+    T(i+1,C.n[0]+8,b0,{s:19,c:'#666',ltr:true});T(r.name,C.name[0]+8,b0,{s:21,w:600});T(r.qty,C.qty[0]+8,b0,{s:21});T(r.dim,C.dim[0]+8,b0,{s:21,ltr:true});T(r.price,C.price[0]+8,b0,{s:21,ltr:true});T(grpTxt(r.amt),C.amt[0]+8,b0,{s:21,w:700,ltr:true});
+    y+=50;L(M,y,W-M,y,'#e2e2e2')});
+  const tl=[[tr('المجموع','Total'),g.total,1]];if(g.sid){tl.push([tr('المدفوع','Payé'),g.paid]);tl.push([tr('الباقي','Reste'),g.total-g.paid])}
+  if(y+tl.length*40+60>bottom)page(false);const bx=W-M-520;y+=44;
+  for(const [l,v,big] of tl){T(l,bx,y,{s:big?26:21,w:big?700:400});T(grpTxt(v)+' '+CUR(),W-M,y,{s:big?26:21,w:big?700:400,a:'end'});y+=42}
+  pages.forEach((p,i)=>{x=p.getContext('2d');T(`${i+1} / ${pages.length}`,W/2,H-34,{s:17,c:'#888',a:'center',ltr:true})});return pages}
+async function purFile(g){const pages=await purPages(g),imgs=[];for(const c of pages){const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',0.9));imgs.push({w:c.width,h:c.height,bytes:new Uint8Array(await blob.arrayBuffer())})}
+  const nm=String(g.sname||'achat').replace(/[\\/:*?"<>|\s]+/g,'-');return new File([pdfFromJpegs(imgs)],`achat-${g.ref?String(g.ref).replace(/[\\/:*?"<>|\s]+/g,'-')+'-':''}${nm}-${g.date}.pdf`,{type:'application/pdf'})}
+function purEdit(gk){const g=purGroup(gk);if(!g)return;const lines=g.items.map(([col,,m])=>{if(col==='stock'){const t=types().find(x=>x.id===m.typeId)||{};return{k:'g',typeId:m.typeId,isNew:false,nn:'',mm:String(num(m.mm)||num(t.mm)||''),sheets:String(num(m.sheets)),sw:String(num(m.sw)),sh:String(num(m.sh)),cost:String(num(m.costM2)),price:String(num(t.price)||''),priceW:String(num(t.priceW)||''),was:num(m.sheets)}}
+    const a=S.arts[m.articleId]||{};return{k:'m',articleId:m.articleId,isNew:false,nn:'',nu:a.unit||'',qty:String(num(m.qty)),uc:String(num(m.unitCost)),was:num(m.qty)}});
+  bud={supplierId:g.sid,newSup:'',date:g.date||today(),ref:g.ref,lines,pm:g.paid>=g.total-0.5?'full':g.paid>0?'part':'debt',paid:String(Math.round(g.paid)),fromSup:g.sid,backArt:'',editGk:gk,editDocs:g.docs};go('buy')}
+{const _cf=cancelForm33;cancelForm33=async function(v){if(v==='buy'&&bud&&bud.editGk){if(!await ask({title:tr('تجاهل التعديل؟','Abandonner les modifications ?'),ok:tr('تجاهل','Abandonner'),cancel:tr('متابعة','Continuer'),body:tr('التعديلات ما تتسجّلش.','Les modifications ne seront pas enregistrées.')}))return true;const gk=bud.editGk;bud=null;go('purview',{id:gk});return true}return _cf(v)}}
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act,id=b.dataset.id;
+  if(a==='open-pur'){e.stopPropagation();return go('purview',{id})}
+  if(a==='pur-pdf'){e.stopPropagation();const g=purGroup(id);if(!g)return;try{const f=await purFile(g);downloadFile(f);toast(tr('تحمّل: ','Téléchargé : ')+f.name)}catch(_){toast(tr('تعذّر تحضير الملف.','Échec.'))}return}
+  if(a==='pur-print'){e.stopPropagation();const g=purGroup(id);if(g)printHTML(purPrintHTML(g),'a4');return}
+  if(a==='pur-edit'){e.stopPropagation();if(isStaff())return;return purEdit(id)}},true);
+{const _bl=buLineHTML;buLineHTML=function(l,i){let h=_bl(l,i);const cur=l.k==='g'?num(l.sheets):num(l.qty);if(l.was!==undefined&&Math.abs(cur-l.was)>0.0001)h=h.replace('</span></button>',` <b class="buwas">(${tr('كانت','avant')} ${dec2(l.was)})</b></span></button>`);return h}}
+{const _b=buyHTML;buyHTML=function(){let h=_b();if(bud&&bud.editGk)h=h.replace('<h2>🧾 '+tr('فاتورة شراء','Facture d’achat')+'</h2>','<h2>✏️ '+tr('تعديل فاتورة شراء','Modifier l’achat')+(bud.ref?' '+esc(bud.ref):'')+'</h2>').replace('>'+tr('حفظ الفاتورة','Enregistrer')+'<','>'+tr('حفظ التعديل','Enregistrer')+'<');return h}}
 
 function backupFile(){const data={app:'daftar-zujaj',version:2,exportedAt:new Date().toISOString(),docs:LocalDB.dump()};return new File([JSON.stringify(data)],`tumayd-backup-${today()}.json`,{type:'application/json'})}
 function downloadFile(f){const u=URL.createObjectURL(f);const a=document.createElement('a');a.href=u;a.download=f.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}
