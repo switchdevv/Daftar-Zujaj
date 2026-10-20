@@ -758,6 +758,15 @@ input.subuse{padding:7px 10px;font-size:.85rem}
 .fglink{justify-self:center;color:#9a5300}
 .bvmore{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px;display:grid;gap:8px}.bvmb{display:flex;flex-wrap:wrap;gap:6px}.bvmb .btn{width:auto}
 .pimgs img{width:100%;display:block;page-break-after:always}
+.kpi4 .kt{position:relative;cursor:pointer}.kpi4 .kt.on{border:2px solid var(--accent);background:var(--accent-soft)}.kch{position:absolute;top:7px;inset-inline-end:10px;color:var(--muted);font-size:.7rem}
+.kdet{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-top:-2px}.kdh{display:flex;justify-content:space-between;gap:8px;background:var(--accent-soft);color:var(--accent);font-weight:800;padding:9px 12px;font-size:.88rem}
+.kdr{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;padding:9px 12px;border:0;border-bottom:1px dashed var(--line);background:none;font:inherit;color:var(--ink);text-align:start;font-size:.86rem}.kdr small{display:block;color:var(--muted);font-size:.74rem;font-weight:500}.kdr b{text-align:end}.kdr b.neg{color:var(--debt)}.kdr b.pos{color:var(--ok)}
+.kdmore{display:block;width:100%;border:0;background:none;padding:10px;color:var(--accent);font:inherit;font-weight:700}
+.emo-av{font-size:1.15rem;background:var(--sunk)}
+.sana{display:grid;gap:10px}.pch2{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}.pch2 button{border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:7px 2px;font:inherit;font-size:.8rem;font-weight:700;color:var(--muted)}.pch2 button.on{background:var(--accent);color:#fff;border-color:transparent}
+.sbars{display:flex;align-items:stretch;gap:4px;height:130px;border-bottom:1px solid var(--line);padding-top:4px}.sbar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:2px;min-width:0}
+.sbar i{display:block;width:100%;background:linear-gradient(#2bb38a,#17635e);border-radius:5px 5px 0 0}.sbar small{font-size:.6rem;color:var(--muted);white-space:nowrap}.sbv{font-size:.6rem;color:var(--muted)}
+.stop{display:grid;gap:3px}.sbb{height:7px;border-radius:99px;background:var(--sunk);overflow:hidden}.sbb i{display:block;height:100%;background:var(--accent)}
 .bvprev img{cursor:zoom-in}
 #modal .zoomv{position:fixed;inset:0;background:#2b2f30;z-index:70;display:grid;grid-template-rows:auto 1fr}
 .zoomv .zx{margin:10px;justify-self:end;background:#fff}
@@ -837,7 +846,7 @@ const num=v=>{const n=parseFloat(String(v??'').replace(/\s/g,'').replace(',','.'
 const loc=()=>isFr()?'fr-FR':'en-US';
 const grp=n=>{const r=Math.round(n);return(r<0?'-':'')+Math.abs(r).toLocaleString(loc()).replace(/ /g,' ')};
 const grpTxt=n=>Math.round(n).toLocaleString('en-US');
-const APP_VER=58; // نفس الرقم تاع VERSION في sw.js
+const APP_VER=59; // نفس الرقم تاع VERSION في sw.js
 const CUR=()=>tr('دج','DA');
 const DA=n=>`<bdi dir="ltr">${grp(n)}</bdi>&nbsp;${CUR()}`;
 const dec2=a=>(Math.round(a*100)/100).toLocaleString(loc(),{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -5793,7 +5802,7 @@ function bvPayHTML(id,b){const walk=b.walkin,total=num(b.total),rem=bvRem(id,b),
     const other=Math.max(0,total-rem-Math.min(total,d));if(other>0.5)H.push([tr('من الفارسمو العام تاع الحساب','Versements du compte'),'',other,''])}
   const half=Math.round(rem/2);
   return `<div class="fvcard ${rem>0.5?'':'ok'}"><div class="rowflex between"><b>💵 ${tr('فارسمو','Versement')}</b>${rem>0.5?`<span class="note">${tr('الباقي','Reste')} <b class="amt neg">${DA(rem)}</b></span>`:`<span class="chip ok">✓ ${tr('خالص','Payé')}</span>`}</div>
-  ${rem>0.5?`<input id="fv-a" inputmode="decimal" dir="ltr" value="${Math.round(rem)}" class="fvin">
+  ${rem>0.5?`<input id="fv-a" inputmode="decimal" dir="ltr" value="" placeholder="0" class="fvin">
   <div class="quickpay"><button type="button" data-act="fv-q" data-v="${Math.round(rem)}">${tr('كامل الباقي','Tout le reste')}</button>${half>0&&half<rem?`<button type="button" data-act="fv-q" data-v="${half}">${tr('النص','Moitié')} ${grp(half)}</button>`:''}</div>
   <button class="btn full" data-act="fv-pay" data-id="${id}">${ic('cash')}${tr('تسجيل الدفعة','Enregistrer le paiement')}</button>
   ${st?'':`<button class="link fglink" data-act="${walk?'fg-bon':'fg-shop'}" data-id="${id}">🤝 ${tr('التنازل عن الباقي','Abandonner le reste')}</button>`}`:''}
@@ -5834,6 +5843,68 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]
   if(a==='bv-zoom'){e.stopPropagation();return bvZoom(b.getAttribute('src'))}
   if(a==='bv-tk'){e.stopPropagation();printHTML(ticketHTML(id),'tk');return}
 },true);
+
+/* ---- v59: فارسمو تبدا فارغة · تحديد الرقم كي تلمسو · تفاصيل خانات الزبون · البحث في كلش · تحليل المورّد ---- */
+/* لمسة على خانة رقم = الرقم كامل يتحدد */
+document.addEventListener('focusin',e=>{const t=e.target;if(!t||t.tagName!=='INPUT')return;const im=(t.getAttribute('inputmode')||'').toLowerCase();if(!(im==='decimal'||im==='numeric'||t.type==='number'))return;if(!String(t.value||'').length)return;
+  setTimeout(()=>{try{t.select();t.setSelectionRange(0,String(t.value).length)}catch(_){}},0)});
+/* ---------- خانات صفحة الزبون ---------- */
+let kpiOpen={key:'',k:'',all:false};
+const invLbl=x=>x.k==='note'?tr('دين قديم','Ancien crédit'):((x.b&&isBL(x.b))?tr('وصل','Bon'):tr('فاتورة','Facture'))+' '+((x.b&&x.b.num)||'');
+const invTypes=x=>x.b?[...new Set((x.b.lines||[]).map(l=>String(l.type||'').split(' — ')[0]).filter(Boolean))].slice(0,3).join('، '):'';
+cKpiHTML=function(D){const ag=agingOf(D.items),key=D.kind+':'+D.id,op=kpiOpen.key===key?kpiOpen.k:'';let lp=null;for(const x of D.pays){if(x.m==='forgive')continue;if(!lp||x.date>lp.date||(x.date===lp.date&&x.t>lp.t))lp=x}
+  const t=(k,cls,lab,val,extra)=>`<div class="${cls} kt ${op===k?'on':''}" role="button" tabindex="0" data-act="kpi-open" data-v="${k}" data-key="${esc(key)}"><small>${lab}</small><b>${val}</b>${extra||''}<span class="kch">${op===k?'▴':'▾'}</span></div>`;
+  return `<div class="kpi4">${t('owe','red',tr('الباقي عليه','Reste dû'),DA(D.owe))}${t('over',ag.over>0.5?'org':'',tr('متأخر +30 يوم','En retard +30 j'),DA(ag.over))}${t('buy','',tr('مجموع المشتريات','Total acheté'),DA(D.buy))}${t('pay','',tr('آخر دفعة','Dernier paiement'),lp?DA(lp.amt):'—',lp?`<span class="kd">${fdate(lp.date)}</span>`:'')}</div>${op?kpiDetailHTML(D,op):''}`};
+function kpiDetailHTML(D,k){let rows=[],title='',sum=0;
+  const invRow=x=>`<button class="kdr" ${x.k==='bon'?`data-act="open-bon" data-id="${esc(x.id)}"`:''}><span>${esc(invLbl(x))}<small>${fdate(x.date)}${invTypes(x)?' · '+esc(invTypes(x)):''}</small></span>`;
+  if(k==='buy'){const L=D.inv;title=`🧾 ${tr('كل المشتريات','Tous les achats')} (${L.length})`;sum=L.reduce((s,x)=>s+x.total,0);rows=L.map(x=>invRow(x)+`<b>${grp(x.total)}</b></button>`)}
+  else if(k==='owe'){const L=D.inv.filter(x=>x.rem>0.5);title=`📌 ${tr('الفواتير اللي ما تخلّصتش','Factures impayées')} (${L.length})`;sum=L.reduce((s,x)=>s+x.rem,0);rows=L.map(x=>invRow(x)+`<b class="neg">${grp(x.rem)}<small>${tr('من','sur')} ${grp(x.total)}</small></b></button>`)}
+  else if(k==='over'){const L=D.inv.filter(x=>x.rem>0.5&&daysAgo(x.date)>=30).sort((a,b)=>a.date<b.date?-1:1);title=`⏰ ${tr('متأخرة أكثر من 30 يوم','En retard +30 j')} (${L.length})`;sum=L.reduce((s,x)=>s+x.rem,0);rows=L.map(x=>invRow(x)+`<b class="neg">${grp(x.rem)}<small>${tr('منذ','depuis')} ${daysAgo(x.date)} ${tr('يوم','j')}</small></b></button>`)}
+  else if(k==='pay'){const L=D.pays;title=`💵 ${tr('كل الدفعات','Tous les paiements')} (${L.length})`;sum=L.reduce((s,x)=>s+x.amt,0);rows=L.map(x=>`<div class="kdr"><span>${x.k==='sale'?tr('عند البيع','À la vente')+(x.num?' · '+tr('وصل','Bon')+' '+x.num:''):x.m==='forgive'?'🤝 '+tr('تنازل','Remise'):tr('دفعة','Paiement')+(x.m&&x.m!=='cash'?' · '+esc(payMName(x.m)):'')}<small>${fdate(x.date)}</small></span><b class="${x.m==='forgive'?'':'pos'}">${grp(x.amt)}</b></div>`)}
+  const all=kpiOpen.all,shown=all?rows:rows.slice(0,8);
+  return `<div class="kdet"><div class="kdh"><span>${title}</span><b>${grp(sum)}</b></div>${shown.length?shown.join(''):`<p class="note" style="margin:8px 12px">${tr('ما كاين والو.','Rien.')}</p>`}
+  ${rows.length>8?`<button class="kdmore" data-act="kpi-all">${all?tr('أقل ▴','Moins ▴'):tr('عرض الكل','Tout voir')+` (${rows.length}) ▾`}</button>`:''}
+  ${k==='owe'&&D.kind==='shop'&&!isStaff()?`<button class="kdmore" data-act="pm-debt" data-id="${esc(D.id)}">✏️ ${tr('تعديل الدين / ملاحظة','Modifier le crédit')}</button>`:''}</div>`}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act="kpi-open"],[data-act="kpi-all"]');if(!b)return;e.stopPropagation();
+  if(b.dataset.act==='kpi-all'){kpiOpen.all=!kpiOpen.all;return render()}
+  const key=b.dataset.key,k=b.dataset.v;if(kpiOpen.key===key&&kpiOpen.k===k)kpiOpen={key:'',k:'',all:false};else kpiOpen={key,k,all:false};render()},true);
+/* ---------- البحث في كلش ---------- */
+const SEARCH_PAGES=[['nav-clients','👥','الزبائن','Clients','حرفي حرفيين زبون زبائن عادي'],['new-pay','💵','فارسمو','Versement','دفع خلاص دفعة'],['new-in','📥','إدخال سلعة (فاتورة شراء)','Entrée de stock','شراء سلعة مورد'],['nav-sups','🚚','الموردون','Fournisseurs','مورد موردين شراء fournisseur'],
+  ['nav-stk','📦','المخزون','Stock','مخزون سلعة زجاج stock'],['nav-prices','🪟','الأسعار وأنواع الزجاج','Prix et types','سعر اسعار نوع انواع زجاج'],['nav-debts','📊','الديون والأرباح','Crédits et bénéfices','دين ديون ربح ارباح تنازل'],['nav-cash','💰','الصندوق والمصاريف','Caisse et dépenses','صندوق مصروف مصاريف سكرة'],
+  ['nav-journal','🧾','سجل الفواتير','Journal des factures','فواتير فاتورة سجل'],['nav-quotes','📝','عروض الأسعار','Devis','عرض عروض devis'],['nav-calc','🧮','كشف تقديري','Estimation','حساب تقدير كشف'],['nav-orders','✂️','الطلبيات','Commandes','طلبية قص جاهزة'],['nav-appts','📅','المواعيد','Rendez-vous','موعد مواعيد تركيب توصيل'],
+  ['nav-pex','💸','مصاريفي','Mes dépenses','مصاريف شخصية دخان غدا'],['nav-collect','📞','جولة التحصيل','Recouvrement','تحصيل اتصال'],['nav-stats','📈','الإحصائيات','Statistiques','احصائيات مبيعات'],['nav-reports','🗓️','التقارير الشهرية','Rapports','تقرير تقارير شهر'],['nav-pos','🛒','طلبيات الشراء','Bons de commande','طلبية مورد'],
+  ['nav-off','✂️','بقايا الزجاج','Chutes','بقايا فضلات'],['nav-weight','⚖️','وزن الزجاج','Poids','وزن'],['nav-export','📤','تصدير Excel','Export Excel','اكسل excel تصدير'],['nav-shop','🏪','معلومات المحل','Magasin','محل شعار عنوان'],['nav-cloud','☁️','المزامنة','Synchronisation','سحاب مزامنة'],['nav-guide','📖','دليل الاستعمال','Guide','دليل شرح'],['nav-set','⚙️','الإعدادات','Réglages','اعدادات']];
+const _searchResults58=searchResults;
+searchResults=function(){const q=String(sq||'').trim();if(!q)return _searchResults58();
+  const hit=v=>qHit(String(v||''),q),hp=v=>{const d=String(v||'').replace(/\D/g,''),qd=q.replace(/\D/g,'');return qd.length>=3&&d.includes(qd)};
+  const pages=SEARCH_PAGES.filter(p=>!(isStaff()&&STAFF_BLOCK.has(p[0]))&&(hit(p[2])||hit(p[3])||hit(p[4]))).slice(0,6);
+  const wp=Object.values(walkPeople()).filter(p=>hit(p.name)||hp(p.phone)).slice(0,8);
+  const ty=types().filter(t=>!t.archived&&hit(t.name)).slice(0,8);
+  const sec=(t,items)=>items?`<h3>${t}</h3><div class="list">${items}</div>`:'';
+  const base=_searchResults58(),empty=base.includes('class="empty"');
+  const extra=sec('🧭 '+tr('الصفحات','Pages'),pages.map(p=>`<button class="row" data-act="${p[0]}"><span class="rleft"><span class="av emo-av">${p[1]}</span><span class="rname">${tr(p[2],p[3])}</span></span><span class="rsub">›</span></button>`).join(''))
+    +sec('🧍 '+tr('الزبائن العاديين','Particuliers'),wp.map(p=>`<button class="row" data-act="open-wp" data-id="${esc(p.key)}"><span class="rleft"><span class="av">${esc(initial(p.name))}</span><span class="rmain"><span class="rname">${esc(p.name)}</span><span class="rsub">${p.phone?`<bdi dir="ltr">${esc(p.phone)}</bdi>`:''}</span></span></span><span class="amt ${p.owe>0.5?'neg':''}">${DA(p.owe)}</span></button>`).join(''))
+    +sec('🪟 '+tr('أنواع الزجاج','Types de verre'),ty.map(t=>{const e=S.sk[t.id];return `<button class="row" data-act="nav-stk"><span class="rleft"><span class="av emo-av">🪟</span><span class="rmain"><span class="rname">${esc(t.name)}</span><span class="rsub">${grp(t.price)}/${tr('م²','m²')}${e?' · '+tr('المخزون','stock')+' '+dec2(Math.max(0,e.bal))+' '+tr('م²','m²'):''}</span></span></span><span class="rsub">›</span></button>`}).join(''));
+  if(!extra&&empty)return base;return extra+(empty?'':base)};
+/* ---------- المورّد: التحليل ---------- */
+let supPer='6';
+const MONTHS_AR=['جانفي','فيفري','مارس','أفريل','ماي','جوان','جويلية','أوت','سبتمبر','أكتوبر','نوفمبر','ديسمبر'],MONTHS_FR=['janv','févr','mars','avr','mai','juin','juil','août','sept','oct','nov','déc'];
+function supMoves(id){const M=[];for(const m of Object.values(S.stock))if(m.kind==='in'&&m.supplierId===id)M.push({date:m.date||'',amt:num(m.cost),key:'g:'+m.typeId,name:m.type||'?',q:num(m.area),u:tr('م²','m²'),pid:m.pid||''});
+  for(const m of Object.values(S.amv))if(m.kind==='in'&&m.supplierId===id){const a=S.arts[m.articleId]||{};M.push({date:m.date||'',amt:num(m.cost),key:'a:'+m.articleId,name:m.name||a.name||'?',q:num(m.qty),u:unitTr(a.unit),pid:m.pid||''})}return M}
+function supAnalyticsHTML(id){const all=supMoves(id);if(!all.length)return'';const td=today(),n=supPer==='all'?0:+supPer;
+  const start=n?(()=>{const d=new Date(td+'T12:00:00');d.setDate(1);d.setMonth(d.getMonth()-(n-1));return dstr(d)})():'0000-01-01';
+  const M=all.filter(m=>m.date>=start),tot=M.reduce((s,m)=>s+m.amt,0),yr=all.filter(m=>m.date.slice(0,4)===td.slice(0,4)).reduce((s,m)=>s+m.amt,0);
+  const nInv=new Set(M.map((m,i)=>m.pid||('x'+i))).size;let months=n;if(!n){const f=all.reduce((a,m)=>m.date&&m.date<a?m.date:a,td);months=Math.max(1,(+td.slice(0,4)-+f.slice(0,4))*12+(+td.slice(5,7)-+f.slice(5,7))+1)}
+  const bm=Math.min(12,n||12),bars=[];for(let i=bm-1;i>=0;i--){const d=new Date(td+'T12:00:00');d.setDate(1);d.setMonth(d.getMonth()-i);const k=dstr(d).slice(0,7);bars.push([k,all.filter(m=>m.date.slice(0,7)===k).reduce((s,m)=>s+m.amt,0)])}
+  const mx=Math.max(1,...bars.map(b=>b[1]));const G={};for(const m of M){const g=G[m.key]||(G[m.key]={name:m.name,q:0,u:m.u,amt:0});g.q+=m.q;g.amt+=m.amt}
+  const top=Object.values(G).sort((a,b)=>b.amt-a.amt).slice(0,5),mn=isFr()?MONTHS_FR:MONTHS_AR;
+  return `<div class="sana"><div class="pch2">${[['3',tr('3 أشهر','3 mois')],['6',tr('6 أشهر','6 mois')],['12',tr('سنة','1 an')],['all',tr('الكل','Tout')]].map(([k,l])=>`<button data-act="sup-per" data-v="${k}" class="${supPer===k?'on':''}">${l}</button>`).join('')}</div>
+  <div class="kpi4"><div><small>${tr('مشتريات المدة','Achats de la période')}</small><b>${DA(tot)}</b></div><div><small>${tr('معدّل الشهر','Moyenne / mois')}</small><b>${DA(tot/Math.max(1,months))}</b></div><div><small>${tr('هذا العام','Cette année')}</small><b>${DA(yr)}</b></div><div><small>${tr('عدد الفواتير','Nb d’achats')}</small><b>${nInv}</b></div></div>
+  <div class="card pad stack" style="gap:6px"><b>📊 ${tr('الشراء كل شهر','Achats par mois')}</b><div class="sbars">${bars.map(([k,v])=>`<div class="sbar" title="${grp(v)}"><span class="sbv">${v>0?grpK(v):''}</span><i style="height:${Math.max(v>0?4:0,Math.round(v/mx*100))}%"></i><small>${mn[+k.slice(5,7)-1]}</small></div>`).join('')}</div></div>
+  <div class="card pad stack" style="gap:8px"><b>🏆 Top 5</b>${top.length?top.map((g,i)=>{const p=tot>0?Math.round(g.amt/tot*100):0;return `<div class="stop"><div class="rowflex between"><span><b>${i+1}.</b> ${esc(g.name)} · <span class="note">${dec2s(g.q)} ${esc(g.u)}</span></span><b>${p}%</b></div><div class="sbb"><i style="width:${p}%"></i></div><div class="note">${DA(g.amt)}</div></div>`}).join(''):`<p class="note">${tr('ما كاين حتى شراء في هاد المدة.','Aucun achat sur cette période.')}</p>`}</div></div>`}
+const grpK=v=>v>=1e6?(Math.round(v/1e5)/10)+'M':v>=1e3?Math.round(v/1e3)+'k':String(Math.round(v));
+{const _s=supHTML;supHTML=function(){const h=_s();const id=view.id;if(!S.sups[id]||isStaff())return h;const a=supAnalyticsHTML(id);if(!a)return h;const mark='<h3>'+tr('الحساب','Compte')+'</h3>',k=h.indexOf(mark);return k<0?h+a:h.slice(0,k)+a+h.slice(k)}}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act="sup-per"]');if(!b)return;e.stopPropagation();supPer=b.dataset.v;render()},true);
 
 function backupFile(){const data={app:'daftar-zujaj',version:2,exportedAt:new Date().toISOString(),docs:LocalDB.dump()};return new File([JSON.stringify(data)],`tumayd-backup-${today()}.json`,{type:'application/json'})}
 function downloadFile(f){const u=URL.createObjectURL(f);const a=document.createElement('a');a.href=u;a.download=f.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}
