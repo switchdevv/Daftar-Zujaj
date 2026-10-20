@@ -851,7 +851,7 @@ const num=v=>{const n=parseFloat(String(v??'').replace(/\s/g,'').replace(',','.'
 const loc=()=>isFr()?'fr-FR':'en-US';
 const grp=n=>{const r=Math.round(n);return(r<0?'-':'')+Math.abs(r).toLocaleString(loc()).replace(/ /g,' ')};
 const grpTxt=n=>Math.round(n).toLocaleString('en-US');
-const APP_VER=62; // نفس الرقم تاع VERSION في sw.js
+const APP_VER=63; // نفس الرقم تاع VERSION في sw.js
 const CUR=()=>tr('دج','DA');
 const DA=n=>`<bdi dir="ltr">${grp(n)}</bdi>&nbsp;${CUR()}`;
 const dec2=a=>(Math.round(a*100)/100).toLocaleString(loc(),{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -1818,7 +1818,7 @@ function cdebtHTML(){const id=view.id,c=S.clients[id];if(!c)return `<div class="
   const s=S.stats[id]||{bal:0},ops=Object.entries(S.bons).filter(([,b])=>b.clientId===id&&b.kind==='opening').sort((a,b)=>a[1].date<b[1].date?-1:1),
     ps=Object.entries(S.pays).filter(([,p])=>p.clientId===id).sort((a,b)=>a[1].date<b[1].date?1:a[1].date>b[1].date?-1:(b[1].createdAt||0)-(a[1].createdAt||0));
   return `<div class="stack">${backBtn('open-client',esc(c.name),id)}
-  <h2>${tr('تعديل الدين','Modifier le crédit')}</h2>
+  <h2>🧾 ${tr('الدين القديم','Ancien crédit')}</h2>
   <div class="balbox"><div><div class="note">${tr('الدين الباقي','Reste à payer')}</div><div class="amt ${s.bal>0?'neg':'pos'}" style="font-size:1.5rem">${DA(s.bal)}</div></div></div>
   <h3>${tr('الدين القديم (من الكراس)','Ancien crédit (cahier)')}</h3>
   ${ops.length?`<div class="led">${ops.map(([bid,b])=>`<button class="le" data-act="odebt" data-id="${bid}"><span class="what">${tr('دين قديم','Ancien crédit')}${b.note&&b.note!==tr('دين قديم من الكراس','Ancien crédit du cahier')?' · '+esc(b.note):''}</span><span class="a" style="color:var(--debt)">${DA(b.total)}</span><span class="d">${fdateTxt(b.date)}</span><span class="run">${ic('edit')} ${tr('تعديل','Modifier')}</span></button>`).join('')}</div>`
@@ -2209,7 +2209,7 @@ function clientFormHTML(){
   <h2>${ed?tr('تعديل معلومات الحرفي','Modifier le client'):tr('حرفي جديد','Nouveau client')}</h2>
   <div class="field"><label for="cn">${tr('اسم الحرفي','Nom de l’atelier')}</label><input id="cn" value="${esc(cdraft.name)}"></div>
   <div class="field"><label for="cp">${tr('الهاتف','Téléphone')}</label><input id="cp" inputmode="tel" dir="ltr" value="${esc(cdraft.phone)}" placeholder="0550 00 00 00"></div>
-  <div class="opts">${optBtn('cown','users',tr('المسؤول','Responsable'),cdraft.owner?esc(cdraft.owner):'')}${optBtn('clim','target',tr('سقف الدين','Plafond'),num(cdraft.limit)>0?grp(num(cdraft.limit)):'')}${optBtn('cpr','tag',tr('أسعار خاصة','Prix spéciaux'),num(cdraft.disc)>0||Object.values(cdraft.sp||{}).some(v=>num(v)>0)?'•':'')}${optBtn('crel','alert',tr('التعامل','Relation'),cdraft.beh||cdraft.stopped?'•':'')}${ed?'':optBtn('cdebt','receipt',tr('دين قديم','Ancien crédit'),num(cdraft.debt)>0?grp(num(cdraft.debt)):'')}</div>
+  <div class="opts">${optBtn('cown','users',tr('المسؤول','Responsable'),cdraft.owner?esc(cdraft.owner):'')}${optBtn('clim','target',tr('سقف الدين','Plafond'),num(cdraft.limit)>0?grp(num(cdraft.limit)):'')}${optBtn('cpr','tag',tr('أسعار خاصة','Prix spéciaux'),num(cdraft.disc)>0||Object.values(cdraft.sp||{}).some(v=>num(v)>0)?'•':'')}${optBtn('crel','alert',tr('التعامل','Relation'),cdraft.beh||cdraft.stopped?'•':'')}${ed?(isStaff()?'':(()=>{const od=Object.values(S.bons).filter(b=>b.clientId===cdraft.id&&b.kind==='opening').reduce((a,b)=>a+num(b.total),0);return `<button type="button" class="opt ${od>0?'has':''}" data-act="cdebt" data-id="${esc(cdraft.id)}">${ic('receipt')}<span>${tr('دين قديم','Ancien crédit')}</span>${od>0?`<em>${grp(od)}</em>`:''}</button>`})()):optBtn('cdebt','receipt',tr('دين قديم','Ancien crédit'),num(cdraft.debt)>0?grp(num(cdraft.debt)):'')}</div>
   ${optBox('cown',`<div class="field"><label for="co">${tr('المسؤول','Responsable')}</label><input id="co" value="${esc(cdraft.owner)}"></div>`)}
   ${optBox('clim',`<div class="field"><label for="cl">${tr('سقف الدين (اختياري)','Limite de crédit (facultatif)')}</label><input id="cl" inputmode="decimal" dir="ltr" value="${esc(cdraft.limit||'')}" placeholder="${tr('مثلاً 200000','ex. 200000')}"><span class="note">${tr('ينبّهك التطبيق عندما يتجاوز الدين هذا المبلغ.','L’application vous alerte quand le crédit dépasse ce montant.')}</span></div>`)}
   ${optBox('cpr',`
