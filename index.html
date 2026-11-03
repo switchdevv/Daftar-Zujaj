@@ -851,7 +851,7 @@ const num=v=>{const n=parseFloat(String(v??'').replace(/\s/g,'').replace(',','.'
 const loc=()=>isFr()?'fr-FR':'en-US';
 const grp=n=>{const r=Math.round(n);return(r<0?'-':'')+Math.abs(r).toLocaleString(loc()).replace(/ /g,' ')};
 const grpTxt=n=>Math.round(n).toLocaleString('en-US');
-const APP_VER=63; // نفس الرقم تاع VERSION في sw.js
+const APP_VER=64; // نفس الرقم تاع VERSION في sw.js
 const CUR=()=>tr('دج','DA');
 const DA=n=>`<bdi dir="ltr">${grp(n)}</bdi>&nbsp;${CUR()}`;
 const dec2=a=>(Math.round(a*100)/100).toLocaleString(loc(),{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -3572,7 +3572,9 @@ function showDueAlarm(id,b,n){const c=S.clients[b.clientId]||{name:'?'},m=$('#mo
 setInterval(()=>{try{if(unlocked)dueCheck()}catch(_){}},30000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(()=>{try{if(unlocked)dueCheck()}catch(_){}},1500)});
 
+let bootRf=false;
 function refresh(){
+  if(bootRf)return;
   compute();
   const g=decideGate();
   if(g!==null||!$('#gate').hidden||$('#shell').hidden){render();return}
@@ -6435,6 +6437,7 @@ applyPrefs();
   db=LocalDB;dbState='ok';LocalDB.setHook(markOut);LocalDB.setEvtHook(evHook);cloudBoot();
   try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(_){}
   const asMap=q=>Object.fromEntries(q.docs.map(d=>[d.id,d.data()]));
+  bootRf=true;
   db.doc('auth/main').onSnapshot(s=>{S.auth=s.exists?s.data():null;S.ok.a=true;refresh()});
   db.doc('settings/main').onSnapshot(s=>{const d=s.exists?s.data():{};S.types=Array.isArray(d.types)&&d.types.length?d.types:null;S.shop=d.shop||{};S.svcs=Array.isArray(d.svcs)?d.svcs:null;S.minArea=d.minArea||0;S.feat=d.feat||{};refresh()});
   db.collection('quotes').onSnapshot(q=>{S.quotes=asMap(q);refresh()});
@@ -6458,6 +6461,7 @@ applyPrefs();
   db.collection('bons').onSnapshot(q=>{S.bons=asMap(q);S.ok.b=true;refresh()});
   db.collection('payments').onSnapshot(q=>{S.pays=asMap(q);S.ok.p=true;refresh()});
   db.collection('stock').onSnapshot(q=>{S.stock=asMap(q);S.ok.k=true;refresh()});
+  setTimeout(()=>{bootRf=false;refresh()},0);
 })();
 if('serviceWorker' in navigator&&location.protocol!=='file:'){
   const hadCtl=!!navigator.serviceWorker.controller;let reloading=false;
