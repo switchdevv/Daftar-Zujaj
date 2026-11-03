@@ -851,7 +851,7 @@ const num=v=>{const n=parseFloat(String(v??'').replace(/\s/g,'').replace(',','.'
 const loc=()=>isFr()?'fr-FR':'en-US';
 const grp=n=>{const r=Math.round(n);return(r<0?'-':'')+Math.abs(r).toLocaleString(loc()).replace(/ /g,' ')};
 const grpTxt=n=>Math.round(n).toLocaleString('en-US');
-const APP_VER=64; // نفس الرقم تاع VERSION في sw.js
+const APP_VER=65; // نفس الرقم تاع VERSION في sw.js
 const CUR=()=>tr('دج','DA');
 const DA=n=>`<bdi dir="ltr">${grp(n)}</bdi>&nbsp;${CUR()}`;
 const dec2=a=>(Math.round(a*100)/100).toLocaleString(loc(),{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -1129,7 +1129,7 @@ async function cloudConnect(email,pw,create){
     if(localHas&&!await ask({title:tr('السحاب فيه بيانات من قبل','Le cloud contient déjà des données'),ok:tr('استعمال بيانات السحاب','Utiliser le cloud'),danger:false,icon:'restore',
       body:tr('ستُستبدل بيانات هذا الهاتف ببيانات السحاب. سنحمّل نسخة احتياطية من بيانات الهاتف أولاً احتياطاً.','Les données de ce téléphone seront remplacées par celles du cloud. Une sauvegarde locale sera téléchargée d’abord.')})){await Sync.auth.signOut();Sync.uid=null;return false}
     if(localHas){try{downloadFile(backupFile())}catch(_){}}
-    const all=await remoteCol().get();const obj={};let maxT=0;all.forEach(d=>{const r=d.data();if(r&&r.p){maxT=Math.max(maxT,r.t||0);if(!r.del&&r.d)obj[r.p]=r.d}});
+    const all=await remoteCol().get();const obj={};let maxT=0;all.forEach(d=>{const r=d.data();if(r&&r.p){maxT=Math.max(maxT,tMs(r.t));if(!r.del&&r.d)obj[r.p]=r.d}});
     saveOut({});await LocalDB.replaceAll(obj);lsSet('sz-pull',String(maxT));
     prefs.cloud={on:true};savePrefs();startListen();Sync.state='ok';Sync.last=Date.now();return 'pulled';
   }
@@ -5971,6 +5971,58 @@ function bvMore(id){const b=S.bons[id];if(!b)return;const m=$('#modal'),walk=b.w
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;
   if(b.dataset.act==='bv-more'){e.stopPropagation();return bvMore(b.dataset.id)}
   if(b.closest('.bvmsheet')){const m=$('#modal');m.onclick=null;m.hidden=true;setTimeout(()=>{if(m.querySelector('.bvmsheet')){m.innerHTML=''}},0)}},true);
+
+/* ---- v65: مزامنة لحظية مضمونة (وقت السحاب · رفع فوري · إعادة ربط · مقارنة كاملة) ---- */
+const tMs=t=>t&&typeof t.toMillis==='function'?t.toMillis():(+t||0);
+const FULL_KEY='sz-full65';
+pushOut=async function(){
+  if(!Sync.uid||Sync.busy)return;if(!navigator.onLine){Sync.state='offline';return syncUI()}
+  const o=outbox(),keys=Object.keys(o);if(!keys.length){Sync.pending=0;Sync.state='ok';return syncUI()}
+  Sync.busy=true;Sync.pending=keys.length;syncUI();
+  try{const ST=firebase.firestore.FieldValue.serverTimestamp();
+    for(let i=0;i<keys.length;i+=400){const batch=Sync.fs.batch();for(const p of keys.slice(i,i+400)){const d=LocalDB.raw(p);batch.set(remoteCol().doc(rid(p)),{p,d:d===undefined?null:d,del:d===undefined,t:ST,ct:o[p],dev:DEV})}await batch.commit()}
+    const now=outbox();for(const p of keys)if(now[p]===o[p])delete now[p];saveOut(now);Sync.pending=Object.keys(now).length;Sync.state='ok';Sync.err='';Sync.last=Date.now()}
+  catch(e){Sync.state='err';Sync.err=(e&&e.code)||String(e)}
+  Sync.busy=false;syncUI();if(Object.keys(outbox()).length&&Sync.state==='ok'){clearTimeout(Sync.timer);Sync.timer=setTimeout(pushOut,300)}
+};
+function applySnapDocs(docs,full){
+  const o=outbox();const apply=[];let maxT=+lsGet('sz-pull','0')||0,dropped=false;const seen=new Set();
+  for(const r of docs){if(!r||!r.p)continue;const rt=tMs(r.t);if(rt)maxT=Math.max(maxT,rt);seen.add(r.p);
+    if(!full&&r.dev===DEV)continue;
+    if(o[r.p]){if(!full&&o[r.p]>=rt)continue;if(full)continue;delete o[r.p];dropped=true}
+    const cur=LocalDB.raw(r.p),nv=r.del?undefined:r.d;
+    if(JSON.stringify(cur)===JSON.stringify(nv))continue;
+    apply.push([r.p,r.del?null:r.d])}
+  if(dropped)saveOut(o);
+  if(full){const miss=LocalDB.keys().filter(k=>!seen.has(k)&&!o[k]);if(miss.length)markOut(miss)}
+  if(apply.length)LocalDB.applyRemote(apply);
+  lsSet('sz-pull',String(maxT));return apply.length}
+startListen=function(){
+  if(Sync.unsub)Sync.unsub();
+  const since=Math.max(0,(+lsGet('sz-pull','0')||0)-10*60000);
+  Sync.unsub=remoteCol().where('t','>',firebase.firestore.Timestamp.fromMillis(since)).onSnapshot(snap=>{
+    const docs=[];snap.docChanges().forEach(ch=>{if(ch.type==='removed')return;const r=ch.doc.data();if(r&&r.t)docs.push(r)});
+    applySnapDocs(docs,false);Sync.state=navigator.onLine?'ok':'offline';Sync.last=Date.now();syncUI();
+  },e=>{Sync.state='err';Sync.err=(e&&e.code)||String(e);syncUI()});
+};
+async function fullSync(){
+  if(!Sync.uid||!navigator.onLine)return null;Sync.state='connecting';syncUI();
+  try{const all=await remoteCol().get();const docs=[];all.forEach(d=>docs.push(d.data()));const n=applySnapDocs(docs,true);await pushOut();startListen();Sync.state='ok';Sync.last=Date.now();syncUI();lsSet(FULL_KEY,'1');return n}
+  catch(e){Sync.state='err';Sync.err=(e&&e.code)||String(e);syncUI();return null}
+}
+{const _mo=markOut;markOut=function(paths){_mo(paths);if(!cloudOn())return;clearTimeout(Sync.timer);Sync.timer=setTimeout(pushOut,60)}}
+cloudBoot=async function(){
+  if(!cloudOn())return;Sync.state='connecting';syncUI();
+  try{await fbInit()}catch(e){Sync.state=navigator.onLine?'err':'offline';Sync.err=(e&&e.code)||'load';return syncUI()}
+  Sync.auth.onAuthStateChanged(u=>{if(u){Sync.uid=u.uid;Sync.email=u.email||'';startListen();pushOut();if(!lsGet(FULL_KEY,''))setTimeout(()=>fullSync().then(n=>{if(n)toast(tr(`تمت مطابقة البيانات مع السحاب (${n} تغيير).`,`Données alignées avec le cloud (${n}).`))}),1500)}else{Sync.uid=null;Sync.state='signedout';syncUI()}});
+};
+const reconnect=()=>{if(!Sync.uid||!cloudOn())return;if(navigator.onLine){startListen();pushOut()}else{Sync.state='offline';syncUI()}};
+window.addEventListener('online',()=>setTimeout(reconnect,300));
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(reconnect,200)});
+window.addEventListener('pageshow',e=>{if(e.persisted)reconnect()});
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]');if(!b)return;
+  if(b.dataset.act==='cloud-sync'){e.stopPropagation();if(!Sync.uid)return toast(syncText());if(!navigator.onLine)return toast(tr('ما كاين أنترنت.','Pas de connexion.'));
+    b.disabled=true;const n=await fullSync();b.disabled=false;toast(n===null?syncText():n?tr(`تمت المزامنة الكاملة: ${n} تغيير.`,`Synchro complète : ${n} changement(s).`):tr('تمت المزامنة: كل شيء مطابق.','Synchronisé : tout est identique.'))}},true);
 
 function backupFile(){const data={app:'daftar-zujaj',version:2,exportedAt:new Date().toISOString(),docs:LocalDB.dump()};return new File([JSON.stringify(data)],`tumayd-backup-${today()}.json`,{type:'application/json'})}
 function downloadFile(f){const u=URL.createObjectURL(f);const a=document.createElement('a');a.href=u;a.download=f.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}
