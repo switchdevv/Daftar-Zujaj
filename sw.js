@@ -1,5 +1,5 @@
 // دفتر الزجاج — service worker: يخلي التطبيق يحل بلا أنترنت
-const VERSION = 'tumayd-v63';
+const VERSION = 'tumayd-v64';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png', './IBMPlexSansArabic-Regular.woff2', './IBMPlexSansArabic-Medium.woff2', './IBMPlexSansArabic-SemiBold.woff2', './IBMPlexSansArabic-Bold.woff2'];
 
 self.addEventListener('install', e => {
@@ -18,14 +18,14 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
 
-  // الصفحة: من الأنترنت إذا كاين (باش توصل التحديثات)، وإلا من الذاكرة
+  // الصفحة: من الذاكرة فوراً (الفتح سريع حتى مع أنترنت ضعيف). التحديثات توصل عبر نسخة جديدة من sw.js
   if (req.mode === 'navigate') {
     e.respondWith(
-      fetch(req, { cache: 'no-store' }).then(res => {
+      caches.match('./index.html').then(hit => hit || fetch(req, { cache: 'no-store' }).then(res => {
         const copy = res.clone();
         caches.open(VERSION).then(c => c.put('./index.html', copy));
         return res;
-      }).catch(() => caches.match('./index.html'))
+      }))
     );
     return;
   }
